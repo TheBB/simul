@@ -22,17 +22,17 @@ def get_tabulator_id(db="sc2-korean"):
     #url = tlpd_tabulator.format(db="sc2-korean")
     #request = Request(url, headers={"User-Agent": user_agent})
     #res = urlopen(request)
-    #q = str(res.read())
+    #q = res.read().decode()
 
     #f = open('test', 'w')
     #f.write(q)
     #f.close()
 
     res = open('test', 'r')
-    q = str(res.read())
+    q = res.read()
     res.close()
 
-    p = re.compile("tblt_ids\[\\\\'tblt\\\\'\] = \\\\'\d+\\\\';")
+    p = re.compile("tblt_ids\['tblt'\] = '\d+';")
     out = p.findall(q)
     if len(out) > 0:
         p = re.compile('\d+')
@@ -41,5 +41,6 @@ def get_tabulator_id(db="sc2-korean"):
         return -1
 
 tabulator = get_tabulator_id()
-if tabulator != -1:
-    print(tlpd_search("parting", tabulator))
+print(str(tabulator))
+#if tabulator != -1:
+    #print(tlpd_search("parting", tabulator))
