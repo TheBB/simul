@@ -5,43 +5,43 @@ import re
 
 class Tlpd:
 
-    _user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:16.0) Gecko/20100101"\
-            + " Firefox/16.0"
+    _user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:16.0) Gecko/20100101'\
+            + ' Firefox/16.0'
 
-    _tlpd_tabulator = "http://www.teamliquid.net/tlpd/{db}"\
-            + "/players/detailed-elo"
+    _tlpd_tabulator = 'http://www.teamliquid.net/tlpd/{db}'\
+            + '/players/detailed-elo'
 
-    _tlpd_url = "http://www.teamliquid.net/tlpd/tabulator/update.php?"\
-            + "tabulator_id={tabulator}&tabulator_page=1&tabulator_order_col="\
-            + "default&tabulator_search={player}"
+    _tlpd_url = 'http://www.teamliquid.net/tlpd/tabulator/update.php?'\
+            + 'tabulator_id={tabulator}&tabulator_page=1&tabulator_order_col='\
+            + 'default&tabulator_search={player}'
 
     from_file = True
 
-    def __init__(self):
+    def __init__(self, db='sc2-korean'):
         self._tabulator = -1
-        self._database = ""
+        self._database = db
 
-    def search(self, player, db="sc2-korean"):
-        if db != self._database or self._tabulator == -1:
-            self.get_tabulator_id(db)
+    def search(self, player):
+        if self._tabulator == -1:
+            self.get_tabulator_id
 
-        if self.from_file == False:
+        if not self.from_file:
             if self._tabulator == -1:
                 return None
 
             url = self._tlpd_url.format(player=player, tabulator=self._tabulator)
-            request = Request(url, headers={"User-Agent": self._user_agent})
+            request = Request(url, headers={'User-Agent': self._user_agent})
             result = urlopen(request)
             q = result.read().decode()
 
-            with open("testsearch", "w") as f:
+            with open('testsearch', 'w') as f:
                 f.write(q)
         else:
-            with open("testsearch", "r") as f:
+            with open('testsearch', 'r') as f:
                 q = f.read()
 
-        out = re.compile("<a title=\"[^ ]* \([PTZ]\)\" ?href=\"\\/tlpd\\/"\
-                + db + "\\/players\\/").finditer(q)
+        out = re.compile('<a title="[^ ]* \([PTZ]\)" ?href="\\/tlpd\\/'\
+                + self._database + '\\/players\\/').finditer(q)
 
         intervals = []
         prev = None
@@ -63,50 +63,61 @@ class Tlpd:
             #print("---------------------------------")
 
             try:
-                temp = re.compile("title=\"[^ ]* \([PTZ]\)\"").findall(plstr)
+                temp = re.compile('title="[^ ]* \([PTZ]\)"').findall(plstr)
                 #print(temp)
                 res['name'] = temp[0][7:-5]
                 res['race'] = temp[0][-3:-2]
 
-                temp = re.compile("  \d+").findall(plstr)
+                temp = re.compile('title="[A-Za-z0-9\\- ]*" href="\\/tlpd\\/'\
+                                  + self._database + '\\/teams').findall(plstr)
+                #print(temp)
+                if len(temp) > 0:
+                    temp = re.compile('title="[A-Za-z0-9\\- ]*"').findall(temp[0])
+                    res['team'] = temp[0][7:-1]
+                else:
+                    res['team'] = 'unknown team or retired'
+
+                temp = re.compile('  \d+').findall(plstr)
                 #print(temp)
                 res['elo'] = int(temp[0][2:])
 
-                temp = re.compile("<span style=\"color\:#00005D\">\d+").findall(plstr)
+                temp = re.compile('<span style="color\:#00005D">\d+').findall(plstr)
                 #print(temp)
                 res['elo_vt'] = int(temp[0][-4:])
-                temp = re.compile("<span style=\"color\:#912A2E\">\d+").findall(plstr)
+                temp = re.compile('<span style="color\:#912A2E">\d+').findall(plstr)
                 #print(temp)
                 res['elo_vz'] = int(temp[0][-4:])
-                temp = re.compile("<span style=\"color\:#006E2F\">\d+").findall(plstr)
+                temp = re.compile('<span style="color\:#006E2F">\d+').findall(plstr)
                 #print(temp)
                 res['elo_vp'] = int(temp[0][-4:])
             except:
-                print("Tlpd: Skipped player entry with incomplete data.")
+                #print('Tlpd: Skipped player entry with incomplete data.')
+                a = 1
             finally:
-                if len(res) == 6:
+                if len(res) == 7:
                     results.append(res)
 
         return results
 
-    def get_tabulator_id(self, db="sc2-korean"):
+    def get_tabulator_id(self):
         if self.from_file == False:
-            url = self._tlpd_tabulator.format(db=db)
-            request = Request(url, headers={"User-Agent": self._user_agent})
+            url = self._tlpd_tabulator.format(db=_self.database)
+            request = Request(url, headers={'User-Agent': self._user_agent})
             result = urlopen(request)
             q = result.read().decode()
 
-            with open("testtabulator", "w") as f:
+            with open('testtabulator', 'w') as f:
                 f.write(q)
         else:
-            with open("testtabulator", "r") as f:
+            with open('testtabulator', 'r') as f:
                 q = f.read()
 
-        out = re.compile("tblt_ids\['tblt'\] = '\d+';").findall(q)
+        out = re.compile('tblt_ids\[\'tblt\'\] = \'\d+\';').findall(q)
         if len(out) > 0:
             self._tabulator = int(re.compile('\d+').findall(out[0])[0])
         else:
             self._tabulator = -1
 
-tlpd = Tlpd()
-print(tlpd.search("rain"))
+if __name__ == '__main__':
+    tlpd = Tlpd()
+    print(tlpd.search('rain'))

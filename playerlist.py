@@ -7,20 +7,56 @@ def get_elo(s=''):
             elo = -1
     return elo
 
-def get_player(i):
+def get_player(i, tlpd=None):
     print('Entering player ' + str(i))
     name = input('ID: ')
 
-    race = ''
-    while race == '':
-        race = input('Race: ').upper()
-        if race != 'P' and race != 'Z' and race != 'T':
-            race = ''
+    results = []
+    if tlpd != None:
+        results = tlpd.search(name)
 
-    elo = get_elo()
-    elo_vt = get_elo('vT')
-    elo_vz = get_elo('vZ')
-    elo_vp = get_elo('vP')
+    result = None
+    if len(results) > 0:
+        pl = len(results) > 1
+        print('Possible match' + ('es' if pl else '') + ':')
+
+        i = 1
+        for res in results:
+            print((str(i) + ': ' if pl else '') + res['name'] + '('\
+                  + res['race'] + ') from '\
+                  + res['team'] + ' (' + str(res['elo']) + ', '\
+                  + str(res['elo_vt']) + ', ' + str(res['elo_vz']) + ', '\
+                  + str(res['elo_vp']) + ')')
+            i += 1
+
+        if pl:
+            choice = int(input('Which is correct? (1-' + str(len(results))\
+                            + ', 0 for none) '))
+            if choice > 0:
+                result = results[choice-1]
+        else:
+            choice = input('Accept? (y/n) ')
+            if choice.lower() == 'y':
+                result = results[0]
+
+    if result != None:
+        name = result['name']
+        race = result['race']
+        elo = result['elo']
+        elo_vt = result['elo_vt']
+        elo_vz = result['elo_vz']
+        elo_vp = result['elo_vp']
+    else:
+        race = ''
+        while race == '':
+            race = input('Race: ').upper()
+            if race != 'P' and race != 'Z' and race != 'T':
+                race = ''
+
+        elo = get_elo()
+        elo_vt = get_elo('vT')
+        elo_vz = get_elo('vZ')
+        elo_vp = get_elo('vP')
 
     print('')
 
@@ -44,9 +80,9 @@ class Player:
 
 class PlayerList:
 
-    def __init__(self, num):
+    def __init__(self, num, tlpd=None):
         self.players = []
         while len(self.players) < num:
             i = len(self.players) + 1
-            player = get_player(i)
+            player = get_player(i, tlpd)
             self.players.append(player)
