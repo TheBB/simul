@@ -23,7 +23,7 @@ class Tlpd:
 
     def search(self, player):
         if self._tabulator == -1:
-            self.get_tabulator_id
+            self.get_tabulator_id()
 
         if not self.from_file:
             if self._tabulator == -1:
