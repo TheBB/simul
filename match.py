@@ -48,7 +48,6 @@ class Match:
                 out += strings['outcomei'].format(winscore=outcome[0]\
                                                 , losescore=outcome[1]\
                                                 , prob=100*outcome[2])
-        out += strings['nl']
 
         out += strings['outcomelist'].format(player=self.player_b.name\
                                            , prob=100*self.prob_b)
@@ -71,5 +70,5 @@ class Match:
                                          , prob=100*mloutcome[2])
 
         out += strings['footer'].format(title=title)
-        
+
         return out
