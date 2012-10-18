@@ -69,6 +69,7 @@ elif args['type'] == 'sebracket':
 elif args['type'] == 'rrgroup':
     players = playerlist.PlayerList(args['players'], tlpd_search)
     obj = roundrobin.Group(args['num'][0], args['tie'], players.players)
+    obj.simulate()
 
 print(obj.output(strings))
 

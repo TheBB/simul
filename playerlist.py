@@ -69,11 +69,18 @@ def get_player(i, tlpd=None):
 
 class Player:
 
-    def __init__(self, name, race, elo, elo_vp, elo_vt, elo_vz):
-        self.name = name
-        self.race = race
-        self.elo = elo
-        self.elo_race = {'P': elo_vp, 'T': elo_vt, 'Z': elo_vz}
+    def __init__(self, name='', race='', elo=0, elo_vp=0, elo_vt=0, elo_vz=0,\
+                 copy=None):
+        if copy == None:
+            self.name = name
+            self.race = race
+            self.elo = elo
+            self.elo_race = {'P': elo_vp, 'T': elo_vt, 'Z': elo_vz}
+        else:
+            self.name = copy.name
+            self.race = copy.race
+            self.elo = copy.elo
+            self.elo_race = copy.elo_race
 
     def prob_of_winning(self, opponent):
         mix = 0.5
