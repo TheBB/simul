@@ -2,6 +2,7 @@
 
 import argparse
 import pickle
+import sys
 
 import playerlist
 import output
@@ -39,6 +40,8 @@ parser.add_argument('-r', '--rounds', dest='rounds', default=3, type=int,\
         help='number of rounds in a bracket')
 parser.add_argument('-p', '--players', dest='players', default=4, type=int,\
         help='number of players in a group')
+parser.add_argument('--threshold', dest='threshold', default=1, type=int,\
+        help='placement threshold in a group')
 parser.add_argument('-s', '--save', dest='save',\
         help='save data to file')
 parser.add_argument('-l', '--load', dest='load',\
@@ -68,8 +71,9 @@ elif args['type'] == 'sebracket':
             players.players)
 elif args['type'] == 'rrgroup':
     players = playerlist.PlayerList(args['players'], tlpd_search)
-    obj = roundrobin.Group(args['num'][0], args['tie'], players.players)
-    obj.simulate()
+    obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
+                          args['threshold'])
+    obj.compute()
 
 print(obj.output(strings))
 

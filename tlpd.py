@@ -34,7 +34,8 @@ class Tlpd:
                 request = Request(url, headers={'User-Agent': self._user_agent})
                 result = urlopen(request)
                 q = result.read().decode()
-            except:
+            except Exception as e:
+                print(' > tlpd.search (request): ' + str(e))
                 return None
 
             with open('testsearch', 'w') as f:
@@ -93,9 +94,10 @@ class Tlpd:
                 temp = re.compile('<span style="color\:#006E2F">\d+').findall(plstr)
                 #print(temp)
                 res['elo_vp'] = int(temp[0][-4:])
-            except:
-                #print('Tlpd: Skipped player entry with incomplete data.')
-                a = 1
+            except IndexError:
+                pass
+            except Exception as e:
+                print(' > tlpd.search (parse): ' + str(e))
             finally:
                 if len(res) == 7:
                     results.append(res)
@@ -110,7 +112,7 @@ class Tlpd:
                 result = urlopen(request)
                 q = result.read().decode()
             except Exception as e:
-                print(e)
+                print(' > tlpd.get_tabulator_id (request): ' + str(e))
                 self._tabulator = -1
                 return
 
@@ -124,6 +126,7 @@ class Tlpd:
         if len(out) > 0:
             self._tabulator = int(re.compile('\d+').findall(out[0])[0])
         else:
+            print(' > tlpd.get_tabulator_id (parse)')
             self._tabulator = -1
 
 if __name__ == '__main__':

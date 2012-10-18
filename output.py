@@ -36,4 +36,11 @@ def get_strings(args):
         strings['mlwinneri'] = '\n[indent]{player}: {prob:.3f}%'
         strings['exroundsi'] = '\n[indent]{player}: {rounds:.3f} rounds ({expl})'
 
+    # Round robin-specific
+    strings['gplayer'] = '\n\n{player}'
+    strings['gpexpscore'] = '\nExpected score: {mw:.2f}-{ml:.2f} (sets: {sw:.2f}-{sl:.2f})'
+    strings['gpprobwin'] = '\nProbability of winning: {prob:.3f}%'
+    strings['gpprobthr'] = '\nProbability of achieving top {thr}: {prob:.3f}%'
+    strings['gpmlplace'] = '\nMost likely place: {place} ({prob:.3f}%)'
+
     return strings

@@ -4,12 +4,22 @@ from operator import attrgetter
 import playerlist
 import match
 
+class ScoreTally:
+
+    def __init__(self, num_players):
+        self.finishes = [0] * num_players
+        self.mscore = 0
+        self.sscore = 0
+        self.swins = 0
+        self.replays = 0
+
 class Group:
 
-    def __init__(self, num, tie, players):
+    def __init__(self, num, tie, players, threshold=1):
         self._num = num
         self._players = players
         self._tie = tie
+        self._threshold = threshold
         self.make_match_list()
 
     def make_match_list(self):
@@ -27,11 +37,30 @@ class Group:
         gen = (player for player in self._players if fits(player))
         return next(gen)
 
+    def compute(self):
+        N = 100000
+
+        self.tally = dict()
+        for p in self._players:
+            self.tally[p] = ScoreTally(len(self._players))
+
+        for i in range(0,N):
+            table = self.simulate()
+            for i in range(0,len(table)):
+                t = self.tally[table[i]]
+                t.finishes[i] += 1./N
+                t.mscore += float(table[i].mscore)/N
+                t.sscore += float(table[i].sscore)/N
+                t.swins += float(table[i].swins)/N
+                if table[i].replayed:
+                    t.replays += 1./N
+
     def simulate(self):
         for player in self._players:
             player.mscore = 0
             player.sscore = 0
             player.swins = 0
+            player.replayed = False
 
         for match in self._matches:
             res = match.get_random_result()
@@ -49,19 +78,10 @@ class Group:
         table = self._players
         table = self.break_ties(table, self._tie)
 
-        print('')
-        for m in self._matches:
-            res = m.random_result
-            print(m.player_a.name + ' ' + str(res[0]) + '-' + str(res[1])\
-                  + ' ' + m.player_b.name)
-        print('')
-        for p in table:
-            print(p.name + ' ' + str(p.mscore) + ' ' + str(p.sscore) + ' ' + str(p.swins))
-
         return table
 
     def break_ties(self, table, tie):
-        print(tie[0])
+        #print(tie[0])
         if tie[0] == 'imscore' or tie[0] == 'isscore' or tie[0] == 'iswins':
             for p in table:
                 p.imscore = 0
@@ -105,6 +125,7 @@ class Group:
         if tie[0] == 'ireplay':
             refplayers = []
             for p in table:
+                p.replayed = True
                 newp = playerlist.Player(copy=p)
                 newp.ref = p
                 refplayers.append(newp)
@@ -117,4 +138,40 @@ class Group:
         return table
 
     def output(self, strings):
-        return "Yay"
+        title = str(len(self._players)) + '-player round robin'
+
+        out = strings['header'].format(title=title)
+
+        nm = len(self._players) - 1
+        players = sorted(self._players, key=lambda p:\
+                         sum(self.tally[p].finishes[0:self._threshold])*100,\
+                         reverse=True)
+
+        for p in players:
+            t = self.tally[p]
+            out += strings['gplayer'].format(player=p.name)
+            out += strings['gpexpscore'].format(mw=(nm+t.mscore)/2,\
+                    ml=(nm-t.mscore)/2, sw=t.swins, sl=t.swins-t.sscore)
+
+            if self._threshold == 1:
+                out += strings['gpprobwin'].format(prob=t.finishes[0]*100)
+            else:
+                out += strings['gpprobthr'].format(prob=sum(\
+                        t.finishes[0:self._threshold])*100,\
+                        thr=self._threshold)
+
+            place = str(t.finishes.index(max(t.finishes)) + 1)
+            if place[-1] == '1' and (place[0] != '1' or len(place) == 1):
+                place += 'st'
+            elif place[-1] == '2' and (place[0] != '1' or len(place) == 1):
+                place += 'nd'
+            elif place[-1] == '3' and (place[0] != '1' or len(place) == 1):
+                place += 'rd'
+            else:
+                place += 'th'
+            out += strings['gpmlplace'].format(place=place,\
+                    prob=max(t.finishes)*100)
+
+        out += strings['footer'].format(title=title)
+
+        return out
