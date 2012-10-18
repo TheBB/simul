@@ -29,9 +29,9 @@ parser.add_argument('-t', '--type', dest='type', default='match',\
         choices=['match','sebracket','rrgroup'],\
         help='tournament type')
 parser.add_argument('--tie', dest='tie', nargs='*',
-        choices=['mscore', 'sscore', 'swins', 'imscore', 'isscore', 'ireplay'],\
-        default=['mscore', 'sscore', 'imscore', 'isscore',\
+        choices=['mscore', 'sscore', 'swins', 'imscore', 'isscore', 'iswins',\
                  'ireplay'],\
+        default=['mscore', 'sscore', 'imscore', 'isscore', 'ireplay'],\
         help='order of tiebreaks in a round robin group')
 parser.add_argument('-n', '--num', dest='num', nargs='+', default=[2], type=int,\
         help='number of sets required to win a match')
@@ -68,7 +68,7 @@ elif args['type'] == 'sebracket':
             players.players)
 elif args['type'] == 'rrgroup':
     players = playerlist.PlayerList(args['players'], tlpd_search)
-    obj = roundrobin.Group(args['num'][0], players.players)
+    obj = roundrobin.Group(args['num'][0], args['tie'], players.players)
 
 print(obj.output(strings))
 

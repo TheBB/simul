@@ -44,8 +44,9 @@ class Match:
             if val >= outcome[2]:
                 val -= outcome[2]
             else:
-                return (outcome[0], outcome[1])
-        return self.get_random_result(self)
+                self.random_result = (outcome[0], outcome[1])
+                return self.random_result
+        return self.get_random_result()
 
     def output(self, strings):
         title = self.player_a.name + ' vs. ' + self.player_b.name
