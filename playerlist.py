@@ -16,7 +16,7 @@ def get_player(i, tlpd=None):
         results = tlpd.search(name)
 
     result = None
-    if len(results) > 0:
+    if results != None and len(results) > 0:
         pl = len(results) > 1
         print('Possible match' + ('es' if pl else '') + ':')
 

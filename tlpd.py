@@ -109,8 +109,10 @@ class Tlpd:
                 request = Request(url, headers={'User-Agent': self._user_agent})
                 result = urlopen(request)
                 q = result.read().decode()
-            except:
+            except Exception as e:
+                print(e)
                 self._tabulator = -1
+                return
 
             with open('testtabulator', 'w') as f:
                 f.write(q)
