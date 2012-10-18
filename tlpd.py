@@ -104,10 +104,13 @@ class Tlpd:
 
     def get_tabulator_id(self):
         if self.from_file == False:
-            url = self._tlpd_tabulator.format(db=self._database)
-            request = Request(url, headers={'User-Agent': self._user_agent})
-            result = urlopen(request)
-            q = result.read().decode()
+            try:
+                url = self._tlpd_tabulator.format(db=self._database)
+                request = Request(url, headers={'User-Agent': self._user_agent})
+                result = urlopen(request)
+                q = result.read().decode()
+            except:
+                self._tabulator = -1
 
             with open('testtabulator', 'w') as f:
                 f.write(q)
