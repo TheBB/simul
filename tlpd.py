@@ -15,7 +15,7 @@ class Tlpd:
             + 'tabulator_id={tabulator}&tabulator_page=1&tabulator_order_col='\
             + 'default&tabulator_search={player}'
 
-    from_file = True
+    from_file = False
 
     def __init__(self, db='sc2-korean'):
         self._tabulator = -1
@@ -29,10 +29,13 @@ class Tlpd:
             if self._tabulator == -1:
                 return None
 
-            url = self._tlpd_url.format(player=player, tabulator=self._tabulator)
-            request = Request(url, headers={'User-Agent': self._user_agent})
-            result = urlopen(request)
-            q = result.read().decode()
+            try:
+                url = self._tlpd_url.format(player=player, tabulator=self._tabulator)
+                request = Request(url, headers={'User-Agent': self._user_agent})
+                result = urlopen(request)
+                q = result.read().decode()
+            except:
+                return None
 
             with open('testsearch', 'w') as f:
                 f.write(q)
@@ -101,7 +104,7 @@ class Tlpd:
 
     def get_tabulator_id(self):
         if self.from_file == False:
-            url = self._tlpd_tabulator.format(db=_self.database)
+            url = self._tlpd_tabulator.format(db=self._database)
             request = Request(url, headers={'User-Agent': self._user_agent})
             result = urlopen(request)
             q = result.read().decode()

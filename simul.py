@@ -29,7 +29,6 @@ parser.add_argument('--tlpd', dest='tlpd', default='none',\
         help='search in TLPD database')
 
 args = vars(parser.parse_args())
-print(args)
 strings = output.get_strings(args)
 
 tlpd_search = None

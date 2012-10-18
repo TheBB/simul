@@ -22,7 +22,7 @@ def get_player(i, tlpd=None):
 
         i = 1
         for res in results:
-            print((str(i) + ': ' if pl else '') + res['name'] + '('\
+            print((str(i) + ': ' if pl else '') + res['name'] + ' ('\
                   + res['race'] + ') from '\
                   + res['team'] + ' (' + str(res['elo']) + ', '\
                   + str(res['elo_vt']) + ', ' + str(res['elo_vz']) + ', '\
@@ -38,6 +38,11 @@ def get_player(i, tlpd=None):
             choice = input('Accept? (y/n) ')
             if choice.lower() == 'y':
                 result = results[0]
+    elif tlpd != None:
+        if results == []:
+            print('No matches for \'' + name + '\' in TLPD.')
+        elif results == None:
+            print('Unable to consult TLPD.')
 
     if result != None:
         name = result['name']
