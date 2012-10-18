@@ -1,3 +1,5 @@
+import random
+
 def binomial(n, k):
     if k == 0:
         return 1
@@ -35,6 +37,15 @@ class Match:
         else:
             self.winner = self.player_b
             self.prob = self.prob_b
+
+    def get_random_result(self):
+        val = random.random()
+        for outcome in self.outcomes:
+            if val >= outcome[2]:
+                val -= outcome[2]
+            else:
+                return (outcome[0], outcome[1])
+        return self.get_random_result(self)
 
     def output(self, strings):
         title = self.player_a.name + ' vs. ' + self.player_b.name
