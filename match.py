@@ -12,6 +12,7 @@ class Match:
         self.num = num
         self.player_a = player_a
         self.player_b = player_b
+        self.fixed_random_result = False
         self.compute()
 
     def compute(self):
@@ -38,15 +39,22 @@ class Match:
             self.winner = self.player_b
             self.prob = self.prob_b
 
+    def fix_random_result(self, i, j):
+        self.random_result = (i, j)
+        self.fixed_random_result = True
+
     def get_random_result(self):
-        val = random.random()
-        for outcome in self.outcomes:
-            if val >= outcome[2]:
-                val -= outcome[2]
-            else:
-                self.random_result = (outcome[0], outcome[1])
-                return self.random_result
-        return self.get_random_result()
+        if not self.fixed_random_result:
+            val = random.random()
+            for outcome in self.outcomes:
+                if val >= outcome[2]:
+                    val -= outcome[2]
+                else:
+                    self.random_result = (outcome[0], outcome[1])
+                    return self.random_result
+            return self.get_random_result()
+        else:
+            return self.random_result
 
     def output(self, strings):
         title = self.player_a.name + ' vs. ' + self.player_b.name
