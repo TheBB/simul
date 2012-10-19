@@ -24,7 +24,7 @@ def put_to_file(obj, file):
 parser = argparse.ArgumentParser(description='Emulate a SC2 tournament'\
         + ' format.')
 parser.add_argument('-f', '--format', dest='format', default='term',\
-        choices=['term','tl','tls'],\
+        choices=['term','tl','tls','reddit'],\
         help='output format')
 parser.add_argument('-t', '--type', dest='type', default='match',\
         choices=['match','sebracket','rrgroup'],\
