@@ -52,30 +52,56 @@ parser.add_argument('--tlpd', dest='tlpd', default='none',\
 args = vars(parser.parse_args())
 strings = output.get_strings(args)
 
+obj = None
 if args['load'] != None:
     obj = get_from_file(args['load'])
-    print(obj.output(strings))
-    sys.exit(0)
 
 tlpd_search = None
 if args['tlpd'] != 'none':
     tlpd_search = tlpd.Tlpd(args['tlpd'])
 
 if args['type'] == 'match':
-    player_a = playerlist.get_player(1, tlpd_search)
-    player_b = playerlist.get_player(2, tlpd_search)
-    obj = match.Match(args['num'][0], player_a, player_b)
-elif args['type'] == 'sebracket':
-    players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
-    bracket = sebracket.SEBracket(args['num'], args['rounds'],\
-            players.players)
-elif args['type'] == 'rrgroup':
-    players = playerlist.PlayerList(args['players'], tlpd_search)
-    obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
-                          args['threshold'])
-    obj.compute()
+    if obj == None:
+        player_a = playerlist.get_player(1, tlpd_search)
+        player_b = playerlist.get_player(2, tlpd_search)
+        obj = match.Match(args['num'][0], player_a, player_b)
 
-print(obj.output(strings))
+    print(obj.output(strings))
+elif args['type'] == 'sebracket':
+    if obj == None:
+        players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
+        bracket = sebracket.SEBracket(args['num'], args['rounds'],\
+                players.players)
+
+    print(obj.output(strings))
+elif args['type'] == 'rrgroup':
+    if obj == None:
+        players = playerlist.PlayerList(args['players'], tlpd_search)
+        obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
+                          args['threshold'])
+        obj.compute()
+
+    print(obj.output(strings))
+
+    while True:
+        s = input('> ').lower().split(' ')
+        s = filter(lambda p: p != '', s)
+        s = list(map(lambda p: p.strip(), s))
+        if len(s) < 1:
+            continue
+
+        if s[0] == 'exit':
+            break
+        elif s[0] == 'set':
+            pa = obj.get_player(s[1])
+            pb = obj.get_player(s[2])
+            match = obj.get_match(obj._matches, pa, pb)
+            ia = int(input('Score for ' + match.player_a.name + ': '))
+            ib = int(input('Score for ' + match.player_b.name + ': '))
+            match.fix_random_result(ia, ib)
+            obj.compute()
+        elif s[0] == 'out':
+            print(obj.output(strings))
 
 if args['save'] != None:
     put_to_file(obj, args['save'])
