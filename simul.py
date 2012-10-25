@@ -99,6 +99,26 @@ elif args['type'] == 'rrgroup':
             ia = int(input('Score for ' + match.player_a.name + ': '))
             ib = int(input('Score for ' + match.player_b.name + ': '))
             match.fix_random_result(ia, ib)
+        elif s[0] == 'unset':
+            pa = obj.get_player(s[1])
+            pb = obj.get_player(s[2])
+            match = obj.get_match(obj._matches, pa, pb)
+            match.fixed_random_result = False
+        elif s[0] == 'list':
+            print('Fixed:', end='')
+            found = False
+            for match in obj._matches:
+                if match.fixed_random_result:
+                    if found:
+                        print(',', end='')
+                    found = True
+                    print(' ' + match.player_a.name + ' ' + str(match.random_result[0])\
+                          + '-' + str(match.random_result[1]) + ' ' + match.player_b.name, end='')
+            if found:
+                print('')
+            else:
+                print(' none')
+        elif s[0] == 'compute':
             obj.compute()
         elif s[0] == 'out':
             print(obj.output(strings))

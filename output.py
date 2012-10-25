@@ -52,9 +52,22 @@ def get_strings(args):
 
     # Round robin-specific
     strings['gplayer'] = '\n\n{player}'
-    strings['gpexpscore'] = '\nExpected score: {mw:.2f}-{ml:.2f} (sets: {sw:.2f}-{sl:.2f})'
-    strings['gpprobwin'] = '\nProbability of winning: {prob:.3f}%'
-    strings['gpprobthr'] = '\nProbability of achieving top {thr}: {prob:.3f}%'
-    strings['gpmlplace'] = '\nMost likely place: {place} ({prob:.3f}%)'
+    if args['format'] == 'reddit':
+        strings['gplayer'] += '\n'
+    if args['format'] == 'term':
+        strings['gpexpscore'] = '\n   Expected score: {mw:.2f}-{ml:.2f} (sets: {sw:.2f}-{sl:.2f})'
+        strings['gpprobwin'] = '\n   Probability of winning: {prob:.3f}%'
+        strings['gpprobthr'] = '\n   Probability of achieving top {thr}: {prob:.3f}%'
+        strings['gpmlplace'] = '\n   Most likely place: {place} ({prob:.3f}%)'
+    elif args['format'] == 'tl' or args['format'] == 'tls':
+        strings['gpexpscore'] = '\n[indent]Expected score: {mw:.2f}-{ml:.2f} (sets: {sw:.2f}-{sl:.2f})'
+        strings['gpprobwin'] = '\n[indent]Probability of winning: {prob:.3f}%'
+        strings['gpprobthr'] = '\n[indent]Probability of achieving top {thr}: {prob:.3f}%'
+        strings['gpmlplace'] = '\n[indent]Most likely place: {place} ({prob:.3f}%)'
+    elif args['format'] == 'reddit':
+        strings['gpexpscore'] = '\n* Expected score: {mw:.2f}-{ml:.2f} (sets: {sw:.2f}-{sl:.2f})'
+        strings['gpprobwin'] = '\n* Probability of winning: {prob:.3f}%'
+        strings['gpprobthr'] = '\n* Probability of achieving top {thr}: {prob:.3f}%'
+        strings['gpmlplace'] = '\n* Most likely place: {place} ({prob:.3f}%)'
 
     return strings
