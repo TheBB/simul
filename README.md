@@ -42,4 +42,61 @@ The major command-line arguments are:
 ### -t, --type
 
 Gives the tournament format to simulate. There are currently four choices:
--   *match*
+-   **match**: a single best-of-N match between two players (default)
+-   **sebracket**: a single elimination bracket with 2^n players
+-   **rrgroup**: a standard round-robin group with customizable tiebreakers
+-   **mslgroup**: a four-player group format used in the MSL and GSL
+
+    ./simul.py -t match
+
+### -f, --format
+
+Gives the output format. There are currently four choices:
+-   **term**: Useful for display and easy reading in the terminal (default)
+-   **tl**: Optimized for readability on the Team Liquid forums
+-   **tls**: Same as **tl**, except wrapped in spoiler tags
+-   **reddit**: Optimized for readability on Reddit
+
+    ./simul.py -f tl
+
+### -s, --save
+
+Saves the match/group/bracket to a file, so that if changes have to be made,
+all the data doesn't have to be input again.
+
+    ./simul.py -s my_group.sc2
+
+### -l, --load
+
+Loads the match/group/bracket from a file. If this parameter is specified, the
+**type** argument, along with whatever secondary arguments it requires, is
+ignored.
+
+    ./simul.py -l my_group.sc2
+
+### --tlpd
+
+If this argument is given, the Team Liquid Progaming Database (TLPD) is
+consulted for player ratings. Currently, there are two relevant SC2 databases:
+-   sc2-korean
+-   sc2-international
+
+If this argument is not given, you will be asked to input ratings manually.
+
+TLPD does not currently offer an API, so this feature can be prone to problems,
+if Team Liquid changes the layout of their site.
+
+    ./simul.py --tlpd sc2-korean
+
+### --tlpd-tabulator
+
+The TLPD lookup requires a *tabulator ID*. When too many tabulator IDs are
+requested too quickly, the remote website will respond with HTTP: 503
+service unavailable.
+
+When simulating several matches or groups in quick succession, you can reuse a
+single tabulator ID. Whenever a tabulator ID is requested from TLPD, it will be
+written to the terminal. You can then pass it along as an argument in
+subsequent executions.
+
+    ./simul.py --tlpd-tabulator 1031
