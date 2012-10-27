@@ -5,6 +5,7 @@ import match
 class Group:
 
     def __init__(self, num, players):
+        self.type = 'MSLGROUP'
         self._num = num
         self._players = players
 
@@ -21,55 +22,30 @@ class Group:
                 w2 = self._players[2+winner_2]
                 l2 = self._players[3-winner_2]
 
-                base_p = self._matches[(w1,l1)].prob_a *\
-                         self._matches[(w2,l2)].prob_a
+                base = self._matches[(w1,l1)].prob_a *\
+                       self._matches[(w2,l2)].prob_a
 
                 wmatch = self._matches[(w1,w2)]
                 lmatch = self._matches[(l1,l2)]
 
-                # First place
-                w1.places[0] += base_p * wmatch.prob_a
-                w2.places[0] += base_p * wmatch.prob_b
+                w1.places[0] += base * wmatch.prob_a
+                w2.places[0] += base * wmatch.prob_b
 
-                # Last place
-                l1.places[3] += base_p * lmatch.prob_b
-                l2.places[3] += base_p * lmatch.prob_a
+                l1.places[3] += base * lmatch.prob_b
+                l2.places[3] += base * lmatch.prob_a
 
-                # Case 1, 1
-                base = base_p * wmatch.prob_b * lmatch.prob_a
-                pw = base * self._matches[(w1,l1)].prob_a
-                pl = base * self._matches[(w1,l1)].prob_b
-                w1.places[1] += pw
-                w1.places[2] += pl
-                l1.places[1] += pl
-                l1.places[2] += pw
+                self.subcase(base * wmatch.prob_b * lmatch.prob_a, w1, l1)
+                self.subcase(base * wmatch.prob_a * lmatch.prob_a, w2, l1)
+                self.subcase(base * wmatch.prob_b * lmatch.prob_b, w1, l2)
+                self.subcase(base * wmatch.prob_a * lmatch.prob_b, w2, l2)
 
-                # Case 2, 1
-                base = base_p * wmatch.prob_a * lmatch.prob_a
-                pw = base * self._matches[(w2,l1)].prob_a
-                pl = base * self._matches[(w2,l1)].prob_b
-                w2.places[1] += pw
-                w2.places[2] += pl
-                l1.places[1] += pl
-                l1.places[2] += pw
-
-                # Case 1, 2
-                base = base_p * wmatch.prob_b * lmatch.prob_b
-                pw = base * self._matches[(w1,l2)].prob_a
-                pl = base * self._matches[(w1,l2)].prob_b
-                w1.places[1] += pw
-                w1.places[2] += pl
-                l2.places[1] += pl
-                l2.places[2] += pw
-
-                # Case 2, 2
-                base = base_p * wmatch.prob_a * lmatch.prob_b
-                pw = base * self._matches[(w2,l2)].prob_a
-                pl = base * self._matches[(w2,l2)].prob_b
-                w2.places[1] += pw
-                w2.places[2] += pl
-                l2.places[1] += pl
-                l2.places[2] += pw
+    def subcase(self, base, w, l):
+        pw = base * self._matches[(w,l)].prob_a
+        pl = base * self._matches[(w,l)].prob_b
+        w.places[1] += pw
+        w.places[2] += pl
+        l.places[1] += pl
+        l.places[2] += pw
 
     def make_matches(self):
         self._matches = dict()

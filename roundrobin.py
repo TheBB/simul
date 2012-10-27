@@ -16,6 +16,7 @@ class ScoreTally:
 class Group:
 
     def __init__(self, num, tie, players, threshold=1):
+        self.type = 'RRGROUP'
         self._num = num
         self._players = players
         self._tie = tie
@@ -25,6 +26,17 @@ class Group:
     def make_match_list(self):
         combs = itertools.combinations(self._players, 2)
         self._matches = [match.Match(self._num, a[0], a[1]) for a in combs]
+
+    def find_match(self, pa=None, pb=None, search=''):
+        if pa != None and pb != None:
+            pa = self.get_player(pa)
+            pb = self.get_player(pb)
+            return self.get_match(self._matches, pa, pb)
+        else:
+            return None
+
+    def get_match_list(self):
+        return self._matches
 
     def get_match(self, matches, player_a, player_b):
         fits = lambda m: (m.player_a == player_a and m.player_b == player_b) or\
@@ -137,9 +149,9 @@ class Group:
 
         return table
 
-    def output(self, strings):
-        title = str(len(self._players)) + '-player round robin'
-
+    def output(self, strings, title=None):
+        if title == None:
+            title = str(len(self._players)) + '-player round robin'
         out = strings['header'].format(title=title)
 
         nm = len(self._players) - 1

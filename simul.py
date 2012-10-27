@@ -14,13 +14,20 @@ import roundrobin
 import mslgroup
 
 def get_from_file(file):
-    with open(file, 'rb') as f:
-        ret = pickle.load(f)
-    return ret
+    try:
+        with open(file, 'rb') as f:
+            ret = pickle.load(f)
+        return ret
+    except Exception as e:
+        print(' > simul.get_from_file: ' + str(e))
+        return None
 
 def put_to_file(obj, file):
-    with open(file, 'wb') as f:
-        pickle.dump(obj, f)
+    try:
+        with open(file, 'wb') as f:
+            pickle.dump(obj, f)
+    except Exception as e:
+        print(' > simul.put_to_file: ' + str(e))
 
 parser = argparse.ArgumentParser(description='Emulate a SC2 tournament'\
         + ' format.')
@@ -53,51 +60,41 @@ parser.add_argument('--tlpd', dest='tlpd', default='none',\
         help='search in TLPD database')
 parser.add_argument('--tlpd-tabulator', dest='tabulator', default=-1, type=int,\
         help='tabulator ID for the TLPD database')
+parser.add_argument('--no-console', dest='noconsole', default=False, type=bool,\
+        help='skip the console')
 
 args = vars(parser.parse_args())
 strings = output.get_strings(args)
-
-obj = None
-if args['load'] != None:
-    obj = get_from_file(args['load'])
 
 tlpd_search = None
 if args['tlpd'] != 'none':
     tlpd_search = tlpd.Tlpd(args['tlpd'], args['tabulator'])
 
-if args['type'] == 'match':
-    if obj == None:
-        player_a = playerlist.get_player(1, tlpd_search)
-        player_b = playerlist.get_player(2, tlpd_search)
-        obj = match.Match(args['num'][0], player_a, player_b)
-
-    print(obj.output(strings, title=args['title']))
-
+obj = None
+if args['load'] != None:
+    obj = get_from_file(args['load'])
+elif args['type'] == 'match':
+    player_a = playerlist.get_player(1, tlpd_search)
+    player_b = playerlist.get_player(2, tlpd_search)
+    obj = match.Match(args['num'][0], player_a, player_b)
+    obj.compute()
 elif args['type'] == 'sebracket':
-    if obj == None:
-        players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
-        bracket = sebracket.SEBracket(args['num'], args['rounds'],\
-                players.players)
-
-    print(obj.output(strings, title=args['title']))
-
+    players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
+    bracket = sebracket.SEBracket(args['num'], args['rounds'], players.players)
+    obj.compute()
 elif args['type'] == 'mslgroup':
-    if obj == None:
-        players = playerlist.PlayerList(4, tlpd_search)
-        obj = mslgroup.Group(args['num'][0], players.players)
-        obj.compute()
-
-    print(obj.output(strings, title=args['title']))
-
+    players = playerlist.PlayerList(4, tlpd_search)
+    obj = mslgroup.Group(args['num'][0], players.players)
+    obj.compute()
 elif args['type'] == 'rrgroup':
-    if obj == None:
-        players = playerlist.PlayerList(args['players'], tlpd_search)
-        obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
-                          args['threshold'])
-        obj.compute()
+    players = playerlist.PlayerList(args['players'], tlpd_search)
+    obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
+                           args['threshold'])
+    obj.compute()
 
-    print(obj.output(strings), title=args['title'])
+print(obj.output(strings, title=args['title']))
 
+if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH']:
     while True:
         s = input('> ').lower().split(' ')
         s = filter(lambda p: p != '', s)
@@ -107,36 +104,98 @@ elif args['type'] == 'rrgroup':
 
         if s[0] == 'exit':
             break
+
         elif s[0] == 'set':
-            pa = obj.get_player(s[1])
-            pb = obj.get_player(s[2])
-            match = obj.get_match(obj._matches, pa, pb)
-            ia = int(input('Score for ' + match.player_a.name + ': '))
-            ib = int(input('Score for ' + match.player_b.name + ': '))
-            match.fix_random_result(ia, ib)
-        elif s[0] == 'unset':
-            pa = obj.get_player(s[1])
-            pb = obj.get_player(s[2])
-            match = obj.get_match(obj._matches, pa, pb)
-            match.fixed_random_result = False
-        elif s[0] == 'list':
-            print('Fixed:', end='')
-            found = False
-            for match in obj._matches:
-                if match.fixed_random_result:
-                    if found:
-                        print(',', end='')
-                    found = True
-                    print(' ' + match.player_a.name + ' ' + str(match.random_result[0])\
-                          + '-' + str(match.random_result[1]) + ' ' + match.player_b.name, end='')
-            if found:
-                print('')
+            match = None
+            if obj.type in ['RRGROUP']:
+                if len(s) > 2:
+                    match = obj.find_match(pa=s[1], pb=s[2])
+            elif obj.type == 'MATCH':
+                match = obj
             else:
-                print(' none')
+                print('Invalid command in current mode')
+                continue
+
+            if match != None:
+                ia = int(input('Score for ' + match.player_a.name + ': '))
+                ib = int(input('Score for ' + match.player_b.name + ': '))
+                res = match.fix_result(ia, ib)
+                if not res:
+                    print('Invalid result')
+            else:
+                print('No such match found')
+
+        elif s[0] == 'unset':
+            match = None
+            if obj.type in ['RRGROUP']:
+                if lens(s) > 2:
+                    match = obj.find_match(pa=s[1], pb=s[2])
+            elif obj.type == 'MATCH':
+                match = obj
+            else:
+                print('Invalid command in current mode')
+                continue
+
+            if match != None:
+                match.unfix_result()
+            else:
+                print('No such match found')
+
+        elif s[0] == 'list':
+            if obj.type not in ['RRGROUP', 'MATCH']:
+                print('Invalid command in current mode')
+
+            if obj.type == 'RRGROUP':
+                print('Modified matches:', end='')
+                found = False
+                for match in obj.get_match_list():
+                    if match.modified_result:
+                        if found:
+                            print(',', end='')
+                        found = True
+                        print(' ' + match.player_a.name + ' ' +\
+                              str(match.result[0]) + '-' +\
+                              str(match.result[1]) + ' ' +\
+                              match.player_b.name, end='')
+                if found:
+                    print('')
+                else:
+                    print(' none')
+
+            elif obj.type == 'MATCH':
+                if obj.fixed_result or obj.modified_result:
+                    if obj.fixed_result:
+                        print('Result fixed: ', end='')
+                    elif obj.modified_result:
+                        print('Result modified: ', end='')
+                    print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
+                          str(obj.result[1]) + ' ' + obj.player_b.name)
+
         elif s[0] == 'compute':
             obj.compute()
+
         elif s[0] == 'out':
             print(obj.output(strings, title=args['title']))
+
+        elif s[0] == 'save':
+            if len(s) > 1:
+                put_to_file(obj, s[1])
+            elif args['save'] != None:
+                put_to_file(obj, args['save'])
+            else:
+                print('No filename given')
+
+        elif s[0] == 'load':
+            temp = None
+            if len(s) > 1:
+                temp = get_from_file(s[1])
+            elif args['load'] != None:
+                temp = get_from_file(args['load'])
+            else:
+                print('No filename given')
+            
+            if temp != None:
+                obj = temp
 
 if args['save'] != None:
     put_to_file(obj, args['save'])

@@ -3,10 +3,10 @@ import match
 class SEBracket:
 
     def __init__(self, num, rounds, players):
+        self.type = 'SEBRACKET'
         self.players = players
         self.num = num
         self.rounds = rounds
-        self.compute()
 
     def compute(self):
         self.winners = []
@@ -56,9 +56,10 @@ class SEBracket:
 
         return out
 
-    def output(self, strings):
-        out = strings['header'].format(title=str(pow(2,self.rounds)) + '-man '\
-                                    + 'single elimination bracket')
+    def output(self, strings, title=None):
+        if title == None:
+            title = str(pow(2,self.rounds)) + '-man single elimination bracket'
+        out = strings['header'].format(title=title)
 
         sorted_winners = sorted(self.winners, key = lambda a: a[1],\
                                 reverse=True)

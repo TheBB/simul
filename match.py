@@ -9,13 +9,17 @@ def binomial(n, k):
 class Match:
 
     def __init__(self, num, player_a, player_b):
+        self.type = 'MATCH'
         self.num = num
         self.player_a = player_a
         self.player_b = player_b
-        self.fixed_random_result = False
+        self.fixed_result = False
+        self.result = (0, 0)
         self.compute()
 
     def compute(self):
+        self.outcomes = []
+
         pa = self.player_a.prob_of_winning(self.player_b)
         pb = 1 - pa
         num = self.num
@@ -24,13 +28,21 @@ class Match:
         self.prob_a = 0
         self.prob_b = 0
 
-        for i in range(0, num):
-            proba = binomial(num+i-1, i) * pow(pa, num) * pow(pb, i)
-            probb = binomial(num+i-1, i) * pow(pb, num) * pow(pa, i)
-            self.outcomes.append((num, i, proba))
-            self.outcomes.append((i, num, probb))
-            self.prob_a += proba
-            self.prob_b += probb
+        start_a = self.result[0]
+        start_b = self.result[1]
+
+        self.modified_result = (start_a != 0) or (start_b != 0)
+        self.fixed_result = (start_a == num) or (start_b == num)
+
+        for i in range(0, num-start_b):
+            prob = binomial(num-start_a+i-1,i) * pow(pa,num-start_a) * pow(pb,i)
+            self.outcomes.append((num, start_b+i, prob))
+            self.prob_a += prob
+
+        for i in range(0, num-start_a):
+            prob = binomial(num-start_b+i-1,i) * pow(pb,num-start_b) * pow(pa,i)
+            self.outcomes.append((start_a+i, num, prob))
+            self.prob_b += prob
 
         if self.prob_a > self.prob_b:
             self.winner = self.player_a
@@ -39,12 +51,20 @@ class Match:
             self.winner = self.player_b
             self.prob = self.prob_b
 
-    def fix_random_result(self, i, j):
-        self.random_result = (i, j)
-        self.fixed_random_result = True
+    def fix_result(self, i, j):
+        if i < 0 or j < 0 or i > self.num or j > self.num or\
+           (i == self.num and j == self.num):
+            return False
+        self.result = (i, j)
+        self.compute()
+        return True
+
+    def unfix_result(self):
+        self.result = (0, 0)
+        self.compute()
 
     def get_random_result(self):
-        if not self.fixed_random_result:
+        if not self.fixed_result:
             val = random.random()
             for outcome in self.outcomes:
                 if val >= outcome[2]:
@@ -54,10 +74,11 @@ class Match:
                     return self.random_result
             return self.get_random_result()
         else:
-            return self.random_result
+            return self.result
 
-    def output(self, strings):
-        title = self.player_a.name + ' vs. ' + self.player_b.name
+    def output(self, strings, title=None):
+        if title == None:
+            title = self.player_a.name + ' vs. ' + self.player_b.name
 
         out = strings['header'].format(title=title)
 
@@ -79,15 +100,13 @@ class Match:
 
         out += strings['mlwinner'].format(player=self.winner.name\
                                         , prob=100*self.prob)
-        mloutcome = self.outcomes[0]
-        for outcome in self.outcomes[1:-1]:
-            if outcome[2] > mloutcome[2]:
-                mloutcome = outcome
+
+        outs = sorted(self.outcomes, key=lambda p: p[2], reverse=True)
 
         out += strings['mloutcome'].format(pa=self.player_a.name\
                                          , pb=self.player_b.name\
-                                         , na=mloutcome[0], nb=mloutcome[1]\
-                                         , prob=100*mloutcome[2])
+                                         , na=outs[0][0], nb=outs[0][1]\
+                                         , prob=100*outs[0][2])
 
         out += strings['footer'].format(title=title)
 
