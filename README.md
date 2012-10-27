@@ -41,14 +41,13 @@ The major command-line arguments are:
 
 ### -t, --type
 
+    ./simul.py -t match
+
 Gives the tournament format to simulate. There are currently four choices:
 -   **match**: a single best-of-N match between two players (default)
 -   **sebracket**: a single elimination bracket with 2^n players
 -   **rrgroup**: a standard round-robin group with customizable tiebreakers
 -   **mslgroup**: a four-player group format used in the MSL and GSL
-
-
-    ./simul.py -t match
 
 ### -f, --format
 
