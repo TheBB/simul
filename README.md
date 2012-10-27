@@ -29,3 +29,14 @@ Installation
 
 Simply put the files in a folder, and run the simul.py script. See the
 following sections for details on command-line arguments.
+
+Usage
+-----
+
+Execute the following command:
+
+    ./simul.py [arguments]
+
+The major command-line arguments are:
+
+### -f, --format
