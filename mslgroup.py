@@ -72,8 +72,6 @@ class Group:
 
                 base = self.first.probs[iw1] * self.second.probs[iw2]
 
-                print('initial winners: ' + w1.name + ' ' + w2.name + ' ' + str(base))
-
                 wmatch = match.Match(self._num, w1, w2)
                 lmatch = match.Match(self._num, l1, l2)
 
@@ -98,8 +96,6 @@ class Group:
 
                 base_p = base * wm.probs[iw] * lm.probs[il]
 
-                print('  secondary winners: ' + wmw.name + ' ' + lmw.name + ' ' + str(base_p))
-
                 wmw.places[0] += base_p
                 lml.places[3] += base_p
 
@@ -109,21 +105,12 @@ class Group:
 
     def compute_fin(self, base=1, fm=None):
         if fm == None:
-            print('premature return compute_fin')
             return
 
         fm.player_a.places[1] += base * fm.prob_a
         fm.player_b.places[2] += base * fm.prob_a
         fm.player_b.places[1] += base * fm.prob_b
         fm.player_a.places[2] += base * fm.prob_b
-
-    def subcase(self, base, w, l):
-        pw = base * self._matches[(w,l)].prob_a
-        pl = base * self._matches[(w,l)].prob_b
-        w.places[1] += pw
-        w.places[2] += pl
-        l.places[1] += pl
-        l.places[2] += pw
 
     def make_matches(self):
         self._matches = dict()
