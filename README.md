@@ -17,3 +17,15 @@ Outputs results intended for display
 Probabilities for the outcome of any single game are based on Elo ratings of
 the players involved, which is collected from the Team Liquid Progaming
 Database (TLPD) automatically, or input manually.
+
+Requires
+--------
+
+Nothing but Python. The program has been written to run on Python 3.x, but will
+likely work on Python 2.x with only minor changes.
+
+Installation
+------------
+
+Simply put the files in a folder, and run the simul.py script. See the
+following sections for details on command-line arguments.
