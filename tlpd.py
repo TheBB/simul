@@ -17,8 +17,8 @@ class Tlpd:
 
     from_file = False
 
-    def __init__(self, db='sc2-korean'):
-        self._tabulator = -1
+    def __init__(self, db='sc2-korean', tabulator=-1):
+        self._tabulator = tabulator
         self._database = db
 
     def search(self, player):
@@ -125,6 +125,7 @@ class Tlpd:
         out = re.compile('tblt_ids\[\'tblt\'\] = \'\d+\';').findall(q)
         if len(out) > 0:
             self._tabulator = int(re.compile('\d+').findall(out[0])[0])
+            print('--- Got TLPD tabulator ID: ' + str(self._tabulator))
         else:
             print(' > tlpd.get_tabulator_id (parse)')
             self._tabulator = -1

@@ -11,6 +11,7 @@ import tlpd
 import match
 import sebracket
 import roundrobin
+import mslgroup
 
 def get_from_file(file):
     with open(file, 'rb') as f:
@@ -27,8 +28,10 @@ parser.add_argument('-f', '--format', dest='format', default='term',\
         choices=['term','tl','tls','reddit'],\
         help='output format')
 parser.add_argument('-t', '--type', dest='type', default='match',\
-        choices=['match','sebracket','rrgroup'],\
+        choices=['match','sebracket','rrgroup','mslgroup'],\
         help='tournament type')
+parser.add_argument('--title', dest='title', default=None,\
+        help='title')
 parser.add_argument('--tie', dest='tie', nargs='*',
         choices=['mscore', 'sscore', 'swins', 'imscore', 'isscore', 'iswins',\
                  'ireplay'],\
@@ -48,6 +51,8 @@ parser.add_argument('-l', '--load', dest='load',\
         help='load data from file')
 parser.add_argument('--tlpd', dest='tlpd', default='none',\
         help='search in TLPD database')
+parser.add_argument('--tlpd-tabulator', dest='tabulator', default=-1, type=int,\
+        help='tabulator ID for the TLPD database')
 
 args = vars(parser.parse_args())
 strings = output.get_strings(args)
@@ -58,7 +63,7 @@ if args['load'] != None:
 
 tlpd_search = None
 if args['tlpd'] != 'none':
-    tlpd_search = tlpd.Tlpd(args['tlpd'])
+    tlpd_search = tlpd.Tlpd(args['tlpd'], args['tabulator'])
 
 if args['type'] == 'match':
     if obj == None:
@@ -66,14 +71,24 @@ if args['type'] == 'match':
         player_b = playerlist.get_player(2, tlpd_search)
         obj = match.Match(args['num'][0], player_a, player_b)
 
-    print(obj.output(strings))
+    print(obj.output(strings, title=args['title']))
+
 elif args['type'] == 'sebracket':
     if obj == None:
         players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
         bracket = sebracket.SEBracket(args['num'], args['rounds'],\
                 players.players)
 
-    print(obj.output(strings))
+    print(obj.output(strings, title=args['title']))
+
+elif args['type'] == 'mslgroup':
+    if obj == None:
+        players = playerlist.PlayerList(4, tlpd_search)
+        obj = mslgroup.Group(args['num'][0], players.players)
+        obj.compute()
+
+    print(obj.output(strings, title=args['title']))
+
 elif args['type'] == 'rrgroup':
     if obj == None:
         players = playerlist.PlayerList(args['players'], tlpd_search)
@@ -81,7 +96,7 @@ elif args['type'] == 'rrgroup':
                           args['threshold'])
         obj.compute()
 
-    print(obj.output(strings))
+    print(obj.output(strings), title=args['title'])
 
     while True:
         s = input('> ').lower().split(' ')
@@ -121,7 +136,7 @@ elif args['type'] == 'rrgroup':
         elif s[0] == 'compute':
             obj.compute()
         elif s[0] == 'out':
-            print(obj.output(strings))
+            print(obj.output(strings, title=args['title']))
 
 if args['save'] != None:
     put_to_file(obj, args['save'])

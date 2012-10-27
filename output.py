@@ -70,4 +70,13 @@ def get_strings(args):
         strings['gpprobthr'] = '\n* Probability of achieving top {thr}: {prob:.3f}%'
         strings['gpmlplace'] = '\n* Most likely place: {place} ({prob:.3f}%)'
 
+    # MSL group-specific
+    strings['header'] += '\n'
+    if args['format'] == 'term':
+        strings['mslgplayer'] = '\n{player:>10}: {prob: >6.3f}%'
+    elif args['format'] == 'tl' or args['format'] == 'tls':
+        strings['mslgplayer'] = '\n[indent]{player}: {prob:.3f}%'
+    elif args['format'] == 'reddit':
+        strings['mslgplayer'] = '\n* {player}: {prob:.3f}%'
+
     return strings
