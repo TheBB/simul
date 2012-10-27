@@ -9,35 +9,113 @@ class Group:
         self._num = num
         self._players = players
 
+        self.first = match.Match(num, players[0], players[1])
+        self.second = match.Match(num, players[2], players[3])
+        self.winners = None
+        self.losers = None
+        self.final = None
+
+    def find_match(self, pa=None, pb=None, search=''):
+        if search == 'first':
+            return self.first
+        elif search == 'second':
+            return self.second
+        elif search == 'winners':
+            return self.winners
+        elif search == 'losers':
+            return self.losers
+        elif search == 'final':
+            return self.final
+        return None
+
+    def update(self):
+        if not (self.first.fixed_result and self.second.fixed_result):
+            self.winners = None
+            self.losers = None
+            self.final = None
+        else:
+            if self.winners == None or self.losers == None or\
+                    (self.winners.player_a != self.first.winner) or\
+                    (self.winners.player_b != self.second.winner) or\
+                    (self.losers.player_a != self.first.loser) or\
+                    (self.losers.player_b != self.second.loser):
+                self.winners = match.Match(self._num, self.first.winner,\
+                                           self.second.winner)
+                self.losers = match.Match(self._num, self.first.loser,\
+                                          self.second.loser)
+
+            if not (self.winners.fixed_result and self.losers.fixed_result):
+                self.final = None
+            else:
+                if self.final == None or\
+                        (self.final.player_a != self.winners.loser) or\
+                        (self.final.player_b != self.losers.winner):
+                    self.final = match.Match(self._num, self.winners.loser,\
+                                             self.losers.winner)
+
     def compute(self):
-        self.make_matches()
+        self.update()
 
         for p in self._players:
             p.places = [0, 0, 0, 0]
 
-        for winner_1 in range(0,2):
-            for winner_2 in range(0,2):
-                w1 = self._players[winner_1]
-                l1 = self._players[1-winner_1]
-                w2 = self._players[2+winner_2]
-                l2 = self._players[3-winner_2]
+        if self.first.fixed_result and self.second.fixed_result:
+            self.compute_wl(base=1, wm=self.winners, lm=self.losers)
+            return
 
-                base = self._matches[(w1,l1)].prob_a *\
-                       self._matches[(w2,l2)].prob_a
+        for iw1 in range(0,2):
+            for iw2 in range(0,2):
+                w1 = self.first.players[iw1]
+                l1 = self.first.players[1-iw1]
+                w2 = self.second.players[iw2]
+                l2 = self.second.players[1-iw2]
 
-                wmatch = self._matches[(w1,w2)]
-                lmatch = self._matches[(l1,l2)]
+                base = self.first.probs[iw1] * self.second.probs[iw2]
 
-                w1.places[0] += base * wmatch.prob_a
-                w2.places[0] += base * wmatch.prob_b
+                print('initial winners: ' + w1.name + ' ' + w2.name + ' ' + str(base))
 
-                l1.places[3] += base * lmatch.prob_b
-                l2.places[3] += base * lmatch.prob_a
+                wmatch = match.Match(self._num, w1, w2)
+                lmatch = match.Match(self._num, l1, l2)
 
-                self.subcase(base * wmatch.prob_b * lmatch.prob_a, w1, l1)
-                self.subcase(base * wmatch.prob_a * lmatch.prob_a, w2, l1)
-                self.subcase(base * wmatch.prob_b * lmatch.prob_b, w1, l2)
-                self.subcase(base * wmatch.prob_a * lmatch.prob_b, w2, l2)
+                self.compute_wl(base=base, wm=wmatch, lm=lmatch)
+
+    def compute_wl(self, base=1, wm=None, lm=None):
+        if wm == None or lm == None:
+            return
+
+        if wm.fixed_result and lm.fixed_result:
+            wm.winner.places[0] += base
+            lm.loser.places[3] += base
+            self.compute_fin(base=base, fm=self.final)
+            return
+
+        for iw in range(0,2):
+            for il in range(0,2):
+                wmw = wm.players[iw]
+                wml = wm.players[1-iw]
+                lmw = lm.players[il]
+                lml = lm.players[1-il]
+
+                base_p = base * wm.probs[iw] * lm.probs[il]
+
+                print('  secondary winners: ' + wmw.name + ' ' + lmw.name + ' ' + str(base_p))
+
+                wmw.places[0] += base_p
+                lml.places[3] += base_p
+
+                fmatch = match.Match(self._num, wml, lmw)
+
+                self.compute_fin(base=base_p, fm=fmatch)
+
+    def compute_fin(self, base=1, fm=None):
+        if fm == None:
+            print('premature return compute_fin')
+            return
+
+        fm.player_a.places[1] += base * fm.prob_a
+        fm.player_b.places[2] += base * fm.prob_a
+        fm.player_b.places[1] += base * fm.prob_b
+        fm.player_a.places[2] += base * fm.prob_b
 
     def subcase(self, base, w, l):
         pw = base * self._matches[(w,l)].prob_a

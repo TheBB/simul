@@ -13,6 +13,7 @@ class Match:
         self.num = num
         self.player_a = player_a
         self.player_b = player_b
+        self.players = [player_a, player_b]
         self.fixed_result = False
         self.result = (0, 0)
         self.compute()
@@ -44,11 +45,15 @@ class Match:
             self.outcomes.append((start_a+i, num, prob))
             self.prob_b += prob
 
+        self.probs = [self.prob_a, self.prob_b]
+
         if self.prob_a > self.prob_b:
             self.winner = self.player_a
+            self.loser = self.player_b
             self.prob = self.prob_a
         else:
             self.winner = self.player_b
+            self.loser = self.player_a
             self.prob = self.prob_b
 
     def fix_result(self, i, j):

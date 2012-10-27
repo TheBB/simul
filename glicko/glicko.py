@@ -4,103 +4,106 @@ import sqlite3
 import math
 import time
 
-class Player:
+#import glicko2
+import glicko1
 
-    def __init__(self):
-        self.id = 0
-        self.pre_rating = 1500
-        self.pre_deviation = 350
-        self.pre_volatility = 0.06
-        self.games = []
-        self._tau = 0.5
-
-    def compute(self, p=False):
-        mu = float(self.pre_rating-1500)/173.7178
-        phi = float(self.pre_deviation)/173.7178
-        vol = self.pre_volatility
-        for i in range(0,len(self.games)):
-            gm = self.games[i]
-            self.games[i] = ((gm[0]-1500)/173.7178, gm[1]/173.7178, gm[2])
-
-        if p:
-            print(mu)
-            print(phi)
-            print(vol)
-            print(self.games)
-
-        try:
-            g = lambda p: 1.0/math.sqrt(1+3*p**2/math.pi**2)
-            E = lambda m, mj, pj: 1.0/(1.0+math.exp(-g(pj)*(m-mj)))
-
-            v = 0
-            exp = 0
-            for gm in self.games:
-                Ev = E(mu, gm[0], gm[1])
-                v += g(gm[1])**2 * Ev * (1.0 - Ev)
-                exp += g(gm[1]) * (gm[2]-Ev)
-            v = 1.0 / v
-            delta = exp * v
-
-            if p:
-                print(v)
-                print(delta)
-        except:
-            print(self)
-
-        # Volatility iteration
-        eps = 1e-6
-        a = math.log(self.pre_volatility**2)
-        f = lambda x: math.exp(x) * (delta**2 - phi**2 - v - math.exp(x)) /\
-                (2*(phi**2 + v + math.exp(x))) - (x-a)/self._tau**2
-
-        A = a
-        if delta**2 > phi**2 + v:
-            B = math.log(delta**2 - phi**2 - v)
-        else:
-            k = 1
-            while f(a - k*math.sqrt(self._tau**2)) < 0:
-                k += 1
-            B = a - k*math.sqrt(self._tau**2)
-        fa = f(A)
-        fb = f(B)
-
-        while abs(A-B) > eps:
-            if p:
-                print(str(A) + ' ' + str(B))
-            C = A + (A-B)*fa/(fb-fa)
-            fc = f(C)
-            if fc*fb < 0:
-                A = B
-                fa = fb
-            else:
-                fa = fa/2
-            B = C
-            fb = fc
-            if p:
-                time.sleep(1)
-
-        self.post_volatility = math.exp(A/2)
-        post_phi = math.sqrt(phi**2 + self.post_volatility**2)
-        post_phi = 1.0/math.sqrt(1.0/post_phi**2 + 1.0/v)
-        post_mu = mu + post_phi**2 * exp
-
-        if p:
-            print(post_mu)
-            print(post_phi)
-            print(self.post_volatility)
-
-        self.post_rating = 173.7178*post_mu+1500
-        self.post_deviation = 173.7178*post_phi
-
-        if p:
-            print(self)
-
-    def __str__(self):
-        return str((self.pre_rating, self.pre_deviation, self.pre_volatility))\
-                + ' ' + str(self.games)
-
-    def __repr__(self):
-        return self.__str__()
+#class Player:
+#
+    #def __init__(self):
+        #self.id = 0
+        #self.pre_rating = 1500
+        #self.pre_deviation = 350
+        #self.pre_volatility = 0.06
+        #self.games = []
+        #self._tau = 0.5
+#
+    #def compute(self, p=False):
+        #mu = float(self.pre_rating-1500)/173.7178
+        #phi = float(self.pre_deviation)/173.7178
+        #vol = self.pre_volatility
+        #for i in range(0,len(self.games)):
+            #gm = self.games[i]
+            #self.games[i] = ((gm[0]-1500)/173.7178, gm[1]/173.7178, gm[2])
+#
+        #if p:
+            #print(mu)
+            #print(phi)
+            #print(vol)
+            #print(self.games)
+#
+        #try:
+            #g = lambda p: 1.0/math.sqrt(1+3*p**2/math.pi**2)
+            #E = lambda m, mj, pj: 1.0/(1.0+math.exp(-g(pj)*(m-mj)))
+#
+            #v = 0
+            #exp = 0
+            #for gm in self.games:
+                #Ev = E(mu, gm[0], gm[1])
+                #v += g(gm[1])**2 * Ev * (1.0 - Ev)
+                #exp += g(gm[1]) * (gm[2]-Ev)
+            #v = 1.0 / v
+            #delta = exp * v
+#
+            #if p:
+                #print(v)
+                #print(delta)
+        #except:
+            #print(self)
+#
+        ## Volatility iteration
+        #eps = 1e-6
+        #a = math.log(self.pre_volatility**2)
+        #f = lambda x: math.exp(x) * (delta**2 - phi**2 - v - math.exp(x)) /\
+                #(2*(phi**2 + v + math.exp(x))) - (x-a)/self._tau**2
+#
+        #A = a
+        #if delta**2 > phi**2 + v:
+            #B = math.log(delta**2 - phi**2 - v)
+        #else:
+            #k = 1
+            #while f(a - k*math.sqrt(self._tau**2)) < 0:
+                #k += 1
+            #B = a - k*math.sqrt(self._tau**2)
+        #fa = f(A)
+        #fb = f(B)
+#
+        #while abs(A-B) > eps:
+            #if p:
+                #print(str(A) + ' ' + str(B))
+            #C = A + (A-B)*fa/(fb-fa)
+            #fc = f(C)
+            #if fc*fb < 0:
+                #A = B
+                #fa = fb
+            #else:
+                #fa = fa/2
+            #B = C
+            #fb = fc
+            #if p:
+                #time.sleep(1)
+#
+        #self.post_volatility = math.exp(A/2)
+        #post_phi = math.sqrt(phi**2 + self.post_volatility**2)
+        #post_phi = 1.0/math.sqrt(1.0/post_phi**2 + 1.0/v)
+        #post_mu = mu + post_phi**2 * exp
+#
+        #if p:
+            #print(post_mu)
+            #print(post_phi)
+            #print(self.post_volatility)
+#
+        #self.post_rating = 173.7178*post_mu+1500
+        #self.post_deviation = 173.7178*post_phi
+#
+        #if p:
+            #print(self)
+#
+    #def __str__(self):
+        #return str((self.pre_rating, self.pre_deviation, self.pre_volatility))\
+                #+ ' ' + str(self.games)
+#
+    #def __repr__(self):
+        #return self.__str__()
 
 class Glicko:
 
@@ -228,11 +231,11 @@ class Glicko:
                         ratings WHERE played=1 and period=:period''',\
                         {'period': period}).fetchall()
         for pl in pls:
-            newplayer = Player()
-            newplayer.id = pl[0]
-            newplayer.pre_rating = pl[1]
-            newplayer.pre_deviation = pl[2]
-            newplayer.pre_volatility = pl[3]
+            newplayer = glicko1.Player(pl[1], pl[2])
+            newplayer.dbid = pl[0]
+            newplayer.game_ratings = []
+            newplayer.game_rds = []
+            newplayer.game_outcomes = []
             players[pl[0]] = newplayer
 
         gms = c.execute('''SELECT winner, loser FROM games WHERE
@@ -240,46 +243,54 @@ class Glicko:
         for gm in gms:
             w = players[gm[0]]
             l = players[gm[1]]
-            w.games.append((l.pre_rating, l.pre_deviation, 1))
-            l.games.append((w.pre_rating, w.pre_deviation, 0))
+
+            w.game_ratings.append(l.rating)
+            w.game_rds.append(l.rd)
+            w.game_outcomes.append(1)
+
+            l.game_ratings.append(w.rating)
+            l.game_rds.append(w.rd)
+            l.game_outcomes.append(0)
+
             games += 1
 
         print('...' + str(len(players)) + ' players competed in this period over ' + str(games) + ' games')
         print('...computing rating changes...')
 
         for pl in players.values():
-            if period > 13 and pl.id == 624:
-                pl.compute(True)
-            else:
-                pl.compute()
+            #if period > 13 and pl.id == 624:
+                #pl.compute(True)
+            #else:
+                #pl.compute()
+
+            pl.update_player(pl.game_ratings, pl.game_rds, pl.game_outcomes)
 
             c.execute('''UPDATE ratings SET rating=:rating,
                        deviation=:deviation, volatility=:volatility WHERE
                        player=:player and period=:period''',\
-                       {'rating': pl.post_rating,\
-                        'deviation': pl.post_deviation,\
-                        'volatility': pl.post_volatility, 'player': pl.id,
-                        'period': period})
+                       {'rating': pl.rating, 'deviation': pl.rd,\
+                        'volatility': self._initial_volatility,\
+                        'player': pl.dbid, 'period': period})
         self._conn.commit()
 
         print('...updating deviations for ' + str(copied+added-len(players)) + ' non-competing players...')
 
-        pls = c.execute('''SELECT player, deviation, volatility FROM ratings
-                        WHERE played=0 and period=:period''',\
+        pls = c.execute('''SELECT player, rating, deviation, volatility FROM 
+                        ratings WHERE played=0 and period=:period''',\
                         {'period': period}).fetchall()
         for pl in pls:
-            phi = pl[1]/173.7178
-            phi = math.sqrt(phi**2 + pl[2]**2)
-            phi = phi*173.7178
+            player = glicko1.Player(pl[1], pl[2])
+            player._preRatingRD()
+
             c.execute('''UPDATE ratings SET deviation=:deviation WHERE
                       player=:player and period=:period''',\
-                      {'player': pl[0], 'deviation': phi, 'period': period})
-
+                      {'player': pl[0], 'deviation': player.rd,\
+                       'period': period})
         self._conn.commit()
 
 if __name__ == '__main__':
     glicko = Glicko('database.sql')
     glicko.make_periods()
     glicko.clear_ratings()
-    for p in range(0,15):
+    for p in range(0,glicko.get_num_periods()):
         glicko.compute_ratings(p+1)

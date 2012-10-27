@@ -92,9 +92,10 @@ elif args['type'] == 'rrgroup':
                            args['threshold'])
     obj.compute()
 
+obj.compute()
 print(obj.output(strings, title=args['title']))
 
-if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH']:
+if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH', 'MSLGROUP']:
     while True:
         s = input('> ').lower().split(' ')
         s = filter(lambda p: p != '', s)
@@ -110,6 +111,9 @@ if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH']:
             if obj.type in ['RRGROUP']:
                 if len(s) > 2:
                     match = obj.find_match(pa=s[1], pb=s[2])
+            elif obj.type in ['MSLGROUP']:
+                if len(s) > 1:
+                    match = obj.find_match(search=s[1])
             elif obj.type == 'MATCH':
                 match = obj
             else:
@@ -122,6 +126,8 @@ if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH']:
                 res = match.fix_result(ia, ib)
                 if not res:
                     print('Invalid result')
+                elif obj.type in ['MSLGROUP']:
+                    obj.compute()
             else:
                 print('No such match found')
 
@@ -130,6 +136,9 @@ if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH']:
             if obj.type in ['RRGROUP']:
                 if lens(s) > 2:
                     match = obj.find_match(pa=s[1], pb=s[2])
+            elif obj.type in ['MSLGROUP']:
+                if len(s) > 1:
+                    match = obj.find_match(search=s[1])
             elif obj.type == 'MATCH':
                 match = obj
             else:
@@ -138,12 +147,15 @@ if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH']:
 
             if match != None:
                 match.unfix_result()
+                if obj.type in ['MSLGROUP']:
+                    obj.compute()
             else:
                 print('No such match found')
 
         elif s[0] == 'list':
-            if obj.type not in ['RRGROUP', 'MATCH']:
+            if obj.type not in ['RRGROUP', 'MATCH', 'MSLGROUP']:
                 print('Invalid command in current mode')
+                continue
 
             if obj.type == 'RRGROUP':
                 print('Modified matches:', end='')
@@ -157,6 +169,25 @@ if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH']:
                               str(match.result[0]) + '-' +\
                               str(match.result[1]) + ' ' +\
                               match.player_b.name, end='')
+                if found:
+                    print('')
+                else:
+                    print(' none')
+
+            elif obj.type == 'MSLGROUP':
+                print('Modified matches:', end='')
+                found = False
+                for match in [obj.first, obj.second, obj.winners, obj.losers, obj.final]:
+                    if match == None:
+                        continue
+                    if match.modified_result:
+                        if found:
+                            print(',', end='')
+                        found = True
+                        print(' ' + match.player_a.name + ' ' +\
+                             str(match.result[0]) + '-' +\
+                             str(match.result[1]) + ' ' +\
+                             match.player_b.name, end='')
                 if found:
                     print('')
                 else:

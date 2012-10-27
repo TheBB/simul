@@ -51,30 +51,32 @@ Gives the tournament format to simulate. There are currently four choices:
 
 ### -f, --format
 
+    ./simul.py -f tl
+
 Gives the output format. There are currently four choices:
 -   **term**: Useful for display and easy reading in the terminal (default)
 -   **tl**: Optimized for readability on the Team Liquid forums
 -   **tls**: Same as **tl**, except wrapped in spoiler tags
 -   **reddit**: Optimized for readability on Reddit
 
-    ./simul.py -f tl
-
 ### -s, --save
+
+    ./simul.py -s my_group.sc2
 
 Saves the match/group/bracket to a file, so that if changes have to be made,
 all the data doesn't have to be input again.
 
-    ./simul.py -s my_group.sc2
-
 ### -l, --load
+
+    ./simul.py -l my_group.sc2
 
 Loads the match/group/bracket from a file. If this parameter is specified, the
 **type** argument, along with whatever secondary arguments it requires, is
 ignored.
 
-    ./simul.py -l my_group.sc2
-
 ### --tlpd
+
+    ./simul.py --tlpd sc2-korean
 
 If this argument is given, the Team Liquid Progaming Database (TLPD) is
 consulted for player ratings. Currently, there are two relevant SC2 databases:
@@ -86,9 +88,9 @@ If this argument is not given, you will be asked to input ratings manually.
 TLPD does not currently offer an API, so this feature can be prone to problems,
 if Team Liquid changes the layout of their site.
 
-    ./simul.py --tlpd sc2-korean
-
 ### --tlpd-tabulator
+
+    ./simul.py --tlpd-tabulator 1031
 
 The TLPD lookup requires a *tabulator ID*. When too many tabulator IDs are
 requested too quickly, the remote website will respond with HTTP: 503
@@ -99,15 +101,13 @@ single tabulator ID. Whenever a tabulator ID is requested from TLPD, it will be
 written to the terminal. You can then pass it along as an argument in
 subsequent executions.
 
-    ./simul.py --tlpd-tabulator 1031
-
 ### --no-console
+
+    ./simul.py --no-console
 
 For certain formats, the program will launch a rudimentary console for making
 changes or updates as the tournament progresses. Use this argument to skip the
 console.
-
-    ./simul.py --no-console
 
 Formats
 -------
@@ -122,3 +122,6 @@ tournament formants.
 ### Round robin
 
 ### MSL-style group
+
+Console
+-------
