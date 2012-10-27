@@ -4,10 +4,10 @@ simul
 Simulator for various tournament formants, intended for Starcraft.
 
 Supports the following tournament formats:
+-   Best-of-N matches
+-   Single elimination brackets
 -   Round robin with customisable tiebreakers
 -   MSL-style four player groups
--   Singe best of N matches
--   Single elimination brackets
 
 Outputs results intended for display
 -   in the terminal
@@ -100,3 +100,23 @@ written to the terminal. You can then pass it along as an argument in
 subsequent executions.
 
     ./simul.py --tlpd-tabulator 1031
+
+### --no-console
+
+For certain formats, the program will launch a rudimentary console for making
+changes or updates as the tournament progresses. Use this argument to skip the
+/bin/bash: .vim/ftplugin/html/sparkup.py: Permission denied
+
+Formats
+-------
+
+The following section describes details on how to use each of the supported
+tournament formants.
+
+### Match
+
+### Single elimination bracket
+
+### Round robin
+
+### MSL-style group
