@@ -39,4 +39,7 @@ Execute the following command:
 
 The major command-line arguments are:
 
-### -f, --format
+### -t, --type
+
+Gives the tournament format to simulate. There are currently four choices:
+-   *match*
