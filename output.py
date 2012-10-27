@@ -41,8 +41,8 @@ def get_strings(args):
         strings['mlwinnerlist'] += '\n'
         strings['exroundslist'] += '\n'
     if args['format'] == 'term':
-        strings['mlwinneri'] = '\n{player:>10}: {prob: >6.3f}%'
-        strings['exroundsi'] = '\n{player:>10}: {rounds: >5.3f} rounds ({expl})'
+        strings['mlwinneri'] = '\n{player:>14}: {prob: >6.3f}%'
+        strings['exroundsi'] = '\n{player:>14}: {rounds: >5.3f} rounds ({expl})'
     elif args['format'] == 'tl' or args['format'] == 'tls':
         strings['mlwinneri'] = '\n[indent]{player}: {prob:.3f}%'
         strings['exroundsi'] = '\n[indent]{player}: {rounds:.3f} rounds ({expl})'
@@ -74,7 +74,7 @@ def get_strings(args):
     if args['type'] == 'mslgroup':
         strings['header'] += '\n'
     if args['format'] == 'term':
-        strings['mslgplayer'] = '\n{player:>10}: {prob: >6.3f}%'
+        strings['mslgplayer'] = '\n{player:>14}: {prob: >6.3f}%'
     elif args['format'] == 'tl' or args['format'] == 'tls':
         strings['mslgplayer'] = '\n[indent]{player}: {prob:.3f}%'
     elif args['format'] == 'reddit':
