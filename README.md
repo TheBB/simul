@@ -47,6 +47,7 @@ Gives the tournament format to simulate. There are currently four choices:
 -   **rrgroup**: a standard round-robin group with customizable tiebreakers
 -   **mslgroup**: a four-player group format used in the MSL and GSL
 
+
     ./simul.py -t match
 
 ### -f, --format
@@ -105,7 +106,9 @@ subsequent executions.
 
 For certain formats, the program will launch a rudimentary console for making
 changes or updates as the tournament progresses. Use this argument to skip the
-/bin/bash: .vim/ftplugin/html/sparkup.py: Permission denied
+console.
+
+    ./simul.py --no-console
 
 Formats
 -------
