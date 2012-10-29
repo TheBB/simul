@@ -92,7 +92,6 @@ elif args['type'] == 'rrgroup':
                            args['threshold'])
     obj.compute()
 
-obj.compute()
 print(obj.output(strings, title=args['title']))
 
 if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH', 'MSLGROUP']:

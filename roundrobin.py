@@ -13,6 +13,13 @@ class ScoreTally:
         self.swins = 0
         self.replays = 0
 
+    def scale_by(self, total):
+        self.mscore /= total
+        self.sscore /= total
+        self.swins /= total
+        self.replays /= total
+        self.finishes = [f / total for f in self.finishes]
+
 class Group:
 
     def __init__(self, num, tie, players, threshold=1):
@@ -50,50 +57,85 @@ class Group:
         return next(gen)
 
     def compute(self):
-        N = 100000
+        matches = self._matches
+        for match in matches:
+            match.compute()
 
-        self.tally = dict()
+        outcome = [0] * len(matches)
+
+        tally = dict()
         for p in self._players:
-            self.tally[p] = ScoreTally(len(self._players))
+            tally[p] = ScoreTally(len(self._players))
 
-        for i in range(0,N):
-            table = self.simulate()
-            for i in range(0,len(table)):
-                t = self.tally[table[i]]
-                t.finishes[i] += 1./N
-                t.mscore += float(table[i].mscore)/N
-                t.sscore += float(table[i].sscore)/N
-                t.swins += float(table[i].swins)/N
-                if table[i].replayed:
-                    t.replays += 1./N
+        total = 0
+        while outcome != False:
+            base = 1
+            for j in range(0,len(matches)):
+                outc = matches[j].outcomes[outcome[j]]
+                matches[j].iter_outcome = (outc[0], outc[1])
+                base *= outc[2]
 
-    def simulate(self):
-        for player in self._players:
+            table = self.collect_table(matches, self._players)
+
+            if table != False:
+                for i in range(0,len(table)):
+                    t = tally[table[i]]
+                    for (shift, prob) in table[i].spread:
+                        t.finishes[i+shift] += prob * base
+                    t.mscore += float(table[i].mscore) * base
+                    t.sscore += float(table[i].sscore) * base
+                    t.swins += float(table[i].swins) * base
+                    if table[i].replayed:
+                        t.replays += base
+                total += base
+
+            outcome = self.get_next_outcome(outcome, matches)
+
+        for t in tally.values():
+            t.scale_by(total)
+
+        self.tally = tally
+
+    def get_next_outcome(self, outcome, matches):
+        j = len(outcome) - 1
+
+        while j >= 0:
+            outcome[j] += 1
+            if outcome[j] == len(matches[j].outcomes):
+                outcome[j] = 0
+                j -= 1
+            else:
+                break
+
+        if j == -1:
+            return False
+        else:
+            return outcome
+
+    def collect_table(self, matches, players):
+        for player in players:
             player.mscore = 0
             player.sscore = 0
             player.swins = 0
             player.replayed = False
+            player.spread = [(0,1)]
 
-        for match in self._matches:
-            res = match.get_random_result()
-            match.player_a.sscore += res[0] - res[1]
-            match.player_a.swins += res[0]
-            match.player_b.sscore += res[1] - res[0]
-            match.player_b.swins += res[1]
+        for i in range(0,len(matches)):
+            res = matches[i].iter_outcome
+            matches[i].player_a.sscore += res[0] - res[1]
+            matches[i].player_a.swins += res[0]
+            matches[i].player_b.sscore += res[1] - res[0]
+            matches[i].player_b.swins += res[1]
             if res[0] > res[1]:
-                match.player_a.mscore += 1
-                match.player_b.mscore -= 1
+                matches[i].player_a.mscore += 1
+                matches[i].player_b.mscore -= 1
             else:
-                match.player_b.mscore += 1
-                match.player_a.mscore -= 1
+                matches[i].player_a.mscore -= 1
+                matches[i].player_b.mscore += 1
 
-        table = self._players
-        table = self.break_ties(table, self._tie)
-
-        return table
+        return self.break_ties(players, self._tie)
 
     def break_ties(self, table, tie):
-        #print(tie[0])
         if tie[0] == 'imscore' or tie[0] == 'isscore' or tie[0] == 'iswins':
             for p in table:
                 p.imscore = 0
@@ -103,7 +145,7 @@ class Group:
             combs = itertools.combinations(table, 2)
             for comb in combs:
                 match = self.get_match(self._matches, comb[0], comb[1])
-                res = match.random_result
+                res = match.iter_outcome
                 match.player_a.isscore += res[0] - res[1]
                 match.player_a.iswins += res[0]
                 match.player_b.isscore += res[1] - res[0]
@@ -125,27 +167,47 @@ class Group:
             for i in range(1, len(table)):
                 if key(table[i]) != keyval:
                     if i > keyind + 1:
-                        table[keyind:i] = self.break_ties(table[keyind:i], tie)
+                        temp = self.break_ties(table[keyind:i], tie)
+                        if temp != False:
+                            table[keyind:i] = temp
+                        else:
+                            return False
                     keyval = key(table[i])
                     keyind = i
 
             if keyind < len(table) - 1 and keyind > 0:
-                table[keyind:] = self.break_ties(table[keyind:], tie)
+                temp = self.break_ties(table[keyind:], tie)
+                if temp != False:
+                    table[keyind:] = temp
+                else:
+                    return False
             elif keyind < len(table) - 1:
                 table = self.break_ties(table, tie[1:])
+                if table == False:
+                    return False
 
         if tie[0] == 'ireplay':
-            refplayers = []
+            if len(table) == len(self._players):
+                return False
+
+            newplayers = []
             for p in table:
                 p.replayed = True
                 newp = playerlist.Player(copy=p)
-                newp.ref = p
-                refplayers.append(newp)
-            smallgroup = Group(self._num, self._tie, refplayers)
-            smalltable = smallgroup.simulate()
+                p.ref = newp
+                newplayers.append(newp)
 
-            for i in range(0,len(table)):
-                table[i] = smalltable[i].ref
+            smallgroup = Group(self._num, self._tie, newplayers)
+            smallgroup.compute()
+            smalltally = smallgroup.tally
+
+            root = 0
+            for p in table:
+                p.spread = []
+                finishes = smalltally[p.ref].finishes
+                for f in range(0,len(finishes)):
+                    p.spread.append((root+f, finishes[f]))
+                root -= 1
 
         return table
 
