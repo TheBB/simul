@@ -2,7 +2,10 @@ def get_elo(s=''):
     elo = -1
     while elo == -1:
         try:
-            elo = int(input('Elo' + (' ' if s != '' else '') + s + ': '))
+            elo = input('Elo' + (' ' if s != '' else '') + s + ': ')
+            if elo.strip().lower() == '':
+                return False
+            elo = int(elo)
         except:
             elo = -1
     return elo
@@ -59,9 +62,15 @@ def get_player(i, tlpd=None):
                 race = ''
 
         elo = get_elo()
-        elo_vt = get_elo('vT')
-        elo_vz = get_elo('vZ')
-        elo_vp = get_elo('vP')
+        if elo == False:
+            elo = 0
+            elo_vt = 0
+            elo_vz = 0
+            elo_vp = 0
+        else:
+            elo_vt = get_elo('vT')
+            elo_vz = get_elo('vZ')
+            elo_vp = get_elo('vP')
 
     print('')
 
