@@ -206,7 +206,12 @@ if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH', 'MSLGROUP']:
             obj.compute()
 
         elif s[0] == 'out':
-            print(obj.output(strings, title=args['title']))
+            if len(s) > 1:
+                strs = output.get_strings({'type': obj.type.lower(),\
+                                           'format': s[1]})
+                print(obj.output(strs, title=args['title']))
+            else:
+                print(obj.output(strings, title=args['title']))
 
         elif s[0] == 'save':
             if len(s) > 1:
