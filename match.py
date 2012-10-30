@@ -16,10 +16,35 @@ class Match:
         self.players = [player_a, player_b]
         self.fixed_result = False
         self.result = (0, 0)
+        self.dependences = []
+        self.link_winner = None
+        self.link_winner_slot = 0
+        self.link_loser = None
+        self.link_loser_slot = 0
+
         self.compute()
+
+    def set_player_a(self, player):
+        self.player_a = player
+        self.players[0] = player
+        self.compute()
+
+    def set_player_b(self, player):
+        self.player_b = player
+        self.players[1] = player
+        self.compute()
+
+    def set_player(self, player, slot):
+        if slot == 0:
+            self.set_player_a(player)
+        else:
+            self.set_player_b(player)
 
     def compute(self):
         self.outcomes = []
+
+        if self.player_a == None or self.player_b == None:
+            return
 
         pa = self.player_a.prob_of_winning(self.player_b)
         pb = 1 - pa
@@ -60,15 +85,33 @@ class Match:
         if i < 0 or j < 0 or i > self.num or j > self.num or\
            (i == self.num and j == self.num):
             return False
+
+        for dep in self.dependences:
+            if not dep.fixed_result:
+                return False
+
         self.result = (i, j)
         self.compute()
+        self.broadcast()
+
         return True
 
     def unfix_result(self):
         self.result = (0, 0)
         self.compute()
+        self.broadcast()
+
+    def broadcast(self):
+        if not self.fixed_result:
+            if self.link_winner != None:
+                self.link_winner.unfix_result()
+            if self.link_loser != None:
+                self.link_loser.unfix_result()
 
     def get_random_result(self):
+        if self.player_a == None or self.player_b == None:
+            return None
+
         if not self.fixed_result:
             val = random.random()
             for outcome in self.outcomes:

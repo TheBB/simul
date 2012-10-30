@@ -10,6 +10,7 @@ import tlpd
 
 import match
 import sebracket
+import debracket
 import roundrobin
 import mslgroup
 
@@ -35,7 +36,7 @@ parser.add_argument('-f', '--format', dest='format', default='term',\
         choices=['term','tl','tls','reddit'],\
         help='output format')
 parser.add_argument('-t', '--type', dest='type', default='match',\
-        choices=['match','sebracket','rrgroup','mslgroup'],\
+        choices=['match','sebracket','rrgroup','mslgroup','debracket'],\
         help='tournament type')
 parser.add_argument('--title', dest='title', default=None,\
         help='title')
@@ -80,7 +81,11 @@ elif args['type'] == 'match':
     obj.compute()
 elif args['type'] == 'sebracket':
     players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
-    bracket = sebracket.SEBracket(args['num'], args['rounds'], players.players)
+    obj = sebracket.SEBracket(args['num'], args['rounds'], players.players)
+    obj.compute()
+elif args['type'] == 'debracket':
+    players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
+    obj = debracket.DEBracket(args['num'][0], args['rounds'], players.players)
     obj.compute()
 elif args['type'] == 'mslgroup':
     players = playerlist.PlayerList(4, tlpd_search)

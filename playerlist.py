@@ -1,3 +1,5 @@
+debug = False
+
 def get_elo(s=''):
     elo = -1
     while elo == -1:
@@ -103,7 +105,12 @@ class PlayerList:
 
     def __init__(self, num, tlpd=None):
         self.players = []
+        k = 1
         while len(self.players) < num:
-            i = len(self.players) + 1
-            player = get_player(i, tlpd)
-            self.players.append(player)
+            if not debug:
+                i = len(self.players) + 1
+                player = get_player(i, tlpd)
+                self.players.append(player)
+            else:
+                self.players.append(Player('player' + str(k), 'T', 0, 0, 0, 0))
+                k += 1
