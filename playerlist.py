@@ -1,4 +1,4 @@
-debug = True
+debug = False
 
 def get_elo(s=''):
     elo = -1
