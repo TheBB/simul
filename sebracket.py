@@ -21,6 +21,8 @@ class SEBracket:
                             self.players[:half])
             self.right = SEBracket(self.num[0:-1], self.rounds-1, \
                             self.players[half:])
+            self.left.compute()
+            self.right.compute()
 
             temp = dict()
 
@@ -65,7 +67,7 @@ class SEBracket:
                                 reverse=True)
 
         out += strings['mlwinnerlist']
-        for res in sorted_winners[0:10]:
+        for res in sorted_winners[0:16]:
             out += strings['mlwinneri'].format(player=res[0].name,\
                                                prob=100*res[1])
 
@@ -78,7 +80,6 @@ class SEBracket:
         out += strings['exroundslist']
         for res in sorted_exrounds:
             rounded = self.rounds - round(res[1])
-            expl = 'lol'
             if rounded <= 0:
                 expl = 'win'
             elif rounded == 1:

@@ -2,8 +2,13 @@ import match
 
 class ScoreTally:
 
-    def __init__(self):
-        pass
+    def __init__(self, rounds):
+        self.finishes = [0] * 2*rounds
+
+    def compute(self):
+        self.exrounds = 0
+        for i in range(0,len(self.finishes)):
+            self.exrounds += (len(self.finishes)-1-i) * self.finishes[i]
 
 class DEBracket:
 
@@ -73,7 +78,7 @@ class DEBracket:
                     losers[i+1][j].dependences.append(losers[i][j])
                 elif i < len(losers) - 1:
                     losers[i][j].link_winner = losers[i+1][j//2]
-                    losers[i][j].link_loser_slot = j % 2
+                    losers[i][j].link_winner_slot = j % 2
                     losers[i+1][j//2].dependences.append(losers[i][j])
 
         losers[-1][0].link_winner = final1
@@ -87,11 +92,20 @@ class DEBracket:
         self.final2.dependences = [final1]
 
     def compute(self):
+        N = 10000
+
         tally = dict()
         for p in self._players:
-            tally[p] = ScoreTally()
+            tally[p] = ScoreTally(self._rounds)
+        
+        for i in range(0,N):
+            self.simulate(tally)
 
-        self.simulate(tally)
+        for t in tally.values():
+            t.finishes = [f/N for f in t.finishes]
+            t.compute()
+
+        self.tally = tally
 
     def simulate(self, tally):
         winners = self.winners
@@ -99,13 +113,13 @@ class DEBracket:
         final1 = self.final1
         final2 = self.final2
 
-        for rnd in winners:
-            for match in rnd:
-                self.do_match(match, tally)
+        for i in range(0,len(winners)):
+            for match in winners[i]:
+                self.do_match(match, tally, -1)
 
-        for rnd in self.losers:
-            for match in rnd:
-                self.do_match(match, tally)
+        for i in range(0,len(losers)):
+            for match in losers[i]:
+                self.do_match(match, tally, i)
 
         final2.set_player_a(final1.player_a)
         final2.set_player_b(final1.player_b)
@@ -113,7 +127,14 @@ class DEBracket:
         res1 = final1.get_random_result()
         res2 = final2.get_random_result()
 
-    def do_match(self, match, tally):
+        if res1[0] > res1[1] or res2[0] > res2[1]:
+            tally[final1.player_a].finishes[0] += 1
+            tally[final1.player_b].finishes[1] += 1
+        else:
+            tally[final1.player_a].finishes[1] += 1
+            tally[final1.player_b].finishes[0] += 1
+
+    def do_match(self, match, tally, round):
         res = match.get_random_result()
 
         winner = (match.player_a if res[0] > res[1] else match.player_b)
@@ -124,27 +145,43 @@ class DEBracket:
         if match.link_loser != None:
             match.link_loser.set_player(loser, match.link_loser_slot)
 
+        if round > -1:
+            tally[loser].finishes[-1-round] += 1
+
         return winner
 
     def output(self, strings, title=None):
-        print('WINNERS BRACKET')
-        print('')
-        for rnd in self.winners:
-            for match in rnd:
-                print(match.player_a.name + ' - ' + match.player_b.name)
-            print('')
+        if title == None:
+            title = str(2**self._rounds) + '-man double elimination bracket'
+        out = strings['header'].format(title=title)
 
-        print('LOSERS BRACKET')
-        print('')
-        for rnd in self.losers:
-            for match in rnd:
-                print(match.player_a.name + ' - ' + match.player_b.name)
-            print('')
+        tally = self.tally
+        players = sorted(self._players, key=lambda p: tally[p].finishes[0], reverse=True)
 
-        print('FINALS')
-        print('')
-        for match in [self.final1, self.final2]:
-            print(match.player_a.name + ' - ' + match.player_b.name)
-        print('')
+        out += strings['mlwinnerlist']
+        for p in players[0:16]:
+            out += strings['mlwinneri'].format(player=p.name,\
+                                              prob=100*tally[p].finishes[0])
 
-        return 'yay'
+        players = sorted(players, key=lambda p: tally[p].exrounds, reverse=True)
+        placings = [1, 1]
+        for r in range(0,self._rounds-1):
+            k = 2**r
+            placings.append(k)
+            placings.append(k)
+
+        out += strings['exroundslist']
+        for p in players:
+            expl = round(tally[p].exrounds)
+            if expl > 0:
+                expl = sum(placings[:-expl])
+            else:
+                expl = sum(placings)
+            expl = 'top ' + str(expl)
+            out += strings['exroundsi'].format(player=p.name,\
+                                               rounds=tally[p].exrounds,\
+                                               expl=expl)
+
+        out += strings['footer'].format(title=title)
+
+        return out

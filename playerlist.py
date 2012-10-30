@@ -1,4 +1,4 @@
-debug = False
+debug = True
 
 def get_elo(s=''):
     elo = -1
@@ -112,5 +112,6 @@ class PlayerList:
                 player = get_player(i, tlpd)
                 self.players.append(player)
             else:
-                self.players.append(Player('player' + str(k), 'T', 0, 0, 0, 0))
+                self.players.append(Player('player' + str(k), 'T', 50*k, 50*k,\
+                                           50*k, 50*k))
                 k += 1
