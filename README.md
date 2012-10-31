@@ -270,7 +270,7 @@ Recomputes the probabilities after making changes.
 
 #### out [format]
 
-Outputs the results in the given format (**term**, **tl**, **tls** or
+Outputs the results in the given format (one of **term**, **tl**, **tls** or
 **reddit**.) If the format is not given, it will default to the value of the
 **-f** command-line argument.
 
