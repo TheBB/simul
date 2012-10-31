@@ -5,7 +5,7 @@ import match
 class Group:
 
     def __init__(self, num, players):
-        self.type = 'MSLGROUP'
+        self.type = 'mslgroup'
         self._num = num
         self._players = players
 
@@ -26,7 +26,11 @@ class Group:
             return self.losers
         elif search == 'final':
             return self.final
-        return None
+        raise Exception('Match must be one of (first, second, winners, losers, final)')
+
+    def get_match_list(self):
+        return list(filter(None, [self.first, self.second, self.winners,\
+                                  self.losers, self.final]))
 
     def update(self):
         if not (self.first.fixed_result and self.second.fixed_result):

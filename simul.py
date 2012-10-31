@@ -30,6 +30,23 @@ def put_to_file(obj, file):
     except Exception as e:
         print(' > simul.put_to_file: ' + str(e))
 
+def print_matches(list, pre='Modified matches', post='none'):
+    print(pre + ':', end='')
+    found = False
+    for match in list:
+        if match.modified_result:
+            if found:
+                print(',', end='')
+            found = True
+            print(' ' + match.player_a.name + ' ' +\
+                  str(match.result[0]) + '-' +\
+                  str(match.result[1]) + ' ' +\
+                  match.player_b.name, end='')
+    if found:
+        print('')
+    else:
+        print(' ' + post)
+
 parser = argparse.ArgumentParser(description='Emulate a SC2 tournament'\
         + ' format.')
 parser.add_argument('-f', '--format', dest='format', default='term',\
@@ -99,7 +116,14 @@ elif args['type'] == 'rrgroup':
 
 print(obj.output(strings, title=args['title']))
 
-if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH', 'MSLGROUP']:
+if not args['noconsole']:
+    supported = {'all': ['save','load','compute','out','exit'],\
+                 'match': ['set','unset','list'],\
+                 'rrgroup': ['set','unset','list'],\
+                 'mslgroup': ['set','unset','list'],\
+                 'sebracket': [],\
+                 'debracket': ['set','unset','list']}
+
     while True:
         s = input('> ').lower().split(' ')
         s = filter(lambda p: p != '', s)
@@ -107,112 +131,19 @@ if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH', 'MSLGROUP']:
         if len(s) < 1:
             continue
 
+        if s[0] not in supported['all'] and s[0] not in supported[obj.type]:
+            print('Invalid command for type \'' + obj.type + '\'')
+            continue
+
         if s[0] == 'exit':
             break
-
-        elif s[0] == 'set':
-            match = None
-            if obj.type in ['RRGROUP']:
-                if len(s) > 2:
-                    match = obj.find_match(pa=s[1], pb=s[2])
-            elif obj.type in ['MSLGROUP']:
-                if len(s) > 1:
-                    match = obj.find_match(search=s[1])
-            elif obj.type == 'MATCH':
-                match = obj
-            else:
-                print('Invalid command in current mode')
-                continue
-
-            if match != None:
-                ia = int(input('Score for ' + match.player_a.name + ': '))
-                ib = int(input('Score for ' + match.player_b.name + ': '))
-                res = match.fix_result(ia, ib)
-                if not res:
-                    print('Invalid result')
-                elif obj.type in ['MSLGROUP']:
-                    obj.compute()
-            else:
-                print('No such match found')
-
-        elif s[0] == 'unset':
-            match = None
-            if obj.type in ['RRGROUP']:
-                if lens(s) > 2:
-                    match = obj.find_match(pa=s[1], pb=s[2])
-            elif obj.type in ['MSLGROUP']:
-                if len(s) > 1:
-                    match = obj.find_match(search=s[1])
-            elif obj.type == 'MATCH':
-                match = obj
-            else:
-                print('Invalid command in current mode')
-                continue
-
-            if match != None:
-                match.unfix_result()
-                if obj.type in ['MSLGROUP']:
-                    obj.compute()
-            else:
-                print('No such match found')
-
-        elif s[0] == 'list':
-            if obj.type not in ['RRGROUP', 'MATCH', 'MSLGROUP']:
-                print('Invalid command in current mode')
-                continue
-
-            if obj.type == 'RRGROUP':
-                print('Modified matches:', end='')
-                found = False
-                for match in obj.get_match_list():
-                    if match.modified_result:
-                        if found:
-                            print(',', end='')
-                        found = True
-                        print(' ' + match.player_a.name + ' ' +\
-                              str(match.result[0]) + '-' +\
-                              str(match.result[1]) + ' ' +\
-                              match.player_b.name, end='')
-                if found:
-                    print('')
-                else:
-                    print(' none')
-
-            elif obj.type == 'MSLGROUP':
-                print('Modified matches:', end='')
-                found = False
-                for match in [obj.first, obj.second, obj.winners, obj.losers, obj.final]:
-                    if match == None:
-                        continue
-                    if match.modified_result:
-                        if found:
-                            print(',', end='')
-                        found = True
-                        print(' ' + match.player_a.name + ' ' +\
-                             str(match.result[0]) + '-' +\
-                             str(match.result[1]) + ' ' +\
-                             match.player_b.name, end='')
-                if found:
-                    print('')
-                else:
-                    print(' none')
-
-            elif obj.type == 'MATCH':
-                if obj.fixed_result or obj.modified_result:
-                    if obj.fixed_result:
-                        print('Result fixed: ', end='')
-                    elif obj.modified_result:
-                        print('Result modified: ', end='')
-                    print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
-                          str(obj.result[1]) + ' ' + obj.player_b.name)
 
         elif s[0] == 'compute':
             obj.compute()
 
         elif s[0] == 'out':
             if len(s) > 1:
-                strs = output.get_strings({'type': obj.type.lower(),\
-                                           'format': s[1]})
+                strs = output.get_strings({'type': obj.type.lower(), 'format': s[1]})
                 print(obj.output(strs, title=args['title']))
             else:
                 print(obj.output(strings, title=args['title']))
@@ -236,6 +167,56 @@ if not args['noconsole'] and obj.type in ['RRGROUP', 'MATCH', 'MSLGROUP']:
             
             if temp != None:
                 obj = temp
+
+        elif s[0] == 'set' or s[0] == 'unset':
+            match = False
+            try:
+                if obj.type in ['rrgroup'] and len(s) > 2:
+                    match = obj.find_match(pa=s[1], pb=s[2])
+                elif obj.type in ['mslgroup', 'debracket'] and len(s) > 1:
+                    match = obj.find_match(search=s[1])
+                elif obj.type in ['match']:
+                    match = obj
+
+                if match == False:
+                    print('Not enough arguments')
+                    continue
+                elif match == None or not match.can_fix():
+                    print('Match not yet ready (unresolved dependencies?)')
+                    continue
+
+                if s[0] == 'set':
+                    ia = int(input('Score for ' + match.player_a.name + ': '))
+                    ib = int(input('Score for ' + match.player_b.name + ': '))
+                    res = match.fix_result(ia, ib)
+                    if not res:
+                        print('Unable to set result')
+                elif s[0] == 'unset':
+                    match.unfix_result()
+
+            except Exception as e:
+                print(str(e))
+
+        elif s[0] == 'list':
+            if obj.type in ['rrgroup', 'mslgroup']:
+                print_matches(obj.get_match_list())
+
+            elif obj.type in ['debracket']:
+                for i in range(0,len(obj.winners)):
+                    print_matches(obj.winners[i], 'WB' + str(i+1))
+                for i in range(0,len(obj.losers)):
+                    print_matches(obj.losers[i], 'LB' + str(i+1))
+                print_matches([obj.final1], pre='First final', post='unmodified')
+                print_matches([obj.final2], pre='Second final', post='unmodified')
+
+            elif obj.type in ['match']:
+                if obj.fixed_result or obj.modified_result:
+                    if obj.fixed_result:
+                        print('Result fixed: ', end='')
+                    elif obj.modified_result:
+                        print('Result modified: ', end='')
+                    print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
+                          str(obj.result[1]) + ' ' + obj.player_b.name)
 
 if args['save'] != None:
     put_to_file(obj, args['save'])

@@ -23,7 +23,7 @@ class ScoreTally:
 class Group:
 
     def __init__(self, num, tie, players, threshold=1):
-        self.type = 'RRGROUP'
+        self.type = 'rrgroup'
         self._num = num
         self._players = players
         self._tie = tie
@@ -35,12 +35,16 @@ class Group:
         self._matches = [match.Match(self._num, a[0], a[1]) for a in combs]
 
     def find_match(self, pa=None, pb=None, search=''):
+        match = None
         if pa != None and pb != None:
             pa = self.get_player(pa)
             pb = self.get_player(pb)
-            return self.get_match(self._matches, pa, pb)
+            match = self.get_match(self._matches, pa, pb)
+
+        if match == None:
+            raise Exception('No such match found: \'' + pa.name + ' vs. ' + pb.name)
         else:
-            return None
+            return match
 
     def get_match_list(self):
         return self._matches

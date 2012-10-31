@@ -13,11 +13,34 @@ class ScoreTally:
 class DEBracket:
 
     def __init__(self, num, rounds, players):
-        self.type = 'DEBRACKET'
+        self.type = 'debracket'
         self._num = num
         self._rounds = rounds
         self._players = players
         self.setup_matches()
+
+    def find_match(self, pa=None, pb=None, search=''):
+        ex = 'No such match found \'' + search + '\''
+
+        if search[0:2].lower() == 'lb':
+            array = self.losers
+        elif search[0:2].lower() == 'wb':
+            array = self.winners
+        elif search[0:2].lower() == 'f1':
+            return self.final1
+        elif search[0:2].lower() == 'f2':
+            return self.final2
+        else:
+            raise Exception(ex)
+
+        search = search[2:].split('-')
+        if len(search) < 2:
+            raise Exception(ex)
+
+        try:
+            return array[int(search[0])-1][int(search[1])-1]
+        except:
+            raise Exception(ex)
 
     def setup_matches(self):
         rounds = self._rounds

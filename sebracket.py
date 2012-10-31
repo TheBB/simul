@@ -3,7 +3,7 @@ import match
 class SEBracket:
 
     def __init__(self, num, rounds, players):
-        self.type = 'SEBRACKET'
+        self.type = 'sebracket'
         self.players = players
         self.num = num
         self.rounds = rounds

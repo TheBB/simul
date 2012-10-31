@@ -9,7 +9,7 @@ def binomial(n, k):
 class Match:
 
     def __init__(self, num, player_a, player_b):
-        self.type = 'MATCH'
+        self.type = 'match'
         self.num = num
         self.player_a = player_a
         self.player_b = player_b
@@ -23,6 +23,12 @@ class Match:
         self.link_loser_slot = 0
 
         self.compute()
+
+    def can_fix(self):
+        for m in self.dependences:
+            if not m.fixed_result:
+                return False
+        return True
 
     def set_player_a(self, player):
         if player != self.player_a:
