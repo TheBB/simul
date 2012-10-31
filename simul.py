@@ -71,7 +71,7 @@ parser.add_argument('-t', '--type', dest='type', default='match',\
         help='tournament type')
 parser.add_argument('--title', dest='title', default=None,\
         help='title')
-parser.add_argument('--tie', dest='tie', nargs='*',
+parser.add_argument('--tie', dest='tie', nargs='*',\
         choices=['mscore', 'sscore', 'swins', 'imscore', 'isscore', 'iswins',\
                  'ireplay'],\
         default=['mscore', 'sscore', 'imscore', 'isscore', 'ireplay'],\
@@ -129,7 +129,6 @@ elif args['type'] == 'rrgroup':
     obj.compute()
 
 print(obj.output(strings, title=args['title']))
-
 
 if not args['noconsole']:
     supported = {'all': ['save','load','compute','out','exit'],\
