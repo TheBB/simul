@@ -86,7 +86,8 @@ class Player:
             self.name = name
             self.race = race
             self.elo = elo
-            self.elo_race = {'P': elo_vp, 'T': elo_vt, 'Z': elo_vz}
+            avg = (elo_vp + elo_vt + elo_vz)/3
+            self.elo_race = {'P': elo_vp-avg, 'T': elo_vt-avg, 'Z': elo_vz-avg}
         else:
             self.name = copy.name
             self.race = copy.race
@@ -94,9 +95,9 @@ class Player:
             self.elo_race = copy.elo_race
 
     def prob_of_winning(self, opponent):
-        mix = 0.5
-        my_elo = mix * self.elo + (1 - mix)*self.elo_race[opponent.race]
-        op_elo = mix * opponent.elo + (1 - mix)*opponent.elo_race[self.race]
+        mix = 0.3
+        my_elo = self.elo + mix * self.elo_race[opponent.race]
+        op_elo = opponent.elo + mix * opponent.elo_race[self.race]
         my_q = pow(10, float(my_elo)/400)
         op_q = pow(10, float(op_elo)/400)
         return my_q/(my_q + op_q)
