@@ -25,14 +25,16 @@ class Match:
         self.compute()
 
     def set_player_a(self, player):
-        self.player_a = player
-        self.players[0] = player
-        self.compute()
+        if player != self.player_a:
+            self.player_a = player
+            self.players[0] = player
+            self.unfix_result()
 
     def set_player_b(self, player):
-        self.player_b = player
-        self.players[1] = player
-        self.compute()
+        if player != self.player_b:
+            self.player_b = player
+            self.players[1] = player
+            self.unfix_result()
 
     def set_player(self, player, slot):
         if slot == 0:
