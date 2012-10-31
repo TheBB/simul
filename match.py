@@ -22,6 +22,8 @@ class Match:
         self.link_loser = None
         self.link_loser_slot = 0
 
+        self.words = []
+
         self.compute()
 
     def can_fix(self):

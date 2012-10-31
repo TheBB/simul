@@ -8,6 +8,8 @@ class SEBracket:
         self.num = num
         self.rounds = rounds
 
+        self.words = []
+
     def compute(self):
         self.winners = []
 

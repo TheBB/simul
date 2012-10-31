@@ -15,6 +15,8 @@ class Group:
         self.losers = None
         self.final = None
 
+        self.words = ['first', 'second', 'winners', 'losers', 'final']
+
     def find_match(self, pa=None, pb=None, search=''):
         if search == 'first':
             return self.first

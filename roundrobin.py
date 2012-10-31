@@ -30,6 +30,10 @@ class Group:
         self._threshold = threshold
         self.make_match_list()
 
+        self.words = []
+        for p in players:
+            self.words.append(p.name)
+
     def make_match_list(self):
         combs = itertools.combinations(self._players, 2)
         self._matches = [match.Match(self._num, a[0], a[1]) for a in combs]

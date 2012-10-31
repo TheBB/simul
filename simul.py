@@ -15,6 +15,19 @@ import debracket
 import roundrobin
 import mslgroup
 
+class Completer:
+    def __init__(self, words):
+        self.words = words
+        self.prefix = None
+    def complete(self, prefix, index):
+        if prefix != self.prefix:
+            self.matching_words = [w for w in self.words if w.startswith(prefix)]
+            self.prefix = prefix
+        try:
+            return self.matching_words[index]
+        except IndexError:
+            return None
+
 def get_from_file(file):
     try:
         with open(file, 'rb') as f:
@@ -117,6 +130,7 @@ elif args['type'] == 'rrgroup':
 
 print(obj.output(strings, title=args['title']))
 
+
 if not args['noconsole']:
     supported = {'all': ['save','load','compute','out','exit'],\
                  'match': ['set','unset','list'],\
@@ -124,6 +138,12 @@ if not args['noconsole']:
                  'mslgroup': ['set','unset','list'],\
                  'sebracket': [],\
                  'debracket': ['set','unset','list']}
+
+    words = ['save','load','compute','out','exit'] + obj.words +\
+            supported[obj.type]
+    completer = Completer(words)
+    readline.parse_and_bind("tab: complete")
+    readline.set_completer(completer.complete)
 
     while True:
         s = input('> ').lower().split(' ')

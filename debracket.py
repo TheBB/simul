@@ -18,6 +18,16 @@ class DEBracket:
         self._rounds = rounds
         self._players = players
         self.setup_matches()
+        
+        self.words = []
+        for i in range(0,len(self.winners)):
+            for j in range(0,len(self.winners[i])):
+                self.words.append('wb' + str(i+1) + '-' + str(j+1))
+        for i in range(0,len(self.losers)):
+            for j in range(0,len(self.losers[i])):
+                self.words.append('lb' + str(i+1) + '-' + str(j+1))
+        self.words.append('f1')
+        self.words.append('f2')
 
     def find_match(self, pa=None, pb=None, search=''):
         ex = 'No such match found \'' + search + '\''
