@@ -3,6 +3,7 @@
 import argparse
 import pickle
 import sys
+import readline
 
 import playerlist
 import output

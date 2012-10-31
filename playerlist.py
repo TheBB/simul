@@ -1,3 +1,5 @@
+import readline
+
 debug = False
 
 def get_elo(s=''):
