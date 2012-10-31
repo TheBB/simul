@@ -187,8 +187,8 @@ Undefined behavior may occur if **ireplay** is first tiebreaker, or if it is
 not present at all. Any tiebreakers after **ireplay** will necessarily be
 ignored.
 
-Formats
--------
+Modes
+-----
 
 The following section describes details on how to use each of the supported
 tournament formants.
@@ -238,3 +238,68 @@ round is player 1 vs. player 2 and player 3 vs. player 4.
 
 Console
 -------
+
+After starting the program, and the initial input of player data (unless loaded
+from a file), you are presented with the *console*, where you can modify the
+results of matches and see the resulting data change accordingly.
+
+If you wish to skip the console, run with the **--no-console** command-line
+argument.
+
+The following commands are available. You can always use tab-completion for
+hints.
+
+#### exit
+
+Closes the program. If the **-s** command-line argument is given, the setup is
+saved.
+
+#### save [filename]
+
+Saves the setup to the given file. If no filename is given, it will default to
+the value of the **-s** command-line argument.
+
+#### load [filename]
+
+Loads the setup from the given file. If no filename is given, it will default
+to the vlaue of the **-l** command-line argument.
+
+#### compute
+
+Recomputes the probabilities after making changes.
+
+#### out [format]
+
+Outputs the results in the given format (**term**, **tl**, **tls** or
+**reddit**.) If the format is not given, it will default to the value of the
+**-f** command-line argument.
+
+#### set [match], unset [match]
+
+Use **set** to set the final or temporary result of a match, and use **unset**
+to clear it.
+
+-   In **rrgroup** mode, specify the match by giving the names of the two
+players.
+-   In **mslgroup** mode, the match name must be one of **first**, **second**
+(for the two initial matches), **winners**, **losers** (for the winner's and
+loser's matches) and **final** (for the final game).
+-   In **debracket** mode, the match name must be on the form **wbR-N** or
+**lbR-N**, where *R* is the round number and *N* is the match number, for the
+winner's and loser's brackets respectively. For the final matche(s), use **f1**
+and **f2**.
+-   In **match** mode, you don't need to supply any additional arguments.
+-   This feature is currently unavailable in **sebracket** mode.
+
+If applicable, you will be asked to input the number of sets won for each
+player in the match.
+
+Note that it is not possible to provide results for matches whose players are
+not yet ready. It is, however, possible to provide unfinished results for two
+or more matches at the same time, as long as none of them depend on each other.
+
+#### list
+
+Use this command to output a list over the currently modified results. This is
+helpful if you are experimenting, and have lost track of which matches are
+modified, and which are not.
