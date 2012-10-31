@@ -126,11 +126,11 @@ differently depending on the type.
 #### -n, --num
 
     ./simul.py -n 3
-    ./simul.py -n 3 3 4
+    ./simul.py -t sebracket -n 3 3 4
 
 Specifies how many sets are required to win a match. If the matches are
 best-of-3, this value should be **2** (not 3), because two wins suffice to win
-a best-of-3 match. In general, for best-of-N, use (N+1)/2.
+a best-of-3 match. In general, for best-of-*N*, use (*N*+1)/2.
 
 For single elimination brackets, input a value for each round, beginning with
 the earliest round. Thus, if the quarter- and semifinals are best-of-5 and the
@@ -138,11 +138,54 @@ final is best-of-7 (such as the GSL), use **-n 3 3 4**.
 
 #### -r, --rounds
 
+    ./simul.py -t [sebracket|debracket] -r 4
+
+Specifies how many rounds to play in a single- or double elimination bracket.
+In either case, for *r* rounds there will be 2^*r* players.
+
+A single elimination bracket will work fine with one round (which is
+essentially just a match), while a double elimination bracket requires at least
+two rounds (so four players at minimum.)
+
 #### -p, --players
+
+    ./simul.py -t rrgroup -p 4
+
+For round robin groups, this argument specifies the number of players in the
+group.
 
 #### --threshold
 
+    ./simul.py -t rrgroup --threshold 2
+
+For round robin groups, this argument specifies the size of the "acceptable"
+region on the top of the rankings. Use this for qualifying groups where you are
+not interested in the probability of a player to *win*, but rather the
+probability to achieve top *N*.
+
 #### --tie
+
+    ./simul.py -t rrgroup --tie mscore sscore imscore isscore ireplay
+
+For round robin groups, this argument specifies which tiebreakers are in force,
+and in which order they are applied. They are given in order from most to least
+important.
+
+-   **mscore**: Total match score
+-   **sscore**: Total set score
+-   **swins**: Total set wins
+-   **imscore**: Internal match score, counted between the tied players
+-   **isscore**: Internal set score, counted between the tied players
+-   **iswins**: Internal number of set wins, counted between the tied players
+-   **ireplay**: Rematch between the tied players
+
+In case of a rematch, it is assumed to take place under the exact same
+conditions as the original group (specifically, best-of-*N* with the same
+tiebreaker structure).
+
+Undefined behavior may occur if **ireplay** is first tiebreaker, or if it is
+not present at all. Any tiebreakers after **ireplay** will necessarily be
+ignored.
 
 Formats
 -------
