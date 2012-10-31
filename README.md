@@ -286,7 +286,7 @@ players.
 loser's matches) and **final** (for the final game).
 -   In **debracket** mode, the match name must be on the form **wbR-N** or
 **lbR-N**, where *R* is the round number and *N* is the match number, for the
-winner's and loser's brackets respectively. For the final matche(s), use **f1**
+winner's and loser's brackets respectively. For the final match(es), use **f1**
 and **f2**.
 -   In **match** mode, you don't need to supply any additional arguments.
 -   This feature is currently unavailable in **sebracket** mode.
@@ -297,6 +297,9 @@ player in the match.
 Note that it is not possible to provide results for matches whose players are
 not yet ready. It is, however, possible to provide unfinished results for two
 or more matches at the same time, as long as none of them depend on each other.
+
+Also note that after making changes in any mode other than **match**, you must
+use **compute** before you see any effects.
 
 #### list
 
