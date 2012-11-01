@@ -29,6 +29,9 @@ class DEBracket:
         self.words.append('f1')
         self.words.append('f2')
 
+    def get_players(self):
+        return self._players
+
     def find_match(self, pa=None, pb=None, search=''):
         ex = 'No such match found \'' + search + '\''
 
@@ -51,6 +54,14 @@ class DEBracket:
             return array[int(search[0])-1][int(search[1])-1]
         except:
             raise Exception(ex)
+
+    def get_player(self, name):
+        fits = lambda p: p.name.lower() == name.lower()
+        gen = (player for player in self._players if fits(player))
+        try:
+            return next(gen)
+        except:
+            return None
 
     def setup_matches(self):
         rounds = self._rounds
@@ -156,6 +167,8 @@ class DEBracket:
 
         final2.set_player_a(final1.player_a)
         final2.set_player_b(final1.player_b)
+        final1.compute()
+        final2.compute()
 
         res1 = final1.get_random_result()
         res2 = final2.get_random_result()
@@ -168,6 +181,7 @@ class DEBracket:
             tally[final1.player_b].finishes[0] += 1
 
     def do_match(self, match, tally, round):
+        match.compute()
         res = match.get_random_result()
 
         winner = (match.player_a if res[0] > res[1] else match.player_b)

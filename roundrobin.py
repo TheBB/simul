@@ -34,6 +34,9 @@ class Group:
         for p in players:
             self.words.append(p.name)
 
+    def get_players(self):
+        return self._players
+
     def make_match_list(self):
         combs = itertools.combinations(self._players, 2)
         self._matches = [match.Match(self._num, a[0], a[1]) for a in combs]
@@ -62,7 +65,10 @@ class Group:
     def get_player(self, name):
         fits = lambda p: p.name.lower() == name.lower()
         gen = (player for player in self._players if fits(player))
-        return next(gen)
+        try:
+            return next(gen)
+        except:
+            return None
 
     def compute(self):
         matches = self._matches

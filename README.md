@@ -298,11 +298,14 @@ Note that it is not possible to provide results for matches whose players are
 not yet ready. It is, however, possible to provide unfinished results for two
 or more matches at the same time, as long as none of them depend on each other.
 
-Also note that after making changes in any mode other than **match**, you must
-use **compute** before you see any effects.
-
 #### list
 
 Use this command to output a list over the currently modified results. This is
 helpful if you are experimenting, and have lost track of which matches are
 modified, and which are not.
+
+#### change [name|race|elo] player
+
+Use **change** to edit player data. There is a second optional argument (one of
+**name**, **race** or **elo**) specifying what exactly should be changed. If
+this argument is not given, you will be queried for everything.

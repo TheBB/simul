@@ -17,9 +17,14 @@ import roundrobin
 import mslgroup
 
 class Completer:
-    def __init__(self, words):
+    def __init__(self, basewords):
+        self.basewords = words
         self.words = words
         self.prefix = None
+
+    def add_words(self, words):
+        self.words = self.basewords + words
+
     def complete(self, prefix, index):
         if prefix != self.prefix:
             self.matching_words = [w for w in self.words if w.startswith(prefix)]
@@ -132,16 +137,18 @@ elif args['type'] == 'rrgroup':
 print(obj.output(strings, title=args['title']))
 
 if not args['noconsole']:
-    supported = {'all': ['save','load','compute','out','exit'],\
+    supported = {'all': ['save','load','compute','out','exit','change'],\
                  'match': ['set','unset','list'],\
                  'rrgroup': ['set','unset','list'],\
                  'mslgroup': ['set','unset','list'],\
                  'sebracket': [],\
                  'debracket': ['set','unset','list']}
 
-    words = ['save','load','compute','out','exit'] + obj.words +\
-            supported[obj.type] + list(filter(os.path.isfile, os.listdir()))
+    words = supported['all'] + obj.words + supported[obj.type] +\
+            ['name','race','elo']
+            #list(filter(os.path.isfile, os.listdir()))
     completer = Completer(words)
+    completer.add_words([p.name for p in obj.get_players()])
     readline.parse_and_bind("tab: complete")
     readline.set_completer(completer.complete)
 
@@ -240,6 +247,45 @@ if not args['noconsole']:
                         print('Result modified: ', end='')
                     print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
                           str(obj.result[1]) + ' ' + obj.player_b.name)
+
+        elif s[0] == 'change':
+            if len(s) < 2:
+                print('Not enough arguments')
+                continue
+
+            player = obj.get_player(s[-1])
+            if player == None:
+                print('No such player \'' + s[-1] + '\'')
+
+            recompute = False
+
+            if len(s) < 3 or s[1] == 'name':
+                player.name = input('Name: ')
+                completer.add_words([p.name for p in obj.get_players()])
+
+            if len(s) < 3 or s[1] == 'race':
+                race = ''
+                while race not in ['P', 'Z', 'T']:
+                    race = input('Race: ').upper()
+                player.race = race
+                recompute = True
+
+            if len(s) < 3 or s[1] == 'elo':
+                elo = playerlist.get_elo()
+                if elo == False:
+                    player.elo = 0
+                    player.elo_race['T'] = 0
+                    player.elo_race['Z'] = 0
+                    player.elo_race['P'] = 0
+                else:
+                    player.elo = elo
+                    player.elo_race['T'] = playerlist.get_elo('vT')
+                    player.elo_race['Z'] = playerlist.get_elo('vZ')
+                    player.elo_race['P'] = playerlist.get_elo('vP')
+                recompute = True
+
+            if recompute:
+                obj.compute()
 
 if args['save'] != None:
     put_to_file(obj, args['save'])

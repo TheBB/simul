@@ -26,6 +26,17 @@ class Match:
 
         self.compute()
 
+    def get_players(self):
+        return self.players
+
+    def get_player(self, name):
+        fits = lambda p: p.name.lower() == name.lower()
+        gen = (player for player in self.players if fits(player))
+        try:
+            return next(gen)
+        except:
+            return None
+
     def can_fix(self):
         for m in self.dependences:
             if not m.fixed_result:

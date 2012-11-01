@@ -30,6 +30,17 @@ class Group:
             return self.final
         raise Exception('Match must be one of (first, second, winners, losers, final)')
 
+    def get_players(self):
+        return self._players
+
+    def get_player(self, name):
+        fits = lambda p: p.name.lower() == name.lower()
+        gen = (player for player in self._players if fits(player))
+        try:
+            return next(gen)
+        except:
+            return None
+
     def get_match_list(self):
         return list(filter(None, [self.first, self.second, self.winners,\
                                   self.losers, self.final]))
@@ -64,6 +75,9 @@ class Group:
 
         for p in self._players:
             p.places = [0, 0, 0, 0]
+
+        for m in self.get_match_list():
+            m.compute()
 
         if self.first.fixed_result and self.second.fixed_result:
             self.compute_wl(base=1, wm=self.winners, lm=self.losers)

@@ -16,7 +16,7 @@ def get_elo(s=''):
 
 def get_player(i, tlpd=None):
     print('Entering player ' + str(i))
-    name = input('ID: ')
+    name = input('Name: ')
 
     results = []
     if tlpd != None:
@@ -60,10 +60,8 @@ def get_player(i, tlpd=None):
         elo_vp = result['elo_vp']
     else:
         race = ''
-        while race == '':
+        while race not in ['P', 'Z', 'T']:
             race = input('Race: ').upper()
-            if race != 'P' and race != 'Z' and race != 'T':
-                race = ''
 
         elo = get_elo()
         if elo == False:

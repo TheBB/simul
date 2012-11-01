@@ -10,6 +10,9 @@ class SEBracket:
 
         self.words = []
 
+    def get_players():
+        return self.players
+
     def compute(self):
         self.winners = []
 
@@ -47,6 +50,14 @@ class SEBracket:
                 self.winners.append((res[0], temp[res[0]]/tot))
             for res in self.right.winners:
                 self.winners.append((res[0], temp[res[0]]/tot))
+
+    def get_player(self, name):
+        fits = lambda p: p.name.lower() == name.lower()
+        gen = (player for player in self.players if fits(player))
+        try:
+            return next(gen)
+        except:
+            return None
 
     def trace_player(self, i):
         out = 0
