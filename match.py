@@ -128,6 +128,11 @@ class Match:
                 self.link_winner.unfix_result()
             if self.link_loser != None:
                 self.link_loser.unfix_result()
+        else:
+            if self.link_winner != None:
+                self.link_winner.set_player(self.winner, self.link_winner_slot)
+            if self.link_loser != None:
+                self.link_loser.set_player(self.loser, self.link_loser_slot)
 
     def get_random_result(self):
         if self.player_a == None or self.player_b == None:

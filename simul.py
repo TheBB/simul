@@ -141,7 +141,7 @@ if not args['noconsole']:
                  'match': ['set','unset','list'],\
                  'rrgroup': ['set','unset','list'],\
                  'mslgroup': ['set','unset','list'],\
-                 'sebracket': [],\
+                 'sebracket': ['set','unset','list'],\
                  'debracket': ['set','unset','list']}
 
     words = supported['all'] + obj.words + supported[obj.type] +\
@@ -201,7 +201,7 @@ if not args['noconsole']:
             try:
                 if obj.type in ['rrgroup'] and len(s) > 2:
                     match = obj.find_match(pa=s[1], pb=s[2])
-                elif obj.type in ['mslgroup', 'debracket'] and len(s) > 1:
+                elif obj.type in ['mslgroup','debracket','sebracket'] and len(s) > 1:
                     match = obj.find_match(search=s[1])
                 elif obj.type in ['match']:
                     match = obj
@@ -238,6 +238,10 @@ if not args['noconsole']:
                     print_matches(obj.losers[i], 'LB' + str(i+1))
                 print_matches([obj.final1], pre='First final', post='unmodified')
                 print_matches([obj.final2], pre='Second final', post='unmodified')
+
+            elif obj.type in ['sebracket']:
+                for i in range(0,len(obj.bracket)):
+                    print_matches(obj.bracket[i], 'R' + str(i+1))
 
             elif obj.type in ['match']:
                 if obj.fixed_result or obj.modified_result:

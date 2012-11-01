@@ -74,7 +74,6 @@ class DEBracket:
             rnd = []
             for j in range(0,2**(rounds-1-i)):
                 rnd.append(match.Match(self._num, None, None))
-                rnd[-1].s = 'winners-' + str(i) + '-' + str(j)
             winners.append(rnd)
 
         for j in range(0,len(winners[0])):
@@ -85,7 +84,6 @@ class DEBracket:
             rnd = []
             for j in range(0,2**(rounds-2-i//2)):
                 rnd.append(match.Match(self._num, None, None))
-                rnd[-1].s = 'losers-' + str(i) + '-' + str(j)
             losers.append(rnd)
 
         for i in range(0,len(winners)):
