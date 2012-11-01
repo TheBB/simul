@@ -4,6 +4,7 @@ import argparse
 import pickle
 import sys
 import readline
+import os
 
 import playerlist
 import output
@@ -139,7 +140,7 @@ if not args['noconsole']:
                  'debracket': ['set','unset','list']}
 
     words = ['save','load','compute','out','exit'] + obj.words +\
-            supported[obj.type]
+            supported[obj.type] + list(filter(os.path.isfile, os.listdir()))
     completer = Completer(words)
     readline.parse_and_bind("tab: complete")
     readline.set_completer(completer.complete)
@@ -213,6 +214,8 @@ if not args['noconsole']:
                         print('Unable to set result')
                 elif s[0] == 'unset':
                     match.unfix_result()
+
+                obj.compute()
 
             except Exception as e:
                 print(str(e))
