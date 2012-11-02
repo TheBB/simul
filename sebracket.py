@@ -45,43 +45,6 @@ class SEBracket:
 
         self.winners = self.do_match(self.bracket[-1][0], self._rounds-1)
 
-        #self.winners = []
-#
-        #if len(self.players) == 2:
-            #vmatch = match.Match(self.num[0], self.players[0], self.players[1])
-            #self.winners.append((self.players[0], vmatch.prob_a))
-            #self.winners.append((self.players[1], vmatch.prob_b))
-        #else:
-            #half = int(len(self.players)/2)
-            #self.left = SEBracket(self.num[0:-1], self.rounds-1, \
-                            #self.players[:half])
-            #self.right = SEBracket(self.num[0:-1], self.rounds-1, \
-                            #self.players[half:])
-            #self.left.compute()
-            #self.right.compute()
-#
-            #temp = dict()
-
-            #for res in self.left.winners:
-                #temp[res[0]] = 0
-            #for res in self.right.winners:
-                #temp[res[0]] = 0
-#
-            #tot = 0
-            #for pa in self.left.winners:
-                #for pb in self.right.winners:
-                    #vmatch = match.Match(self.num[-1], pa[0], pb[0])
-                    #lhs = pa[1] * pb[1] * vmatch.prob_a
-                    #rhs = pa[1] * pb[1] * vmatch.prob_b
-                    #temp[pa[0]] += lhs
-                    #temp[pb[0]] += rhs
-                    #tot += lhs + rhs
-#
-            #for res in self.left.winners:
-                #self.winners.append((res[0], temp[res[0]]/tot))
-            #for res in self.right.winners:
-                #self.winners.append((res[0], temp[res[0]]/tot))
-
     def do_match(self, match, round):
         if match.can_fix():
             if round != 0:
@@ -95,7 +58,6 @@ class SEBracket:
         else:
             res_left = self.do_match(match.dependences[0], round-1)
             res_right = self.do_match(match.dependences[1], round-1)
-
             for l in res_left:
                 for r in res_right:
                     prob = l.exrounds[round-1] * r.exrounds[round-1]
@@ -103,7 +65,6 @@ class SEBracket:
                     match.set_player_b(r)
                     l.exrounds[round] += match.prob_a * prob
                     r.exrounds[round] += match.prob_b * prob
-
             return res_left + res_right
 
     def backtrack(self, match, round):
@@ -158,7 +119,7 @@ class SEBracket:
 
         sorted_exrounds = sorted(self._players, key = lambda a: sum(a.exrounds),\
                                 reverse=True)
-#
+
         out += strings['exroundslist']
         for res in sorted_exrounds:
             rounded = self._rounds - round(sum(res.exrounds))
@@ -172,7 +133,7 @@ class SEBracket:
                 expl = 'lose in the quarterfinals'
             elif rounded >= 4:
                 expl = 'lose in the round of' + str(2 << rounded - 2)
-#
+
             out += strings['exroundsi'].format(player=res.name,\
                                                rounds=sum(res.exrounds),\
                                                expl=expl)

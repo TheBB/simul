@@ -67,6 +67,41 @@ def print_matches(list, pre='Modified matches', post='none'):
     else:
         print(' ' + post)
 
+def sanity_check(args):
+    if args['load'] != None:
+        if not os.path.isfile(args['load']):
+            print('File does not exist: \'' + args['load'] + '\'')
+            sys.exit(1)
+
+    for n in args['num']:
+        if n < 1:
+            print('Number of sets to win must be at least 1')
+            sys.exit(1)
+
+    if args['type'] == 'rrgroup':
+        if len(args['tie']) < 2:
+            print('Must have at least two tiebreakers')
+            sys.exit(1)
+        if args['tie'][-1] != 'ireplay':
+            print('Last tiebreaker must be ireplay')
+            sys.exit(1)
+        if args['tie'][0] == 'ireplay':
+            print('First tiebreaker must not be ireplay')
+            sys.exit(1)
+        if args['players'] < 2:
+            print('Must have at least two players')
+            sys.exit(1)
+        if args['threshold'] < 1:
+            print('Threshold must be at least 1')
+            sys.exit(1)
+
+    if args['rounds'] < 2 and args['type'] == 'debracket':
+        print('Must have at least two rounds')
+        sys.exit(1)
+    if args['rounds'] < 1 and args['type'] == 'sebracket':
+        print('Must have at least one round')
+        sys.exit(1)
+
 parser = argparse.ArgumentParser(description='Emulate a SC2 tournament'\
         + ' format.')
 parser.add_argument('-f', '--format', dest='format', default='term',\
@@ -98,11 +133,15 @@ parser.add_argument('--tlpd', dest='tlpd', default='none',\
         help='search in TLPD database')
 parser.add_argument('--tlpd-tabulator', dest='tabulator', default=-1, type=int,\
         help='tabulator ID for the TLPD database')
-parser.add_argument('--no-console', dest='noconsole', default=False, type=bool,\
+parser.add_argument('-nc', '--no-console', dest='noconsole', action='store_true',\
         help='skip the console')
 
 args = vars(parser.parse_args())
+sanity_check(args)
+
 strings = output.get_strings(args)
+
+print(args)
 
 tlpd_search = None
 if args['tlpd'] != 'none':
