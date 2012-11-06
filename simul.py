@@ -34,6 +34,9 @@ class Completer:
         except IndexError:
             return None
 
+def swipe_history():
+    readline.remove_history_item(readline.get_current_history_length()-1)
+
 def get_from_file(file):
     try:
         with open(file, 'rb') as f:
@@ -102,231 +105,235 @@ def sanity_check(args):
         print('Must have at least one round')
         sys.exit(1)
 
-parser = argparse.ArgumentParser(description='Emulate a SC2 tournament'\
-        + ' format.')
-parser.add_argument('-f', '--format', dest='format', default='term',\
-        choices=['term','tl','tls','reddit'],\
-        help='output format')
-parser.add_argument('-t', '--type', dest='type', default='match',\
-        choices=['match','sebracket','rrgroup','mslgroup','debracket'],\
-        help='tournament type')
-parser.add_argument('--title', dest='title', default=None,\
-        help='title')
-parser.add_argument('--tie', dest='tie', nargs='*',\
-        choices=['mscore', 'sscore', 'swins', 'imscore', 'isscore', 'iswins',\
-                 'ireplay'],\
-        default=['mscore', 'sscore', 'imscore', 'isscore', 'ireplay'],\
-        help='order of tiebreaks in a round robin group')
-parser.add_argument('-n', '--num', dest='num', nargs='+', default=[2], type=int,\
-        help='number of sets required to win a match')
-parser.add_argument('-r', '--rounds', dest='rounds', default=3, type=int,\
-        help='number of rounds in a bracket')
-parser.add_argument('-p', '--players', dest='players', default=4, type=int,\
-        help='number of players in a group')
-parser.add_argument('--threshold', dest='threshold', default=1, type=int,\
-        help='placement threshold in a group')
-parser.add_argument('-s', '--save', dest='save',\
-        help='save data to file')
-parser.add_argument('-l', '--load', dest='load',\
-        help='load data from file')
-parser.add_argument('--tlpd', dest='tlpd', default='none',\
-        help='search in TLPD database')
-parser.add_argument('--tlpd-tabulator', dest='tabulator', default=-1, type=int,\
-        help='tabulator ID for the TLPD database')
-parser.add_argument('-nc', '--no-console', dest='noconsole', action='store_true',\
-        help='skip the console')
+if __name__ == '__main__':
 
-args = vars(parser.parse_args())
-sanity_check(args)
+    parser = argparse.ArgumentParser(description='Emulate a SC2 tournament'\
+            + ' format.')
+    parser.add_argument('-f', '--format', dest='format', default='term',\
+            choices=['term','tl','tls','reddit'],\
+            help='output format')
+    parser.add_argument('-t', '--type', dest='type', default='match',\
+            choices=['match','sebracket','rrgroup','mslgroup','debracket'],\
+            help='tournament type')
+    parser.add_argument('--title', dest='title', default=None,\
+            help='title')
+    parser.add_argument('--tie', dest='tie', nargs='*',\
+            choices=['mscore', 'sscore', 'swins', 'imscore', 'isscore', 'iswins',\
+                     'ireplay'],\
+            default=['mscore', 'sscore', 'imscore', 'isscore', 'ireplay'],\
+            help='order of tiebreaks in a round robin group')
+    parser.add_argument('-n', '--num', dest='num', nargs='+', default=[2], type=int,\
+            help='number of sets required to win a match')
+    parser.add_argument('-r', '--rounds', dest='rounds', default=3, type=int,\
+            help='number of rounds in a bracket')
+    parser.add_argument('-p', '--players', dest='players', default=4, type=int,\
+            help='number of players in a group')
+    parser.add_argument('--threshold', dest='threshold', default=1, type=int,\
+            help='placement threshold in a group')
+    parser.add_argument('-s', '--save', dest='save',\
+            help='save data to file')
+    parser.add_argument('-l', '--load', dest='load',\
+            help='load data from file')
+    parser.add_argument('--tlpd', dest='tlpd', default='none',\
+            help='search in TLPD database')
+    parser.add_argument('--tlpd-tabulator', dest='tabulator', default=-1, type=int,\
+            help='tabulator ID for the TLPD database')
+    parser.add_argument('-nc', '--no-console', dest='noconsole', action='store_true',\
+            help='skip the console')
 
-strings = output.get_strings(args)
+    args = vars(parser.parse_args())
+    sanity_check(args)
 
-tlpd_search = None
-if args['tlpd'] != 'none':
-    tlpd_search = tlpd.Tlpd(args['tlpd'], args['tabulator'])
+    strings = output.get_strings(args)
 
-obj = None
-if args['load'] != None:
-    obj = get_from_file(args['load'])
-elif args['type'] == 'match':
-    player_a = playerlist.get_player(1, tlpd_search)
-    player_b = playerlist.get_player(2, tlpd_search)
-    obj = match.Match(args['num'][0], player_a, player_b)
-    obj.compute()
-elif args['type'] == 'sebracket':
-    players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
-    obj = sebracket.SEBracket(args['num'], args['rounds'], players.players)
-    obj.compute()
-elif args['type'] == 'debracket':
-    players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
-    obj = debracket.DEBracket(args['num'][0], args['rounds'], players.players)
-    obj.compute()
-elif args['type'] == 'mslgroup':
-    players = playerlist.PlayerList(4, tlpd_search)
-    obj = mslgroup.Group(args['num'][0], players.players)
-    obj.compute()
-elif args['type'] == 'rrgroup':
-    players = playerlist.PlayerList(args['players'], tlpd_search)
-    obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
-                           args['threshold'])
-    obj.compute()
+    tlpd_search = None
+    if args['tlpd'] != 'none':
+        tlpd_search = tlpd.Tlpd(args['tlpd'], args['tabulator'])
 
-print(obj.output(strings, title=args['title']))
+    obj = None
+    if args['load'] != None:
+        obj = get_from_file(args['load'])
+    elif args['type'] == 'match':
+        player_a = playerlist.get_player(1, tlpd_search)
+        player_b = playerlist.get_player(2, tlpd_search)
+        obj = match.Match(args['num'][0], player_a, player_b)
+        obj.compute()
+    elif args['type'] == 'sebracket':
+        players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
+        obj = sebracket.SEBracket(args['num'], args['rounds'], players.players)
+        obj.compute()
+    elif args['type'] == 'debracket':
+        players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
+        obj = debracket.DEBracket(args['num'][0], args['rounds'], players.players)
+        obj.compute()
+    elif args['type'] == 'mslgroup':
+        players = playerlist.PlayerList(4, tlpd_search)
+        obj = mslgroup.Group(args['num'][0], players.players)
+        obj.compute()
+    elif args['type'] == 'rrgroup':
+        players = playerlist.PlayerList(args['players'], tlpd_search)
+        obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
+                               args['threshold'])
+        obj.compute()
 
-if not args['noconsole']:
-    supported = {'all': ['save','load','compute','out','exit','change'],\
-                 'match': ['set','unset','list'],\
-                 'rrgroup': ['set','unset','list'],\
-                 'mslgroup': ['set','unset','list'],\
-                 'sebracket': ['set','unset','list'],\
-                 'debracket': ['set','unset','list']}
+    print(obj.output(strings, title=args['title']))
 
-    words = supported['all'] + obj.words + supported[obj.type] +\
-            ['name','race','elo']
-            #list(filter(os.path.isfile, os.listdir()))
-    completer = Completer(words)
-    completer.add_words([p.name for p in obj.get_players()])
-    readline.parse_and_bind("tab: complete")
-    readline.set_completer(completer.complete)
+    if not args['noconsole']:
+        supported = {'all': ['save','load','compute','out','exit','change'],\
+                     'match': ['set','unset','list'],\
+                     'rrgroup': ['set','unset','list'],\
+                     'mslgroup': ['set','unset','list'],\
+                     'sebracket': ['set','unset','list'],\
+                     'debracket': ['set','unset','list']}
 
-    while True:
-        s = input('> ').lower().split(' ')
-        s = filter(lambda p: p != '', s)
-        s = list(map(lambda p: p.strip(), s))
-        if len(s) < 1:
-            continue
+        words = supported['all'] + obj.words + supported[obj.type] +\
+                ['name','race','elo']
+                #list(filter(os.path.isfile, os.listdir()))
+        completer = Completer(words)
+        completer.add_words([p.name for p in obj.get_players()])
+        readline.parse_and_bind("tab: complete")
+        readline.set_completer(completer.complete)
 
-        if s[0] not in supported['all'] and s[0] not in supported[obj.type]:
-            print('Invalid command for type \'' + obj.type + '\'')
-            continue
-
-        if s[0] == 'exit':
-            break
-
-        elif s[0] == 'compute':
-            obj.compute()
-
-        elif s[0] == 'out':
-            if len(s) > 1:
-                strs = output.get_strings({'type': obj.type.lower(), 'format': s[1]})
-                print(obj.output(strs, title=args['title']))
-            else:
-                print(obj.output(strings, title=args['title']))
-
-        elif s[0] == 'save':
-            if len(s) > 1:
-                put_to_file(obj, s[1])
-            elif args['save'] != None:
-                put_to_file(obj, args['save'])
-            else:
-                print('No filename given')
-
-        elif s[0] == 'load':
-            temp = None
-            if len(s) > 1:
-                temp = get_from_file(s[1])
-            elif args['load'] != None:
-                temp = get_from_file(args['load'])
-            else:
-                print('No filename given')
-            
-            if temp != None:
-                obj = temp
-
-        elif s[0] == 'set' or s[0] == 'unset':
-            match = False
-            try:
-                if obj.type in ['rrgroup'] and len(s) > 2:
-                    match = obj.find_match(pa=s[1], pb=s[2])
-                elif obj.type in ['mslgroup','debracket','sebracket'] and len(s) > 1:
-                    match = obj.find_match(search=s[1])
-                elif obj.type in ['match']:
-                    match = obj
-
-                if match == False:
-                    print('Not enough arguments')
-                    continue
-                elif match == None or not match.can_fix():
-                    print('Match not yet ready (unresolved dependencies?)')
-                    continue
-
-                if s[0] == 'set':
-                    ia = int(input('Score for ' + match.player_a.name + ': '))
-                    ib = int(input('Score for ' + match.player_b.name + ': '))
-                    res = match.fix_result(ia, ib)
-                    if not res:
-                        print('Unable to set result')
-                elif s[0] == 'unset':
-                    match.unfix_result()
-
-                obj.compute()
-
-            except Exception as e:
-                print(str(e))
-
-        elif s[0] == 'list':
-            if obj.type in ['rrgroup', 'mslgroup']:
-                print_matches(obj.get_match_list())
-
-            elif obj.type in ['debracket']:
-                for i in range(0,len(obj.winners)):
-                    print_matches(obj.winners[i], 'WB' + str(i+1))
-                for i in range(0,len(obj.losers)):
-                    print_matches(obj.losers[i], 'LB' + str(i+1))
-                print_matches([obj.final1], pre='First final', post='unmodified')
-                print_matches([obj.final2], pre='Second final', post='unmodified')
-
-            elif obj.type in ['sebracket']:
-                for i in range(0,len(obj.bracket)):
-                    print_matches(obj.bracket[i], 'R' + str(i+1))
-
-            elif obj.type in ['match']:
-                if obj.fixed_result or obj.modified_result:
-                    if obj.fixed_result:
-                        print('Result fixed: ', end='')
-                    elif obj.modified_result:
-                        print('Result modified: ', end='')
-                    print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
-                          str(obj.result[1]) + ' ' + obj.player_b.name)
-
-        elif s[0] == 'change':
-            if len(s) < 2:
-                print('Not enough arguments')
+        while True:
+            s = input('> ').lower().split(' ')
+            s = filter(lambda p: p != '', s)
+            s = list(map(lambda p: p.strip(), s))
+            if len(s) < 1:
                 continue
 
-            player = obj.get_player(s[-1])
-            if player == None:
-                print('No such player \'' + s[-1] + '\'')
+            if s[0] not in supported['all'] and s[0] not in supported[obj.type]:
+                print('Invalid command for type \'' + obj.type + '\'')
+                continue
 
-            recompute = False
+            if s[0] == 'exit':
+                break
 
-            if len(s) < 3 or s[1] == 'name':
-                player.name = input('Name: ')
-                completer.add_words([p.name for p in obj.get_players()])
-
-            if len(s) < 3 or s[1] == 'race':
-                race = ''
-                while race not in ['P', 'Z', 'T']:
-                    race = input('Race: ').upper()
-                player.race = race
-                recompute = True
-
-            if len(s) < 3 or s[1] == 'elo':
-                elo = playerlist.get_elo()
-                if elo == False:
-                    player.elo = 0
-                    player.elo_race['T'] = 0
-                    player.elo_race['Z'] = 0
-                    player.elo_race['P'] = 0
-                else:
-                    player.elo = elo
-                    player.elo_race['T'] = playerlist.get_elo('vT')
-                    player.elo_race['Z'] = playerlist.get_elo('vZ')
-                    player.elo_race['P'] = playerlist.get_elo('vP')
-                recompute = True
-
-            if recompute:
+            elif s[0] == 'compute':
                 obj.compute()
 
-if args['save'] != None:
-    put_to_file(obj, args['save'])
+            elif s[0] == 'out':
+                if len(s) > 1:
+                    strs = output.get_strings({'type': obj.type.lower(), 'format': s[1]})
+                    print(obj.output(strs, title=args['title']))
+                else:
+                    print(obj.output(strings, title=args['title']))
+
+            elif s[0] == 'save':
+                if len(s) > 1:
+                    put_to_file(obj, s[1])
+                elif args['save'] != None:
+                    put_to_file(obj, args['save'])
+                else:
+                    print('No filename given')
+
+            elif s[0] == 'load':
+                temp = None
+                if len(s) > 1:
+                    temp = get_from_file(s[1])
+                elif args['load'] != None:
+                    temp = get_from_file(args['load'])
+                else:
+                    print('No filename given')
+                
+                if temp != None:
+                    obj = temp
+
+            elif s[0] == 'set' or s[0] == 'unset':
+                match = False
+                try:
+                    if obj.type in ['rrgroup'] and len(s) > 2:
+                        match = obj.find_match(pa=s[1], pb=s[2])
+                    elif obj.type in ['mslgroup','debracket','sebracket'] and len(s) > 1:
+                        match = obj.find_match(search=s[1])
+                    elif obj.type in ['match']:
+                        match = obj
+
+                    if match == False:
+                        print('Not enough arguments')
+                        continue
+                    elif match == None or not match.can_fix():
+                        print('Match not yet ready (unresolved dependencies?)')
+                        continue
+
+                    if s[0] == 'set':
+                        ia = int(input('Score for ' + match.player_a.name + ': '))
+                        swipe_history()
+                        ib = int(input('Score for ' + match.player_b.name + ': '))
+                        swipe_history()
+                        res = match.fix_result(ia, ib)
+                        if not res:
+                            print('Unable to set result')
+                    elif s[0] == 'unset':
+                        match.unfix_result()
+
+                    obj.compute()
+
+                except Exception as e:
+                    print(str(e))
+
+            elif s[0] == 'list':
+                if obj.type in ['rrgroup', 'mslgroup']:
+                    print_matches(obj.get_match_list())
+
+                elif obj.type in ['debracket']:
+                    for i in range(0,len(obj.winners)):
+                        print_matches(obj.winners[i], 'WB' + str(i+1))
+                    for i in range(0,len(obj.losers)):
+                        print_matches(obj.losers[i], 'LB' + str(i+1))
+                    print_matches([obj.final1], pre='First final', post='unmodified')
+                    print_matches([obj.final2], pre='Second final', post='unmodified')
+
+                elif obj.type in ['sebracket']:
+                    for i in range(0,len(obj.bracket)):
+                        print_matches(obj.bracket[i], 'R' + str(i+1))
+
+                elif obj.type in ['match']:
+                    if obj.fixed_result or obj.modified_result:
+                        if obj.fixed_result:
+                            print('Result fixed: ', end='')
+                        elif obj.modified_result:
+                            print('Result modified: ', end='')
+                        print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
+                              str(obj.result[1]) + ' ' + obj.player_b.name)
+
+            elif s[0] == 'change':
+                if len(s) < 2:
+                    print('Not enough arguments')
+                    continue
+
+                player = obj.get_player(s[-1])
+                if player == None:
+                    print('No such player \'' + s[-1] + '\'')
+
+                recompute = False
+
+                if len(s) < 3 or s[1] == 'name':
+                    player.name = input('Name: ')
+                    completer.add_words([p.name for p in obj.get_players()])
+
+                if len(s) < 3 or s[1] == 'race':
+                    race = ''
+                    while race not in ['P', 'Z', 'T']:
+                        race = input('Race: ').upper()
+                    player.race = race
+                    recompute = True
+
+                if len(s) < 3 or s[1] == 'elo':
+                    elo = playerlist.get_elo()
+                    if elo == False:
+                        player.elo = 0
+                        player.elo_race['T'] = 0
+                        player.elo_race['Z'] = 0
+                        player.elo_race['P'] = 0
+                    else:
+                        player.elo = elo
+                        player.elo_race['T'] = playerlist.get_elo('vT')
+                        player.elo_race['Z'] = playerlist.get_elo('vZ')
+                        player.elo_race['P'] = playerlist.get_elo('vP')
+                    recompute = True
+
+                if recompute:
+                    obj.compute()
+
+    if args['save'] != None:
+        put_to_file(obj, args['save'])

@@ -1,5 +1,7 @@
 import readline
 
+import simul
+
 debug = False
 
 def get_elo(s=''):
@@ -9,6 +11,7 @@ def get_elo(s=''):
             elo = input('Elo' + (' ' if s != '' else '') + s + ': ')
             if elo.strip().lower() == '':
                 return False
+            simul.swipe_history()
             elo = int(elo)
         except:
             elo = -1
@@ -39,10 +42,12 @@ def get_player(i, tlpd=None):
         if pl:
             choice = int(input('Which is correct? (1-' + str(len(results))\
                             + ', 0 for none) '))
+            simul.swipe_history()
             if choice > 0:
                 result = results[choice-1]
         else:
             choice = input('Accept? (y/n) ')
+            simul.swipe_history()
             if choice.lower() == 'y':
                 result = results[0]
     elif tlpd != None:
@@ -62,6 +67,8 @@ def get_player(i, tlpd=None):
         race = ''
         while race not in ['P', 'Z', 'T']:
             race = input('Race: ').upper()
+            if race != '':
+                simul.swipe_history()
 
         elo = get_elo()
         if elo == False:
