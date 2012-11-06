@@ -8,7 +8,7 @@ class ScoreTally:
     def compute(self):
         self.exrounds = 0
         for i in range(0,len(self.finishes)):
-            self.exrounds += (len(self.finishes)-1-i) * self.finishes[i]
+            self.exrounds += i * self.finishes[i]
 
 class DEBracket:
 
@@ -68,12 +68,17 @@ class DEBracket:
 
         winners = []
         losers = []
+        all = []
         final1 = match.Match(self._num, None, None)
 
         for i in range(0,rounds):
             rnd = []
             for j in range(0,2**(rounds-1-i)):
-                rnd.append(match.Match(self._num, None, None))
+                m = match.Match(self._num, None, None)
+                m.winners_bracket = True
+                m.round = -1
+                rnd.append(m)
+                all.append(m)
             winners.append(rnd)
 
         for j in range(0,len(winners[0])):
@@ -83,7 +88,11 @@ class DEBracket:
         for i in range(0,2*(rounds-1)):
             rnd = []
             for j in range(0,2**(rounds-2-i//2)):
-                rnd.append(match.Match(self._num, None, None))
+                m = match.Match(self._num, None, None)
+                m.winners_bracket = False
+                m.round = i
+                rnd.append(m)
+                all.append(m)
             losers.append(rnd)
 
         for i in range(0,len(winners)):
@@ -133,21 +142,74 @@ class DEBracket:
         self.final2 = match.Match(self._num, None, None)
         self.final2.dependences = [final1]
 
+        all.append(final1)
+        all.append(self.final2)
+        self.all = all
+
     def compute(self):
-        N = 10000
+        matches = self.all
+        for match in matches:
+            match.compute()
+
+        outcome = [0] * len(matches)
 
         tally = dict()
         for p in self._players:
             tally[p] = ScoreTally(self._rounds)
         
-        for i in range(0,N):
-            self.simulate(tally)
+        while outcome != False:
+            base = 1
+            for j in range(0,len(matches)):
+                m = matches[j]
+                base *= m.probs[outcome[j]]
+                if not m.fixed_result:
+                    if m.link_winner != None:
+                        m.link_winner.set_player(m.players[outcome[j]], m.link_winner_slot)
+                    if m.link_loser != None:
+                        m.link_loser.set_player(m.players[1-outcome[j]], m.link_loser_slot)
+                if j == len(matches) - 2:
+                    matches[-1].set_player(m.player_a, 0)
+                    matches[-1].set_player(m.player_b, 1)
+
+            for j in range(0,len(matches)-2):
+                m = matches[j]
+                if not m.winners_bracket:
+                    tally[m.players[1-outcome[j]]].finishes[m.round] += base
+
+            if outcome[-1] == 0 or outcome[-2] == 0:
+                tally[self.final1.player_a].finishes[-1] += base
+                tally[self.final1.player_b].finishes[-2] += base
+            else:
+                tally[self.final1.player_b].finishes[-1] += base
+                tally[self.final1.player_a].finishes[-2] += base
+
+            #for j in range(0,len(matches)):
+                #m = matches[j]
+                #print(m.player_a.name + '-' + m.player_b.name + ' ' +
+                      #str(outcome[j]))
+
+            outcome = self.get_next_outcome(outcome)
 
         for t in tally.values():
-            t.finishes = [f/N for f in t.finishes]
             t.compute()
 
         self.tally = tally
+
+    def get_next_outcome(self, outcome):
+        j = len(outcome) - 1
+
+        while j >= 0:
+            outcome[j] += 1
+            if outcome[j] == 2:
+                outcome[j] = 0
+                j -= 1
+            else:
+                break
+
+        if j == -1:
+            return False
+        else:
+            return outcome
 
     def simulate(self, tally):
         winners = self.winners
@@ -201,12 +263,12 @@ class DEBracket:
         out = strings['header'].format(title=title)
 
         tally = self.tally
-        players = sorted(self._players, key=lambda p: tally[p].finishes[0], reverse=True)
+        players = sorted(self._players, key=lambda p: tally[p].finishes[-1], reverse=True)
 
         out += strings['mlwinnerlist']
         for p in players[0:16]:
             out += strings['mlwinneri'].format(player=p.name,\
-                                              prob=100*tally[p].finishes[0])
+                                              prob=100*tally[p].finishes[-1])
 
         players = sorted(players, key=lambda p: tally[p].exrounds, reverse=True)
         placings = [1, 1]
