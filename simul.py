@@ -37,6 +37,12 @@ class Completer:
 def swipe_history():
     readline.remove_history_item(readline.get_current_history_length()-1)
 
+def better_input(query, swipe=False):
+    ret = input(query)
+    if (swipe or ret.strip() == '') and ret != '':
+        swipe_history()
+    return ret
+
 def get_from_file(file):
     try:
         with open(file, 'rb') as f:
@@ -195,7 +201,7 @@ if __name__ == '__main__':
         readline.set_completer(completer.complete)
 
         while True:
-            s = input('> ').lower().split(' ')
+            s = better_input('> ').lower().split(' ')
             s = filter(lambda p: p != '', s)
             s = list(map(lambda p: p.strip(), s))
             if len(s) < 1:
@@ -256,10 +262,10 @@ if __name__ == '__main__':
                         continue
 
                     if s[0] == 'set':
-                        ia = int(input('Score for ' + match.player_a.name + ': '))
-                        swipe_history()
-                        ib = int(input('Score for ' + match.player_b.name + ': '))
-                        swipe_history()
+                        ia = int(better_input('Score for ' + match.player_a.name + ': '),\
+                                swipe=True)
+                        ib = int(better_input('Score for ' + match.player_b.name + ': '),\
+                                 swipe=True)
                         res = match.fix_result(ia, ib)
                         if not res:
                             print('Unable to set result')
@@ -308,13 +314,13 @@ if __name__ == '__main__':
                 recompute = False
 
                 if len(s) < 3 or s[1] == 'name':
-                    player.name = input('Name: ')
+                    player.name = better_input('Name: ')
                     completer.add_words([p.name for p in obj.get_players()])
 
                 if len(s) < 3 or s[1] == 'race':
                     race = ''
                     while race not in ['P', 'Z', 'T']:
-                        race = input('Race: ').upper()
+                        race = better_input('Race: ', swipe=True).upper()
                     player.race = race
                     recompute = True
 

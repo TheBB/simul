@@ -8,10 +8,10 @@ def get_elo(s=''):
     elo = -1
     while elo == -1:
         try:
-            elo = input('Elo' + (' ' if s != '' else '') + s + ': ')
+            elo = simul.better_input('Elo' + (' ' if s != '' else '') + s + ': ',\
+                                     swipe=True)
             if elo.strip().lower() == '':
                 return False
-            simul.swipe_history()
             elo = int(elo)
         except:
             elo = -1
@@ -19,7 +19,7 @@ def get_elo(s=''):
 
 def get_player(i, tlpd=None):
     print('Entering player ' + str(i))
-    name = input('Name: ')
+    name = simul.better_input('Name: ')
 
     results = []
     if tlpd != None:
@@ -40,14 +40,12 @@ def get_player(i, tlpd=None):
             i += 1
 
         if pl:
-            choice = int(input('Which is correct? (1-' + str(len(results))\
-                            + ', 0 for none) '))
-            simul.swipe_history()
+            s = 'Which is correct? (1-' + str(len(results)) + ', 0 for none) '
+            choice = int(simul.better_input(s, swipe=True))
             if choice > 0:
                 result = results[choice-1]
         else:
-            choice = input('Accept? (y/n) ')
-            simul.swipe_history()
+            choice = simul.better_input('Accept? (y/n) ', swipe=True)
             if choice.lower() == 'y':
                 result = results[0]
     elif tlpd != None:
@@ -66,9 +64,7 @@ def get_player(i, tlpd=None):
     else:
         race = ''
         while race not in ['P', 'Z', 'T']:
-            race = input('Race: ').upper()
-            if race != '':
-                simul.swipe_history()
+            race = simul.better_input('Race: ', swipe=True).upper()
 
         elo = get_elo()
         if elo == False:
