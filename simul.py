@@ -141,8 +141,6 @@ sanity_check(args)
 
 strings = output.get_strings(args)
 
-print(args)
-
 tlpd_search = None
 if args['tlpd'] != 'none':
     tlpd_search = tlpd.Tlpd(args['tlpd'], args['tabulator'])
