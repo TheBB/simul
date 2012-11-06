@@ -114,6 +114,9 @@ def sanity_check(args):
     if args['rounds'] < 1 and args['type'] == 'sebracket':
         print('Must have at least one round')
         sys.exit(1)
+    if len(args['num']) != args['rounds'] and args['type'] == 'sebracket':
+        print('Must have a num argument for each round')
+        sys.exit(1)
 
 if __name__ == '__main__':
 
