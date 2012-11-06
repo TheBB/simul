@@ -3,8 +3,12 @@
 import argparse
 import pickle
 import sys
-import readline
 import os
+
+try:
+    import pyreadline as readline
+except ImportError:
+    import readline
 
 import playerlist
 import output

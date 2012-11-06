@@ -1,4 +1,7 @@
-import readline
+try:
+    import pyreadline as readline
+except ImportError:
+    import readline
 
 import simul
 
