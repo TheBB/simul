@@ -211,17 +211,13 @@ class Group:
             if len(table) == len(self._players):
                 return False
 
-            subgroup_id = 0
-            newplayers = []
-            s = ''
-            for p in table:
-                subgroup_id += p.flag
-                s += p.name
-                p.replayed = True
-                newp = playerlist.Player(copy=p)
-                newplayers.append(newp)
+            subgroup_id = sum([p.flag for p in table])
 
             if not subgroup_id in self._subgroups:
+                newplayers = []
+                for p in table:
+                    p.replayed = True
+                    newplayers.append(playerlist.Player(copy=p))
                 subgroup = Group(self._num, self._tie, newplayers,\
                                  subgroups=self._subgroups)
                 self._subgroups[subgroup_id] = subgroup
