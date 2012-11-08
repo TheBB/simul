@@ -269,10 +269,10 @@ if __name__ == '__main__':
                         continue
 
                     if s[0] == 'set':
-                        ia = int(better_input('Score for ' + match.player_a.name + ': '),\
-                                swipe=True)
-                        ib = int(better_input('Score for ' + match.player_b.name + ': '),\
-                                 swipe=True)
+                        ia = int(better_input('Score for ' + match.player_a.name + ': ',\
+                                 swipe=True))
+                        ib = int(better_input('Score for ' + match.player_b.name + ': ',\
+                                 swipe=True))
                         res = match.fix_result(ia, ib)
                         if not res:
                             print('Unable to set result')
