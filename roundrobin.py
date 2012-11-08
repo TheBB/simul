@@ -104,7 +104,6 @@ class Group:
                 total += base
 
             outcome = self.get_next_outcome(outcome, matches)
-            k += 1
 
         for t in tally.values():
             t.scale_by(total)
