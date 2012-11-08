@@ -94,11 +94,13 @@ class Player:
             self.elo = elo
             avg = (elo_vp + elo_vt + elo_vz)/3
             self.elo_race = {'P': elo_vp-avg, 'T': elo_vt-avg, 'Z': elo_vz-avg}
+            self.flag = -1
         else:
             self.name = copy.name
             self.race = copy.race
             self.elo = copy.elo
             self.elo_race = copy.elo_race
+            self.flag = copy.flag
 
     def prob_of_winning(self, opponent):
         mix = 0.3

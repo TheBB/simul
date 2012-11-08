@@ -22,13 +22,20 @@ class ScoreTally:
 
 class Group:
 
-    def __init__(self, num, tie, players, threshold=1):
+    def __init__(self, num, tie, players, threshold=1, subgroups=None):
         self.type = 'rrgroup'
         self._num = num
         self._players = players
         self._tie = tie
         self._threshold = threshold
         self.make_match_list()
+
+        if subgroups == None:
+            self._subgroups = dict()
+            for i in range(0,len(players)):
+                players[i].flag = 1 << i
+        else:
+            self._subgroups = subgroups
 
         self.words = []
         for p in players:
@@ -204,21 +211,29 @@ class Group:
             if len(table) == len(self._players):
                 return False
 
+            subgroup_id = 0
             newplayers = []
+            s = ''
             for p in table:
+                subgroup_id += p.flag
+                s += p.name
                 p.replayed = True
                 newp = playerlist.Player(copy=p)
-                p.ref = newp
                 newplayers.append(newp)
 
-            smallgroup = Group(self._num, self._tie, newplayers)
-            smallgroup.compute()
-            smalltally = smallgroup.tally
+            if not subgroup_id in self._subgroups:
+                subgroup = Group(self._num, self._tie, newplayers,\
+                                 subgroups=self._subgroups)
+                self._subgroups[subgroup_id] = subgroup
+                subgroup.compute()
+            else:
+                subgroup = self._subgroups[subgroup_id]
 
             root = 0
             for p in table:
                 p.spread = []
-                finishes = smalltally[p.ref].finishes
+                ref = next(filter(lambda q: q.flag == p.flag, subgroup._players))
+                finishes = subgroup.tally[ref].finishes
                 for f in range(0,len(finishes)):
                     p.spread.append((root+f, finishes[f]))
                 root -= 1
