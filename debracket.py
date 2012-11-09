@@ -146,7 +146,22 @@ class DEBracket:
         all.append(self.final2)
         self.all = all
 
+    def can_use_exact(self):
+        ms = 2 + sum([len(a) for a in self.winners]) +\
+                sum([len(a) for a in self.losers])
+        num = (2*self._num)**ms
+        return num < 5e5
+
     def compute(self):
+        if self.can_use_exact():
+            self.compute_exact()
+        else:
+            self.compute_mc()
+
+    def compute_mc(self):
+        self.compute_exact()
+
+    def compute_exact(self):
         matches = self.all
         for match in matches:
             match.compute()

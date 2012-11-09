@@ -77,7 +77,21 @@ class Group:
         except:
             return None
 
+    def can_use_exact(self):
+        pls = len(self._players)
+        num = (2*self._num)**(pls*(pls-1)/2)
+        return num < 2e5
+
     def compute(self):
+        if self.can_use_exact():
+            self.compute_exact()
+        else
+            self.compute_mc()
+
+    def compute_mc(self):
+        self.compute_exact()
+
+    def compute_exact(self):
         matches = self._matches
         for match in matches:
             match.compute()
