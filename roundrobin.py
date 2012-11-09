@@ -85,7 +85,7 @@ class Group:
     def compute(self):
         if self.can_use_exact():
             self.compute_exact()
-        else
+        else:
             self.compute_mc()
 
     def compute_mc(self):
