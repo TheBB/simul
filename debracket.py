@@ -1,4 +1,5 @@
 import match
+import progressbar
 
 class ScoreTally:
 
@@ -150,7 +151,7 @@ class DEBracket:
         ms = 2 + sum([len(a) for a in self.winners]) +\
                 sum([len(a) for a in self.losers])
         num = (2*self._num)**ms
-        return num < 5e5
+        return num < 1e5
 
     def compute(self):
         if self.can_use_exact():
@@ -159,7 +160,26 @@ class DEBracket:
             self.compute_mc()
 
     def compute_mc(self):
-        self.compute_exact()
+        tally = dict()
+        for p in self._players:
+            tally[p] = ScoreTally(self._rounds)
+
+        N = 50000
+        progress = progressbar.ProgressBar(N, exp='Monte Carlo')
+        for i in range(0,N):
+            self.simulate(tally)
+            if i % 500 == 0:
+                progress.update_time(i)
+                print(progress.dyn_str())
+        progress.update_time(N)
+        print(progress.dyn_str())
+        print('')
+
+        for t in tally.values():
+            t.finishes = [f/N for f in t.finishes]
+            t.compute()
+
+        self.tally = tally
 
     def compute_exact(self):
         matches = self.all
@@ -186,6 +206,9 @@ class DEBracket:
                     matches[-1].set_player(m.player_a, 0)
                     matches[-1].set_player(m.player_b, 1)
 
+            if base == 0:
+                continue
+
             for j in range(0,len(matches)-2):
                 m = matches[j]
                 if not m.winners_bracket:
@@ -197,11 +220,6 @@ class DEBracket:
             else:
                 tally[self.final1.player_b].finishes[-1] += base
                 tally[self.final1.player_a].finishes[-2] += base
-
-            #for j in range(0,len(matches)):
-                #m = matches[j]
-                #print(m.player_a.name + '-' + m.player_b.name + ' ' +
-                      #str(outcome[j]))
 
             outcome = self.get_next_outcome(outcome)
 
@@ -249,11 +267,11 @@ class DEBracket:
         res2 = final2.get_random_result()
 
         if res1[0] > res1[1] or res2[0] > res2[1]:
-            tally[final1.player_a].finishes[0] += 1
-            tally[final1.player_b].finishes[1] += 1
+            tally[final1.player_a].finishes[-1] += 1
+            tally[final1.player_b].finishes[-2] += 1
         else:
-            tally[final1.player_a].finishes[1] += 1
-            tally[final1.player_b].finishes[0] += 1
+            tally[final1.player_a].finishes[-2] += 1
+            tally[final1.player_b].finishes[-1] += 1
 
     def do_match(self, match, tally, round):
         match.compute()
@@ -268,7 +286,7 @@ class DEBracket:
             match.link_loser.set_player(loser, match.link_loser_slot)
 
         if round > -1:
-            tally[loser].finishes[-1-round] += 1
+            tally[loser].finishes[round] += 1
 
         return winner
 

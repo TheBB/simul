@@ -153,6 +153,8 @@ if __name__ == '__main__':
             help='tabulator ID for the TLPD database')
     parser.add_argument('-nc', '--no-console', dest='noconsole', action='store_true',\
             help='skip the console')
+    parser.add_argument('--exact', dest='exact', action='store_true',\
+            help='force exact computation')
 
     args = vars(parser.parse_args())
     sanity_check(args)
@@ -178,7 +180,10 @@ if __name__ == '__main__':
     elif args['type'] == 'debracket':
         players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
         obj = debracket.DEBracket(args['num'][0], args['rounds'], players.players)
-        obj.compute()
+        if args['exact']:
+            obj.compute_exact()
+        else:
+            obj.compute()
     elif args['type'] == 'mslgroup':
         players = playerlist.PlayerList(4, tlpd_search)
         obj = mslgroup.Group(args['num'][0], players.players)
@@ -187,7 +192,10 @@ if __name__ == '__main__':
         players = playerlist.PlayerList(args['players'], tlpd_search)
         obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
                                args['threshold'])
-        obj.compute()
+        if args['exact']:
+            obj.compute_exact()
+        else:
+            obj.compute()
 
     print(obj.output(strings, title=args['title']))
 
@@ -222,7 +230,12 @@ if __name__ == '__main__':
                 break
 
             elif s[0] == 'compute':
-                obj.compute()
+                if obj.type not in ['rrgroup', 'debracket']:
+                    obj.compute()
+                elif (len(s) > 1 and s[1] == 'ex') or args['exact']:
+                    obj.compute_exact()
+                else:
+                    obj.compute()
 
             elif s[0] == 'out':
                 if len(s) > 1:

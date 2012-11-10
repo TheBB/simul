@@ -21,6 +21,8 @@ class Match:
         self.link_winner_slot = 0
         self.link_loser = None
         self.link_loser_slot = 0
+        self.modified_result = False
+        self.fixed_result = False
 
         self.words = []
 
@@ -118,9 +120,10 @@ class Match:
         return True
 
     def unfix_result(self):
-        self.result = (0, 0)
-        self.compute()
-        self.broadcast()
+        if self.modified_result:
+            self.result = (0, 0)
+            self.compute()
+            self.broadcast()
 
     def broadcast(self):
         if not self.fixed_result:
