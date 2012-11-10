@@ -197,6 +197,9 @@ class DEBracket:
             for j in range(0,len(matches)):
                 m = matches[j]
                 base *= m.probs[outcome[j]]
+                if base == 0:
+                    break
+
                 if not m.fixed_result:
                     if m.link_winner != None:
                         m.link_winner.set_player(m.players[outcome[j]], m.link_winner_slot)
