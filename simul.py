@@ -205,7 +205,7 @@ if __name__ == '__main__':
                      'rrgroup': ['set','unset','list'],\
                      'mslgroup': ['set','unset','list'],\
                      'sebracket': ['set','unset','list'],\
-                     'debracket': ['set','unset','list']}
+                     'debracket': ['set','unset','list','detail']}
 
         words = supported['all'] + obj.words + supported[obj.type] +\
                 ['name','race','elo']
@@ -243,6 +243,9 @@ if __name__ == '__main__':
                     print(obj.output(strs, title=args['title']))
                 else:
                     print(obj.output(strings, title=args['title']))
+
+            elif s[0] == 'detail':
+                print(obj.detail())
 
             elif s[0] == 'save':
                 if len(s) > 1:
