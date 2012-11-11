@@ -80,4 +80,21 @@ def get_strings(args):
     elif args['format'] == 'reddit':
         strings['mslgplayer'] = '\n* {player}: {prob:.2f}%'
 
+    # Probability table
+    if args['format'] == 'term':
+        strings['ptableheader'] = ' '*15
+        strings['ptableheading'] = '{heading: >8}'
+        strings['ptablename'] = '{player:>14}:'
+        strings['ptableentry'] = '{prob: >7.2f}%'
+    elif args['format'] == 'tls' or args['format'] == 'tl':
+        strings['ptableheader'] = 'Not implemented.'
+        strings['ptableheading'] = ''
+        strings['ptablename'] = ''
+        strings['ptableentry'] = ''
+    elif args['format'] == 'reddit':
+        strings['ptableheader'] = 'Not implemented.'
+        strings['ptableheading'] = ''
+        strings['ptablename'] = ''
+        strings['ptableentry'] = ''
+
     return strings

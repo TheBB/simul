@@ -293,13 +293,13 @@ class DEBracket:
 
         return winner
 
-    def detail(self):
-        out = ' ' * 15
+    def detail(self, strings):
+        out = strings['ptableheader']
 
         top = 16
         dec = top // 4
         for i in range(0,len(self.losers)+2):
-            out += ' ' * (5+2-len(str(top))) + 'T' + str(top)
+            out += strings['ptableheading'].format(heading='T'+str(top))
             top -= dec
             if i % 2 == 1:
                 dec = max(dec // 2, 1)
@@ -307,9 +307,9 @@ class DEBracket:
         for p in self._players:
             out += '\n'
             t = self.tally[p]
-            out += '{a:>14}: '.format(a=p.name)
+            out += strings['ptablename'].format(player=p.name)
             for i in t.finishes:
-                out += '{a: >6.2f}% '.format(a=100*i)
+                out += strings['ptableentry'].format(prob=100*i)
 
         return out
 

@@ -237,15 +237,15 @@ if __name__ == '__main__':
                 else:
                     obj.compute()
 
-            elif s[0] == 'out':
+            elif s[0] == 'out' or s[0] == 'detail':
                 if len(s) > 1:
                     strs = output.get_strings({'type': obj.type.lower(), 'format': s[1]})
-                    print(obj.output(strs, title=args['title']))
                 else:
-                    print(obj.output(strings, title=args['title']))
-
-            elif s[0] == 'detail':
-                print(obj.detail())
+                    strs = strings
+                if s[0] == 'out':
+                    print(obj.output(strs, title=args['title']))
+                elif s[0] == 'detail':
+                    print(obj.detail(strs))
 
             elif s[0] == 'save':
                 if len(s) > 1:
