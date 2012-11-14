@@ -294,6 +294,9 @@ class DEBracket:
         return winner
 
     def detail(self, strings):
+        out = strings['detailheader']
+
+        out = strings['ptabletitle'].format(title='Detailed placement probabilities')
         out = strings['ptableheader']
 
         top = 16
@@ -310,6 +313,8 @@ class DEBracket:
             out += strings['ptablename'].format(player=p.name)
             for i in t.finishes:
                 out += strings['ptableentry'].format(prob=100*i)
+
+        out += strings['detailfooter']
 
         return out
 

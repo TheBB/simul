@@ -203,7 +203,7 @@ if __name__ == '__main__':
         supported = {'all': ['save','load','compute','out','exit','change'],\
                      'match': ['set','unset','list'],\
                      'rrgroup': ['set','unset','list'],\
-                     'mslgroup': ['set','unset','list'],\
+                     'mslgroup': ['set','unset','list','detail'],\
                      'sebracket': ['set','unset','list'],\
                      'debracket': ['set','unset','list','detail']}
 

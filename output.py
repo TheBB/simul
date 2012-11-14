@@ -82,19 +82,37 @@ def get_strings(args):
 
     # Probability table
     if args['format'] == 'term':
+        strings['detailheader'] = ''
+        strings['ptabletitle'] = '{title}\n\n'
         strings['ptableheader'] = ' '*15
         strings['ptableheading'] = '{heading: >8}'
         strings['ptablename'] = '{player:>14}:'
         strings['ptableentry'] = '{prob: >7.2f}%'
+        strings['ptableempty'] = '        '
+        strings['ptablebetween'] = '\n\n'
+        strings['detailfooter'] = ''
     elif args['format'] == 'tls' or args['format'] == 'tl':
-        strings['ptableheader'] = 'Not implemented.'
-        strings['ptableheading'] = ''
-        strings['ptablename'] = ''
-        strings['ptableentry'] = ''
+        strings['detailheader'] = '[code]'
+        strings['ptabletitle'] = '{title}\n\n'
+        strings['ptableheader'] = ' '*15
+        strings['ptableheading'] = '{heading: >8}'
+        strings['ptablename'] = '{player:>14}:'
+        strings['ptableentry'] = '{prob: >7.2f}%'
+        strings['ptableempty'] = '        '
+        strings['ptablebetween'] = '\n\n'
+        strings['detailfooter'] = '[/code]'
+        if args['format'] == 'tls':
+            strings['detailheader'] = '[spoiler=Details][code]'
+            strings['detailfooter'] = '[/code][/spoiler]'
     elif args['format'] == 'reddit':
-        strings['ptableheader'] = 'Not implemented.'
-        strings['ptableheading'] = ''
-        strings['ptablename'] = ''
-        strings['ptableentry'] = ''
+        strings['detailheader'] = ''
+        strings['ptabletitle'] = '{title}\n\n'
+        strings['ptableheader'] = ' '*19
+        strings['ptableheading'] = '{heading: >8}'
+        strings['ptablename'] = '    {player:>14}:'
+        strings['ptableentry'] = '{prob: >7.2f}%'
+        strings['ptableempty'] = '        '
+        strings['ptablebetween'] = '\n\n'
+        strings['detailfooter'] = ''
 
     return strings

@@ -76,6 +76,11 @@ class Group:
         for p in self._players:
             p.places = [0, 0, 0, 0]
 
+        self.pairs = dict()
+        for pair in itertools.permutations(self._players, 2):
+            if pair[0] != pair[1]:
+                self.pairs[pair] = 0
+
         for m in self.get_match_list():
             m.compute()
 
@@ -104,7 +109,7 @@ class Group:
         if wm.fixed_result and lm.fixed_result:
             wm.winner.places[0] += base
             lm.loser.places[3] += base
-            self.compute_fin(base=base, fm=self.final)
+            self.compute_fin(base=base, fm=self.final, first=wm.winner)
             return
 
         for iw in range(0,2):
@@ -121,9 +126,9 @@ class Group:
 
                 fmatch = match.Match(self._num, wml, lmw)
 
-                self.compute_fin(base=base_p, fm=fmatch)
+                self.compute_fin(base=base_p, fm=fmatch, first=wmw)
 
-    def compute_fin(self, base=1, fm=None):
+    def compute_fin(self, base=1, fm=None, first=None):
         if fm == None:
             return
 
@@ -132,16 +137,43 @@ class Group:
         fm.player_b.places[1] += base * fm.prob_b
         fm.player_a.places[2] += base * fm.prob_b
 
-    def make_matches(self):
-        self._matches = dict()
-        for (pa,pb) in itertools.combinations(self._players, 2):
-            match1 = match.Match(self._num, pa, pb)
-            match1.compute()
-            self._matches[(pa,pb)] = match1
+        self.pairs[(first,fm.player_a)] += base * fm.prob_a
+        self.pairs[(first,fm.player_b)] += base * fm.prob_b
 
-            match2 = match.Match(self._num, pb, pa)
-            match2.compute()
-            self._matches[(pb,pa)] = match2
+    def detail(self, strings):
+        out = strings['detailheader']
+
+        out += strings['ptabletitle'].format(title='Detailed placement probabilities')
+        out += strings['ptableheader']
+        out += strings['ptableheading'].format(heading='4th')
+        out += strings['ptableheading'].format(heading='3rd')
+        out += strings['ptableheading'].format(heading='2nd')
+        out += strings['ptableheading'].format(heading='1st')
+
+        for p in self._players:
+            out += '\n'
+            out += strings['ptablename'].format(player=p.name)
+            for i in p.places[-1::-1]:
+                out += strings['ptableentry'].format(prob=100*i)
+
+        out += strings['ptablebetween']
+
+        out += strings['ptabletitle'].format(title='Probability of each pair advancing')
+        out += strings['ptableheader']
+        for p in self._players:
+            out += strings['ptableheading'].format(heading=p.name[:6])
+        for p in self._players:
+            out += '\n'
+            out += strings['ptablename'].format(player=p.name)
+            for q in self._players:
+                if p != q:
+                    out += strings['ptableentry'].format(prob=100*self.pairs[(p,q)])
+                else:
+                    out += strings['ptableempty']
+
+        out += strings['detailfooter']
+
+        return out
 
     def output(self, strings, title=None):
         if title == None:
