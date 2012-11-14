@@ -154,7 +154,10 @@ class Group:
             out += '\n'
             out += strings['ptablename'].format(player=p.name)
             for i in p.places[-1::-1]:
-                out += strings['ptableentry'].format(prob=100*i)
+                if i > 1e-10:
+                    out += strings['ptableentry'].format(prob=100*i)
+                else:
+                    out += strings['ptableempty']
 
         out += strings['ptablebetween']
 
@@ -166,7 +169,7 @@ class Group:
             out += '\n'
             out += strings['ptablename'].format(player=p.name)
             for q in self._players:
-                if p != q:
+                if p != q and self.pairs[(p,q)] > 1e-10:
                     out += strings['ptableentry'].format(prob=100*self.pairs[(p,q)])
                 else:
                     out += strings['ptableempty']
