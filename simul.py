@@ -221,7 +221,6 @@ if __name__ == '__main__':
 
         words = supported['all'] + obj.words + supported[obj.type] +\
                 ['name','race','elo']
-                #list(filter(os.path.isfile, os.listdir()))
         completer = Completer(words)
         completer.add_words([p.name for p in obj.get_players()])
         readline.parse_and_bind("tab: complete")
