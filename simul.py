@@ -19,6 +19,7 @@ import sebracket
 import debracket
 import roundrobin
 import mslgroup
+import glicko
 
 class Completer:
     def __init__(self, basewords):
@@ -151,45 +152,56 @@ if __name__ == '__main__':
             help='search in TLPD database')
     parser.add_argument('--tlpd-tabulator', dest='tabulator', default=-1, type=int,\
             help='tabulator ID for the TLPD database')
+    parser.add_argument('--glicko', dest='glicko', action='store_true',\
+            help='search in SC2Charts database')
     parser.add_argument('-nc', '--no-console', dest='noconsole', action='store_true',\
             help='skip the console')
     parser.add_argument('--exact', dest='exact', action='store_true',\
             help='force exact computation')
+    parser.add_argument('--glicko-update', dest='glicko-update', action='store_true',\
+            help='update local glicko database')
 
     args = vars(parser.parse_args())
     sanity_check(args)
 
+    if args['glicko-update']:
+        glicko.update()
+        sys.exit(0)
+
     strings = output.get_strings(args)
 
-    tlpd_search = None
+    finder = None
     if args['tlpd'] != 'none':
-        tlpd_search = tlpd.Tlpd(args['tlpd'], args['tabulator'])
+        iface = tlpd.Tlpd(args['tlpd'], args['tabulator'])
+        finder = iface.search
+    elif args['glicko']:
+        finder = glicko.search
 
     obj = None
     if args['load'] != None:
         obj = get_from_file(args['load'])
     elif args['type'] == 'match':
-        player_a = playerlist.get_player(1, tlpd_search)
-        player_b = playerlist.get_player(2, tlpd_search)
+        player_a = playerlist.get_player(1, finder)
+        player_b = playerlist.get_player(2, finder)
         obj = match.Match(args['num'][0], player_a, player_b)
         obj.compute()
     elif args['type'] == 'sebracket':
-        players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
+        players = playerlist.PlayerList(pow(2,args['rounds']), finder)
         obj = sebracket.SEBracket(args['num'], args['rounds'], players.players)
         obj.compute()
     elif args['type'] == 'debracket':
-        players = playerlist.PlayerList(pow(2,args['rounds']), tlpd_search)
+        players = playerlist.PlayerList(pow(2,args['rounds']), finder)
         obj = debracket.DEBracket(args['num'][0], args['rounds'], players.players)
         if args['exact']:
             obj.compute_exact()
         else:
             obj.compute()
     elif args['type'] == 'mslgroup':
-        players = playerlist.PlayerList(4, tlpd_search)
+        players = playerlist.PlayerList(4, finder)
         obj = mslgroup.Group(args['num'][0], players.players)
         obj.compute()
     elif args['type'] == 'rrgroup':
-        players = playerlist.PlayerList(args['players'], tlpd_search)
+        players = playerlist.PlayerList(args['players'], finder)
         obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
                                args['threshold'])
         if args['exact']:

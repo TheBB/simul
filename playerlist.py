@@ -20,13 +20,13 @@ def get_elo(s=''):
             elo = -1
     return elo
 
-def get_player(i, tlpd=None):
+def get_player(i, finder=None):
     print('Entering player ' + str(i))
     name = simul.better_input('Name: ')
 
     results = []
-    if tlpd != None:
-        results = tlpd.search(name)
+    if finder != None:
+        results = finder(name)
 
     result = None
     if results != None and len(results) > 0:
@@ -53,9 +53,9 @@ def get_player(i, tlpd=None):
                 result = results[0]
     elif tlpd != None:
         if results == []:
-            print('No matches for \'' + name + '\' in TLPD.')
+            print('No matches for \'' + name + '\' in database.')
         elif results == None:
-            print('Unable to consult TLPD.')
+            print('Unable to consult database.')
 
     if result != None:
         name = result['name']
@@ -112,13 +112,13 @@ class Player:
 
 class PlayerList:
 
-    def __init__(self, num, tlpd=None):
+    def __init__(self, num, finder=None):
         self.players = []
         k = 1
         while len(self.players) < num:
             if not debug:
                 i = len(self.players) + 1
-                player = get_player(i, tlpd)
+                player = get_player(i, finder)
                 self.players.append(player)
             else:
                 self.players.append(Player('player' + str(k), 'T', 50*k, 50*k,\
