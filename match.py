@@ -120,9 +120,9 @@ class Match:
         return True
 
     def unfix_result(self):
+        self.compute()
         if self.modified_result:
             self.result = (0, 0)
-            self.compute()
             self.broadcast()
 
     def broadcast(self):
