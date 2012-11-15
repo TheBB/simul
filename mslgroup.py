@@ -140,6 +140,31 @@ class Group:
         self.pairs[(first,fm.player_a)] += base * fm.prob_a
         self.pairs[(first,fm.player_b)] += base * fm.prob_b
 
+    def instance(self):
+        if self.final != None:
+            (fw,fl) = self.final.get_random_winner()
+            return [self.winners.winner, fw, fl, self.losers.loser]
+        
+        elif self.winners != None and self.losers != None:
+            (ww,wl) = self.winners.get_random_winner()
+            (lw,ll) = self.losers.get_random_winner()
+            fin = match.Match(self._num, wl, lw)
+            (fw,fl) = self.final.get_random_winner()
+            return [ww, fw, fl, ll]
+
+        else:
+            (wa,la) = self.first.get_random_winner()
+            (wb,lb) = self.second.get_random_winner()
+
+            win = match.Match(self._num, wa, wb)
+            los = match.Match(self._num, la, lb)
+            (ww,wl) = win.get_random_winner()
+            (lw,ll) = los.get_random_winner()
+
+            fin = match.Match(self._num, wl, lw)
+            (fw,fl) = fin.get_random_winner()
+            return [ww, fw, fl, ll]
+
     def detail(self, strings):
         out = strings['detailheader']
 

@@ -19,6 +19,7 @@ import sebracket
 import debracket
 import roundrobin
 import mslgroup
+import combination
 import glicko
 
 class Completer:
@@ -127,7 +128,8 @@ if __name__ == '__main__':
             choices=['term','tl','tls','reddit'],\
             help='output format')
     parser.add_argument('-t', '--type', dest='type', default='match',\
-            choices=['match','sebracket','rrgroup','mslgroup','debracket'],\
+            choices=['match','sebracket','rrgroup','mslgroup','debracket',\
+                    'combination'],\
             help='tournament type')
     parser.add_argument('--title', dest='title', default=None,\
             help='title')
@@ -208,6 +210,10 @@ if __name__ == '__main__':
             obj.compute_exact()
         else:
             obj.compute()
+    elif args['type'] == 'combination':
+        players = playerlist.PlayerList(32, finder)
+        obj = combination.Combination(players.players)
+        obj.compute()
 
     print(obj.output(strings, title=args['title']))
 
@@ -217,7 +223,8 @@ if __name__ == '__main__':
                      'rrgroup': ['set','unset','list'],\
                      'mslgroup': ['set','unset','list','detail'],\
                      'sebracket': ['set','unset','list'],\
-                     'debracket': ['set','unset','list','detail']}
+                     'debracket': ['set','unset','list','detail'],\
+                     'combination': ['']}
 
         words = supported['all'] + obj.words + supported[obj.type] +\
                 ['name','race','elo']

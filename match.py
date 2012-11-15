@@ -137,6 +137,15 @@ class Match:
             if self.link_loser != None:
                 self.link_loser.set_player(self.loser, self.link_loser_slot)
 
+    def get_random_winner(self):
+        res = self.get_random_result()
+        if res == None:
+            return None
+        if res[0] > res[1]:
+            return (self.player_a, self.player_b)
+        else:
+            return (self.player_b, self.player_a)
+
     def get_random_result(self):
         if self.player_a == None or self.player_b == None:
             return None

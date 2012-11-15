@@ -39,7 +39,7 @@ def search(player):
                       'name LIKE \'%' + player + '%\'')
     results = []
     for row in res:
-        elo = round(row[3]/_elo_factor)
+        elo = row[3]/_elo_factor
         results.append({'name': row[0], 'race': row[1], 'team': row[2],\
                         'elo': elo, 'elo_vt': elo, 'elo_vz': elo, 'elo_vp': elo})
 

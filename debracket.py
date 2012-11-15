@@ -296,8 +296,8 @@ class DEBracket:
     def detail(self, strings):
         out = strings['detailheader']
 
-        out = strings['ptabletitle'].format(title='Detailed placement probabilities')
-        out = strings['ptableheader']
+        out += strings['ptabletitle'].format(title='Detailed placement probabilities')
+        out += strings['ptableheader']
 
         top = 16
         dec = top // 4

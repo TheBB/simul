@@ -85,20 +85,20 @@ def get_strings(args):
         strings['detailheader'] = ''
         strings['ptabletitle'] = '{title}\n\n'
         strings['ptableheader'] = ' '*15
-        strings['ptableheading'] = '{heading: >8}'
+        strings['ptableheading'] = '{heading: >9}'
         strings['ptablename'] = '{player:>14}:'
-        strings['ptableentry'] = '{prob: >7.2f}%'
-        strings['ptableempty'] = '        '
+        strings['ptableentry'] = '{prob: >8.2f}%'
+        strings['ptableempty'] = '         '
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = ''
     elif args['format'] == 'tls' or args['format'] == 'tl':
         strings['detailheader'] = '[code]'
         strings['ptabletitle'] = '{title}\n\n'
         strings['ptableheader'] = ' '*15
-        strings['ptableheading'] = '{heading: >8}'
+        strings['ptableheading'] = '{heading: >9}'
         strings['ptablename'] = '{player:>14}:'
-        strings['ptableentry'] = '{prob: >7.2f}%'
-        strings['ptableempty'] = '        '
+        strings['ptableentry'] = '{prob: >8.2f}%'
+        strings['ptableempty'] = '         '
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = '[/code]'
         if args['format'] == 'tls':
@@ -108,10 +108,10 @@ def get_strings(args):
         strings['detailheader'] = ''
         strings['ptabletitle'] = '{title}\n\n'
         strings['ptableheader'] = ' '*19
-        strings['ptableheading'] = '{heading: >8}'
-        strings['ptablename'] = '    {player:>14}:'
-        strings['ptableentry'] = '{prob: >7.2f}%'
-        strings['ptableempty'] = '        '
+        strings['ptableheading'] = '{heading: >9}'
+        strings['ptablename'] = '    {player:>16}:'
+        strings['ptableentry'] = '{prob: >8.2f}%'
+        strings['ptableempty'] = '         '
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = ''
 

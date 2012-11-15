@@ -37,9 +37,10 @@ def get_player(i, finder=None):
         for res in results:
             print((str(i) + ': ' if pl else '') + res['name'] + ' ('\
                   + res['race'] + ') from '\
-                  + res['team'] + ' (' + str(res['elo']) + ', '\
-                  + str(res['elo_vt']) + ', ' + str(res['elo_vz']) + ', '\
-                  + str(res['elo_vp']) + ')')
+                  + res['team'] + ' (' + str(round(res['elo'])) + ', '\
+                  + str(round(res['elo_vt'])) + ', '\
+                  + str(round(res['elo_vz'])) + ', '\
+                  + str(round(res['elo_vp'])) + ')')
             i += 1
 
         if pl:
