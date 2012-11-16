@@ -14,8 +14,6 @@ class Match(format.Format):
         self._result = (0, 0)
         self._winner_links = []
         self._loser_links = []
-
-        self.words = []
     
     def is_fixed(self):
         return self._result[0] == self._num or self._result[1] == self._num
@@ -31,22 +29,27 @@ class Match(format.Format):
 
     def modify(self, num_a, num_b):
         if not self.is_ready():
+            print('not ready')
             return False
 
         if num_a < 0 or num_b < 0 or num_a > self._num or num_b > self._num or\
            (num_a == self._num and num_b == self._num):
+            print('useless input')
             return False
 
         for dep in self._dependencies:
             if not dep.is_fixed():
+                print('deps')
                 return False
 
         if self._result[0] != num_a or self._result[1] != num_b:
             self._result = (num_a, num_b)
             self.notify()
 
+        return True
+
     def clear(self):
-        self.modify(0, 0)
+        return self.modify(0, 0)
 
     def fill(self):
         self.notify()
@@ -88,7 +91,7 @@ class Match(format.Format):
             self._tally[loser][0] = 1
             return
 
-        pa = self._players[0].prob_of_winning(self.player_b)
+        pa = self._players[0].prob_of_winning(self._players[1])
         pb = 1 - pa
         num = self._num
 
@@ -111,6 +114,43 @@ class Match(format.Format):
     def detail(self, strings):
         return NotImplemented
 
-    def out(self, strings, title=None):
+    def summary(self, strings, title=None):
+        tally = self._tally
+
         if title == None:
             title = self._players[0].name + ' vs. ' + self._players[1].name
+
+        out = strings['header'].format(title=title)
+
+        ml_winner = None
+        ml_winner_prob = 0
+        ml_outcome = (None, None, 0, None)
+        i = 0
+        for p in self._players:
+            if tally[p][1] > ml_winner_prob:
+                ml_winner_prob = tally[p][1]
+                ml_winner = p
+
+            out += strings['outcomelist'].format(player=p.name, 
+                                                 prob=100*tally[p][1])
+            for outcome in self._outcomes:
+                if outcome[2] > ml_outcome[2]:
+                    ml_outcome = outcome
+                if outcome[3] == p:
+                    out += strings['outcomei'].format(winscore=outcome[i]\
+                                                    , losescore=outcome[1-i]\
+                                                    , prob=100*outcome[2])
+
+            i = 1-i
+
+        out += strings['mlwinner'].format(player=ml_winner.name\
+                                        , prob=100*ml_winner_prob)
+
+        out += strings['mloutcome'].format(pa=self._players[0].name\
+                                         , pb=self._players[1].name\
+                                         , na=ml_outcome[0], nb=ml_outcome[1]
+                                         , prob=100*ml_outcome[2])
+
+        out += strings['footer'].format(title=title)
+
+        return out

@@ -13,14 +13,14 @@ except ImportError:
 import playerlist
 import output
 import tlpd
-
-import match
-import sebracket
-import debracket
-import roundrobin
-import mslgroup
-import combination
 import glicko
+
+from formats import match
+#import sebracket
+#import debracket
+#import roundrobin
+#import mslgroup
+#import combination
 
 class Completer:
     def __init__(self, basewords):
@@ -183,51 +183,52 @@ if __name__ == '__main__':
     if args['load'] != None:
         obj = get_from_file(args['load'])
     elif args['type'] == 'match':
-        player_a = playerlist.get_player(1, finder)
-        player_b = playerlist.get_player(2, finder)
-        obj = match.Match(args['num'][0], player_a, player_b)
+        players = playerlist.PlayerList(2, finder)
+        obj = match.Match(args['num'][0])
+        obj.set_players(players.players)
         obj.compute()
-    elif args['type'] == 'sebracket':
-        players = playerlist.PlayerList(pow(2,args['rounds']), finder)
-        obj = sebracket.SEBracket(args['num'], args['rounds'], players.players)
-        obj.compute()
-    elif args['type'] == 'debracket':
-        players = playerlist.PlayerList(pow(2,args['rounds']), finder)
-        obj = debracket.DEBracket(args['num'][0], args['rounds'], players.players)
-        if args['exact']:
-            obj.compute_exact()
-        else:
-            obj.compute()
-    elif args['type'] == 'mslgroup':
-        players = playerlist.PlayerList(4, finder)
-        obj = mslgroup.Group(args['num'][0], players.players)
-        obj.compute()
-    elif args['type'] == 'rrgroup':
-        players = playerlist.PlayerList(args['players'], finder)
-        obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
-                               args['threshold'])
-        if args['exact']:
-            obj.compute_exact()
-        else:
-            obj.compute()
-    elif args['type'] == 'combination':
-        players = playerlist.PlayerList(32, finder)
-        obj = combination.Combination(players.players)
-        obj.compute()
+    #elif args['type'] == 'sebracket':
+        #players = playerlist.PlayerList(pow(2,args['rounds']), finder)
+        #obj = sebracket.SEBracket(args['num'], args['rounds'], players.players)
+        #obj.compute()
+    #elif args['type'] == 'debracket':
+        #players = playerlist.PlayerList(pow(2,args['rounds']), finder)
+        #obj = debracket.DEBracket(args['num'][0], args['rounds'], players.players)
+        #if args['exact']:
+            #obj.compute_exact()
+        #else:
+            #obj.compute()
+    #elif args['type'] == 'mslgroup':
+        #players = playerlist.PlayerList(4, finder)
+        #obj = mslgroup.Group(args['num'][0], players.players)
+        #obj.compute()
+    #elif args['type'] == 'rrgroup':
+        #players = playerlist.PlayerList(args['players'], finder)
+        #obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
+                               #args['threshold'])
+        #if args['exact']:
+            #obj.compute_exact()
+        #else:
+            #obj.compute()
+    #elif args['type'] == 'combination':
+        #players = playerlist.PlayerList(32, finder)
+        #obj = combination.Combination(players.players)
+        #obj.compute()
 
-    print(obj.output(strings, title=args['title']))
+    print(obj.summary(strings, title=args['title']))
 
     if not args['noconsole']:
         supported = {'all': ['save','load','compute','out','exit','change'],\
-                     'match': ['set','unset','list'],\
-                     'rrgroup': ['set','unset','list'],\
-                     'mslgroup': ['set','unset','list','detail'],\
-                     'sebracket': ['set','unset','list'],\
-                     'debracket': ['set','unset','list','detail'],\
-                     'combination': ['']}
+                     match.Match: ['set','unset','list']}
+                     #'rrgroup': ['set','unset','list'],\
+                     #'mslgroup': ['set','unset','list','detail'],\
+                     #'sebracket': ['set','unset','list'],\
+                     #'debracket': ['set','unset','list','detail'],\
+                     #'combination': ['']}
 
-        words = supported['all'] + obj.words + supported[obj.type] +\
-                ['name','race','elo']
+        #words = supported['all'] + obj.words + supported[obj.type] +\
+                #['name','race','elo']
+        words = supported['all'] + supported[type(obj)] + ['name','race','elo']
         completer = Completer(words)
         completer.add_words([p.name for p in obj.get_players()])
         readline.parse_and_bind("tab: complete")
@@ -240,30 +241,32 @@ if __name__ == '__main__':
             if len(s) < 1:
                 continue
 
-            if s[0] not in supported['all'] and s[0] not in supported[obj.type]:
-                print('Invalid command for type \'' + obj.type + '\'')
+            if s[0] not in supported['all'] and s[0] not in supported[type(obj)]:
+                print('Invalid command for type \'' + str(type(obj)) + '\'')
                 continue
 
             if s[0] == 'exit':
                 break
 
             elif s[0] == 'compute':
-                if obj.type not in ['rrgroup', 'debracket']:
-                    obj.compute()
-                elif (len(s) > 1 and s[1] == 'ex') or args['exact']:
-                    obj.compute_exact()
-                else:
-                    obj.compute()
+                #if obj.type not in ['rrgroup', 'debracket']:
+                    #obj.compute()
+                #elif (len(s) > 1 and s[1] == 'ex') or args['exact']:
+                    #obj.compute_exact()
+                #else:
+                    #obj.compute()
+
+                obj.compute()
 
             elif s[0] == 'out' or s[0] == 'detail':
-                if len(s) > 1:
-                    strs = output.get_strings({'type': obj.type.lower(), 'format': s[1]})
-                else:
-                    strs = strings
+                #if len(s) > 1:
+                    #strs = output.get_strings({'type': obj.type.lower(), 'format': s[1]})
+                #else:
+                    #strs = strings
                 if s[0] == 'out':
-                    print(obj.output(strs, title=args['title']))
+                    print(obj.summary(strings, title=args['title']))
                 elif s[0] == 'detail':
-                    print(obj.detail(strs))
+                    print(obj.detail(strings))
 
             elif s[0] == 'save':
                 if len(s) > 1:
@@ -286,101 +289,116 @@ if __name__ == '__main__':
                     obj = temp
 
             elif s[0] == 'set' or s[0] == 'unset':
-                match = False
-                try:
-                    if obj.type in ['rrgroup'] and len(s) > 2:
-                        match = obj.find_match(pa=s[1], pb=s[2])
-                    elif obj.type in ['mslgroup','debracket','sebracket'] and len(s) > 1:
-                        match = obj.find_match(search=s[1])
-                    elif obj.type in ['match']:
-                        match = obj
+                match = obj
 
-                    if match == False:
-                        print('Not enough arguments')
-                        continue
-                    elif match == None or not match.can_fix():
-                        print('Match not yet ready (unresolved dependencies?)')
-                        continue
+                if s[0] == 'set':
+                    ia = int(better_input('Score for ' + match.get_player(0).name\
+                                          + ': ', swipe=True))
+                    ib = int(better_input('Score for ' + match.get_player(1).name\
+                                          + ': ', swipe=True))
+                    res = match.modify(ia, ib)
+                    if not res:
+                        print('Unable to modify match')
+                elif s[0] == 'unset':
+                    match.clear()
 
-                    if s[0] == 'set':
-                        ia = int(better_input('Score for ' + match.player_a.name + ': ',\
-                                 swipe=True))
-                        ib = int(better_input('Score for ' + match.player_b.name + ': ',\
-                                 swipe=True))
-                        res = match.fix_result(ia, ib)
-                        if not res:
-                            print('Unable to set result')
-                    elif s[0] == 'unset':
-                        match.unfix_result()
+                #match = False
+                #try:
+                    #if obj.type in ['rrgroup'] and len(s) > 2:
+                        #match = obj.find_match(pa=s[1], pb=s[2])
+                    #elif obj.type in ['mslgroup','debracket','sebracket'] and len(s) > 1:
+                        #match = obj.find_match(search=s[1])
+                    #elif obj.type in ['match']:
+                        #match = obj
 
-                    obj.compute()
+                    #if match == False:
+                        #print('Not enough arguments')
+                        #continue
+                    #elif match == None or not match.can_fix():
+                        #print('Match not yet ready (unresolved dependencies?)')
+                        #continue
 
-                except Exception as e:
-                    print(str(e))
+                    #if s[0] == 'set':
+                        #ia = int(better_input('Score for ' + match.player_a.name + ': ',\
+                                 #swipe=True))
+                        #ib = int(better_input('Score for ' + match.player_b.name + ': ',\
+                                 #swipe=True))
+                        #res = match.fix_result(ia, ib)
+                        #if not res:
+                            #print('Unable to set result')
+                    #elif s[0] == 'unset':
+                        #match.unfix_result()
+
+                    #obj.compute()
+
+                #except Exception as e:
+                    #print(str(e))
 
             elif s[0] == 'list':
-                if obj.type in ['rrgroup', 'mslgroup']:
-                    print_matches(obj.get_match_list())
+                pass
+                #if obj.type in ['rrgroup', 'mslgroup']:
+                    #print_matches(obj.get_match_list())
 
-                elif obj.type in ['debracket']:
-                    for i in range(0,len(obj.winners)):
-                        print_matches(obj.winners[i], 'WB' + str(i+1))
-                    for i in range(0,len(obj.losers)):
-                        print_matches(obj.losers[i], 'LB' + str(i+1))
-                    print_matches([obj.final1], pre='First final', post='unmodified')
-                    print_matches([obj.final2], pre='Second final', post='unmodified')
+                #elif obj.type in ['debracket']:
+                    #for i in range(0,len(obj.winners)):
+                        #print_matches(obj.winners[i], 'WB' + str(i+1))
+                    #for i in range(0,len(obj.losers)):
+                        #print_matches(obj.losers[i], 'LB' + str(i+1))
+                    #print_matches([obj.final1], pre='First final', post='unmodified')
+                    #print_matches([obj.final2], pre='Second final', post='unmodified')
 
-                elif obj.type in ['sebracket']:
-                    for i in range(0,len(obj.bracket)):
-                        print_matches(obj.bracket[i], 'R' + str(i+1))
+                #elif obj.type in ['sebracket']:
+                    #for i in range(0,len(obj.bracket)):
+                        #print_matches(obj.bracket[i], 'R' + str(i+1))
 
-                elif obj.type in ['match']:
-                    if obj.fixed_result or obj.modified_result:
-                        if obj.fixed_result:
-                            print('Result fixed: ', end='')
-                        elif obj.modified_result:
-                            print('Result modified: ', end='')
-                        print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
-                              str(obj.result[1]) + ' ' + obj.player_b.name)
+                #elif obj.type in ['match']:
+                    #if obj.fixed_result or obj.modified_result:
+                        #if obj.fixed_result:
+                            #print('Result fixed: ', end='')
+                        #elif obj.modified_result:
+                            #print('Result modified: ', end='')
+                        #print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
+                              #str(obj.result[1]) + ' ' + obj.player_b.name)
 
             elif s[0] == 'change':
-                if len(s) < 2:
-                    print('Not enough arguments')
-                    continue
+                pass
+                #if len(s) < 2:
+                    #print('Not enough arguments')
+                    #continue
 
-                player = obj.get_player(s[-1])
-                if player == None:
-                    print('No such player \'' + s[-1] + '\'')
+                #player = obj.get_player(s[-1])
+                #if player == None:
+                    #print('No such player \'' + s[-1] + '\'')
 
-                recompute = False
+                #recompute = False
 
-                if len(s) < 3 or s[1] == 'name':
-                    player.name = better_input('Name: ')
-                    completer.add_words([p.name for p in obj.get_players()])
+                #if len(s) < 3 or s[1] == 'name':
+                    #player.name = better_input('Name: ')
+                    #completer.add_words([p.name for p in obj.get_players()])
 
-                if len(s) < 3 or s[1] == 'race':
-                    race = ''
-                    while race not in ['P', 'Z', 'T']:
-                        race = better_input('Race: ', swipe=True).upper()
-                    player.race = race
-                    recompute = True
+                #if len(s) < 3 or s[1] == 'race':
+                    #race = ''
+                    #while race not in ['P', 'Z', 'T']:
+                        #race = better_input('Race: ', swipe=True).upper()
+                    #player.race = race
+                    #recompute = True
 
-                if len(s) < 3 or s[1] == 'elo':
-                    elo = playerlist.get_elo()
-                    if elo == False:
-                        player.elo = 0
-                        player.elo_race['T'] = 0
-                        player.elo_race['Z'] = 0
-                        player.elo_race['P'] = 0
-                    else:
-                        player.elo = elo
-                        player.elo_race['T'] = playerlist.get_elo('vT')
-                        player.elo_race['Z'] = playerlist.get_elo('vZ')
-                        player.elo_race['P'] = playerlist.get_elo('vP')
-                    recompute = True
+                #if len(s) < 3 or s[1] == 'elo':
+                    #elo = playerlist.get_elo()
+                    #if elo == False:
+                        #player.elo = 0
+                        #player.elo_race['T'] = 0
+                        #player.elo_race['Z'] = 0
+                        #player.elo_race['P'] = 0
+                    #else:
+                        #player.elo = elo
+                        #player.elo_race['T'] = playerlist.get_elo('vT')
+                        #player.elo_race['Z'] = playerlist.get_elo('vZ')
+                        #player.elo_race['P'] = playerlist.get_elo('vP')
+                    #recompute = True
 
-                if recompute:
-                    obj.compute()
+                #if recompute:
+                    #obj.compute()
 
     if args['save'] != None:
         put_to_file(obj, args['save'])

@@ -73,12 +73,19 @@ class Format:
         return None
 
     def get_player(self, key):
-        fits = lambda p: p.name.lower() == key.lower()
-        gen = (p for p in self._players if fits(p))
-        try:
-            return next(gen)
-        except:
-            return None
+        if type(key) == int:
+            return self._players[key]
+        
+        else:
+            fits = lambda p: p.name.lower() == key.lower()
+            gen = (p for p in self._players if fits(p))
+            try:
+                return next(gen)
+            except:
+                return None
+
+    def get_players(self):
+        return self._players
 
     def set_player(self, key, player):
         if self._players[key] != player:
@@ -126,5 +133,5 @@ class Format:
     def detail(self, strings):
         return NotImplemented
 
-    def out(self, strings, title=None):
+    def summary(self, strings, title=None):
         return NotImplemented
