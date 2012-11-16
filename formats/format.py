@@ -25,6 +25,7 @@ class Format:
         self._tally = None
         self._parents = []
         self._dependencies = []
+        self._instance = None
 
         self.setup()
 
@@ -50,10 +51,10 @@ class Format:
         return True
 
     def is_fixed(self):
-        return False
+        raise NotImplementedError()
 
     def is_modified(self):
-        return False
+        raise NotImplementedError()
 
     def is_updated(self):
         return self._updated
@@ -64,13 +65,10 @@ class Format:
             p.notify()
 
     def clear(self):
-        return NotImplemented
+        raise NotImplementedError()
 
     def get_tally(self):
         return self._tally
-
-    def get_match(self, key):
-        return None
 
     def get_player(self, key):
         if type(key) == int:
@@ -98,16 +96,13 @@ class Format:
             self.fill()
 
     def should_use_mc(self):
-        return True
-
-    def setup(self):
-        return NotImplemented
+        raise NotImplementedError()
 
     def fill(self):
-        return NotImplemented
+        raise NotImplementedError()
 
-    def instance(self):
-        return NotImplemented
+    def instance(self, new=False):
+        raise NotImplementedError()
 
     def compute(self):
         if not self.is_ready():
@@ -125,13 +120,13 @@ class Format:
         self._updated = True
 
     def compute_mc(self, runs=1000):
-        return NotImplemented
+        raise NotImplementedError()
 
     def compute_exact(self):
-        return NotImplemented
+        raise NotImplementedError()
 
     def detail(self, strings):
-        return NotImplemented
+        raise NotImplementedError()
 
     def summary(self, strings, title=None):
-        return NotImplemented
+        raise NotImplementedError()

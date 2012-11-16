@@ -1,4 +1,4 @@
-import formats.format as format
+from formats.format import Format
 
 def binomial(n, k):
     if k == 0:
@@ -6,10 +6,10 @@ def binomial(n, k):
     else:
         return n/k * binomial(n-1, k-1)
 
-class Match(format.Format):
+class Match(Format):
 
     def __init__(self, num):
-        format.Format.__init__(self, [1,1], [1,1])
+        Format.__init__(self, [1,1], [1,1])
         self._num = num
         self._result = (0, 0)
         self._winner_links = []
@@ -24,22 +24,24 @@ class Match(format.Format):
     def should_use_mc(self):
         return False
 
-    def setup(self):
-        pass
+    def add_winner_link(self, target, slot):
+        self._winner_links.append((target, slot))
+        target.add_dependency(self)
+
+    def add_loser_link(self, target, slot):
+        self._loser_links.append((target, slot))
+        target.add_dependency(self)
 
     def modify(self, num_a, num_b):
         if not self.is_ready():
-            print('not ready')
             return False
 
         if num_a < 0 or num_b < 0 or num_a > self._num or num_b > self._num or\
            (num_a == self._num and num_b == self._num):
-            print('useless input')
             return False
 
         for dep in self._dependencies:
             if not dep.is_fixed():
-                print('deps')
                 return False
 
         if self._result[0] != num_a or self._result[1] != num_b:
@@ -54,17 +56,17 @@ class Match(format.Format):
     def fill(self):
         self.notify()
 
-    def instance(self):
+    def instance(self, new=False):
         if not self.is_updated():
             return None
 
-        res = self.instance_detail()
+        res = self.instance_detail(new)
         if res[0] > res[1]:
-            return [self._players[0], self._players[1]]
-        else:
             return [self._players[1], self._players[0]]
+        else:
+            return [self._players[0], self._players[1]]
     
-    def instance_detail(self):
+    def instance_detail(self, new=False):
         if not self.is_updated():
             return None
 
@@ -112,7 +114,7 @@ class Match(format.Format):
             self._tally[self._players[0]][0] += base
 
     def detail(self, strings):
-        return NotImplemented
+        raise NotImplementedError()
 
     def summary(self, strings, title=None):
         tally = self._tally

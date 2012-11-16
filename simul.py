@@ -15,7 +15,7 @@ import output
 import tlpd
 import glicko
 
-from formats import match
+from formats import match, mslgroup
 #import sebracket
 #import debracket
 #import roundrobin
@@ -198,10 +198,11 @@ if __name__ == '__main__':
             #obj.compute_exact()
         #else:
             #obj.compute()
-    #elif args['type'] == 'mslgroup':
-        #players = playerlist.PlayerList(4, finder)
-        #obj = mslgroup.Group(args['num'][0], players.players)
-        #obj.compute()
+    elif args['type'] == 'mslgroup':
+        players = playerlist.PlayerList(4, finder)
+        obj = mslgroup.MSLGroup(args['num'][0])
+        obj.set_players(players.players)
+        obj.compute()
     #elif args['type'] == 'rrgroup':
         #players = playerlist.PlayerList(args['players'], finder)
         #obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
@@ -219,9 +220,9 @@ if __name__ == '__main__':
 
     if not args['noconsole']:
         supported = {'all': ['save','load','compute','out','exit','change'],\
-                     match.Match: ['set','unset','list']}
+                     match.Match: ['set','unset','list'],\
+                     mslgroup.MSLGroup: ['set','unset','list','detail']}
                      #'rrgroup': ['set','unset','list'],\
-                     #'mslgroup': ['set','unset','list','detail'],\
                      #'sebracket': ['set','unset','list'],\
                      #'debracket': ['set','unset','list','detail'],\
                      #'combination': ['']}
