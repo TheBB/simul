@@ -89,7 +89,7 @@ def get_strings(args):
         strings['ptablename'] = '{player:>14}:'
         strings['ptableentry'] = '{prob: >8.2f}%'
         strings['ptableempty'] = '         '
-        strings['ptabletextnum'] = '  {text} ({prob:.2f}%)'
+        strings['ptabletextnum'] = '  {text:>10} ({prob:5.2f}%)'
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = ''
     elif args['format'] == 'tls' or args['format'] == 'tl':
@@ -114,7 +114,7 @@ def get_strings(args):
         strings['ptablename'] = '    {player:>16}:'
         strings['ptableentry'] = '{prob: >8.2f}%'
         strings['ptableempty'] = '         '
-        strings['ptabletextnum'] = '  {text} ({prob:.2f}%)'
+        strings['ptabletextnum'] = '  {text:>10} ({prob:5.2f}%)'
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = ''
 
