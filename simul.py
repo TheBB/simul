@@ -290,50 +290,33 @@ if __name__ == '__main__':
                     obj = temp
 
             elif s[0] == 'set' or s[0] == 'unset':
-                match = obj
+                m = False
+                try:
+                    if type(obj) in [mslgroup.MSLGroup] and len(s) > 1:
+                        m = obj.get_match(s[1])
+                    elif type(obj) in [match.Match]:
+                        m = obj
 
-                if s[0] == 'set':
-                    ia = int(better_input('Score for ' + match.get_player(0).name\
-                                          + ': ', swipe=True))
-                    ib = int(better_input('Score for ' + match.get_player(1).name\
-                                          + ': ', swipe=True))
-                    res = match.modify(ia, ib)
-                    if not res:
-                        print('Unable to modify match')
-                elif s[0] == 'unset':
-                    match.clear()
+                    if m == False:
+                        print('Not enough arguments')
+                        continue
+                    elif m == None or not m.can_modify():
+                        print('Match not yet ready (unresolved dependencies?)')
+                        continue
 
-                #match = False
-                #try:
-                    #if obj.type in ['rrgroup'] and len(s) > 2:
-                        #match = obj.find_match(pa=s[1], pb=s[2])
-                    #elif obj.type in ['mslgroup','debracket','sebracket'] and len(s) > 1:
-                        #match = obj.find_match(search=s[1])
-                    #elif obj.type in ['match']:
-                        #match = obj
+                    if s[0] == 'set':
+                        ia = int(better_input('Score for ' + m.get_player(0).name\
+                                              + ': ', swipe=True))
+                        ib = int(better_input('Score for ' + m.get_player(1).name\
+                                              + ': ', swipe=True))
+                        res = m.modify(ia, ib)
+                        if not res:
+                            print('Unable to modify match')
+                    elif s[0] == 'unset':
+                        m.clear()
 
-                    #if match == False:
-                        #print('Not enough arguments')
-                        #continue
-                    #elif match == None or not match.can_fix():
-                        #print('Match not yet ready (unresolved dependencies?)')
-                        #continue
-
-                    #if s[0] == 'set':
-                        #ia = int(better_input('Score for ' + match.player_a.name + ': ',\
-                                 #swipe=True))
-                        #ib = int(better_input('Score for ' + match.player_b.name + ': ',\
-                                 #swipe=True))
-                        #res = match.fix_result(ia, ib)
-                        #if not res:
-                            #print('Unable to set result')
-                    #elif s[0] == 'unset':
-                        #match.unfix_result()
-
-                    #obj.compute()
-
-                #except Exception as e:
-                    #print(str(e))
+                except Exception as e:
+                    print(str(e))
 
             elif s[0] == 'list':
                 pass

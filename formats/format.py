@@ -27,8 +27,6 @@ class Format:
         self._dependencies = []
         self._instance = None
 
-        self.setup()
-
     def add_parent(self, parent):
         self._parents.append(parent)
 
@@ -101,7 +99,10 @@ class Format:
     def fill(self):
         raise NotImplementedError()
 
-    def instance(self, new=False):
+    def instances(self):
+        raise NotImplementedError()
+
+    def random_instance(self, new=False):
         raise NotImplementedError()
 
     def compute(self):
