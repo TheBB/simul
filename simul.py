@@ -214,8 +214,8 @@ if __name__ == '__main__':
     if not args['noconsole']:
         supported = {'all': ['save','load','compute','out','exit','change'],\
                      match.Match: ['set','unset','list'],\
-                     mslgroup.MSLGroup: ['set','unset','list','detail'],\
-                     sebracket.SEBracket: ['set','unset','list','detail']}
+                     mslgroup.MSLGroup: ['set','unset','list','detail','mout'],\
+                     sebracket.SEBracket: ['set','unset','list','detail','mout']}
                      #'rrgroup': ['set','unset','list'],\
                      #'sebracket': ['set','unset','list'],\
                      #'debracket': ['set','unset','list','detail'],\
@@ -287,7 +287,7 @@ if __name__ == '__main__':
                 if temp != None:
                     obj = temp
 
-            elif s[0] == 'set' or s[0] == 'unset':
+            elif s[0] == 'set' or s[0] == 'unset' or s[0] == 'mout':
                 m = False
                 try:
                     if type(obj) not in [match.Match] and len(s) > 1:
@@ -298,7 +298,12 @@ if __name__ == '__main__':
                     if m == False:
                         print('Not enough arguments')
                         continue
-                    elif m == None or not m.can_modify():
+
+                    if s[0] == 'mout':
+                        print(m.summary(strings))
+                        continue
+
+                    if not m.can_modify():
                         print('Match not yet ready (unresolved dependencies?)')
                         continue
 
