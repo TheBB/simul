@@ -132,7 +132,7 @@ class SEBracket:
             elif rounded == 3:
                 expl = 'lose in the quarterfinals'
             elif rounded >= 4:
-                expl = 'lose in the round of' + str(2 << rounded - 2)
+                expl = 'lose in the round of ' + str(2 << rounded - 2)
 
             out += strings['exroundsi'].format(player=res.name,\
                                                rounds=sum(res.exrounds),\
