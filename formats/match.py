@@ -60,7 +60,7 @@ class Match(Format):
             if self.is_fixed():
                 winner = self._players[0] if num_a > num_b else self._players[1]
                 loser = self._players[1] if num_a > num_b else self._players[0]
-                self.broadcast_instance([loser, winner])
+                self.broadcast_instance((0, [loser, winner]))
 
         return True
 
@@ -72,47 +72,51 @@ class Match(Format):
 
     def broadcast_instance(self, instance):
         for (target, slot) in self._winner_links:
-            target.set_player(slot, instance[-1])
+            target.set_player(slot, instance[1][1])
         for (target, slot) in self._loser_links:
-            target.set_player(slot, instance[0])
+            target.set_player(slot, instance[1][0])
+
+    def instances(self):
+        if self.is_fixed():
+            (ra, rb) = self._result
+            winner = self._players[0] if ra > rb else self._players[1]
+            loser = self._players[1] if ra > rb else self._players[0]
+            yield (1, [loser, winner])
+        else:
+            for i in range(0,len(self._players)):
+                winner = self._players[i]
+                loser = self._players[1-i]
+                tally = self._tally[winner]
+                yield (tally[1], [loser, winner])
 
     def random_instance(self, new=False):
         if not self.is_updated():
             return None
 
-        if self.is_fixed():
-            (ra, rb) = self._result
-            winner = self._players[0] if ra > rb else self._players[1]
-            loser = self._players[1] if ra > rb else self._players[0]
-            return (1, [loser, winner])
-
         if not new and self._instance != None:
             return self._instance
 
         val = random.random()
-        if val <= self._tally[self._players[0]][1]:
-            winner = self._players[0]
-            loser = self._players[1]
-        else:
-            winner = self._players[1]
-            loser = self._players[0]
-        self._instance = (self._tally[winner][1], [loser, winner])
-        return self._instance
+        for instance in self.instances():
+            if val >= instance[0]:
+                val -= instance[0]
+            else:
+                self._instance = instance
+                return self._instance
+
+    def instances_detail(self):
+        for outcome in self._outcomes:
+            yield outcome
 
     def random_instance_detail(self, new=False):
         if not self.is_updated():
             return None
 
-        if self.is_fixed():
-            (ra, rb) = self._result
-            winner = self._players[0] if ra > rb else self._players[1]
-            return (self._result[0], self._result[1], 1, winner)
-
         if not new and self._instance_detail != None:
             return self._instance_detail
 
         val = random.random()
-        for outcome in self._outcomes:
+        for outcome in self.instances_detail():
             if val >= outcome[0]:
                 val -= outcome[0]
             else:
@@ -139,13 +143,15 @@ class Match(Format):
 
         for i in range(0, num - start_b):
             base = binomial(num-start_a+i-1,i) * pa**(num-start_a) * pb**i
-            self._outcomes.append((base, num, start_b+i, self._players[0]))
+            self._outcomes.append((base, num, start_b+i, self._players[0],\
+                                  self._players[1]))
             self._tally[self._players[0]][1] += base
             self._tally[self._players[1]][0] += base
 
         for i in range(0, num - start_a):
             base = binomial(num-start_b+i-1,i) * pb**(num-start_b) * pa**i
-            self._outcomes.append((base, start_a+i, num, self._players[1]))
+            self._outcomes.append((base, start_a+i, num, self._players[1],\
+                                   self._players[0]))
             self._tally[self._players[1]][1] += base
             self._tally[self._players[0]][0] += base
 
@@ -162,32 +168,29 @@ class Match(Format):
 
         ml_winner = None
         ml_winner_prob = 0
-        ml_outcome = (0, 0, 0, None)
+        ml_outcome = (0, 0, 0, None, None)
         i = 0
         for p in self._players:
             if tally[p][1] > ml_winner_prob:
                 ml_winner_prob = tally[p][1]
                 ml_winner = p
 
-            out += strings['outcomelist'].format(player=p.name, 
-                                                 prob=100*tally[p][1])
+            out += strings['outcomelist'].format(player=p.name, prob=100*tally[p][1])
             for outcome in self._outcomes:
                 if outcome[0] > ml_outcome[0]:
                     ml_outcome = outcome
                 if outcome[3] == p:
-                    out += strings['outcomei'].format(winscore=outcome[1+i]\
-                                                    , losescore=outcome[2-i]\
-                                                    , prob=100*outcome[0])
+                    out += strings['outcomei'].format(winscore=outcome[1+i],\
+                            losescore=outcome[2-i], prob=100*outcome[0])
 
             i = 1-i
 
-        out += strings['mlwinner'].format(player=ml_winner.name\
-                                        , prob=100*ml_winner_prob)
+        out += strings['mlwinner'].format(player=ml_winner.name, 
+                            prob=100*ml_winner_prob)
 
-        out += strings['mloutcome'].format(pa=self._players[0].name\
-                                         , pb=self._players[1].name\
-                                         , na=ml_outcome[1], nb=ml_outcome[2]
-                                         , prob=100*ml_outcome[0])
+        out += strings['mloutcome'].format(pa=self._players[0].name,\
+                            pb=self._players[1].name, na=ml_outcome[1],\
+                            nb=ml_outcome[2], prob=100*ml_outcome[0])
 
         out += strings['footer'].format(title=title)
 

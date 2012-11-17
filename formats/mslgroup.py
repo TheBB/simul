@@ -1,5 +1,16 @@
+import itertools
+
 from formats.composite import Composite
 from formats.match import Match
+from formats.format import Tally as ParentTally
+
+class Tally(ParentTally):
+
+    def __init__(self, rounds, players):
+        ParentTally.__init__(self, rounds)
+        self.pairs = dict()
+        for p in players:
+            self.pairs[p] = 0
 
 class MSLGroup(Composite):
     
@@ -47,11 +58,86 @@ class MSLGroup(Composite):
         self._first[0].set_players(self._players[:2])
         self._first[1].set_players(self._players[2:])
 
+    def tally_maker(self):
+        return Tally(len(self._schema_out), self._players)
+
     def compute_exact(self):
-        pass
+        for m in self._first:
+            m.compute()
+
+        for (if0, if1) in itertools.product(self._first[0].instances(),\
+                                            self._first[1].instances()):
+            base_f = if0[0] * if1[0]
+            self._first[0].broadcast_instance(if0)
+            self._first[1].broadcast_instance(if1)
+            for m in self._second:
+                m.compute()
+
+            for (is0, is1) in itertools.product(self._second[0].instances(),\
+                                                self._second[1].instances()):
+                base_s = base_f * is0[0] * is1[0]
+                self._second[0].broadcast_instance(is0)
+                self._second[1].broadcast_instance(is1)
+                self._final.compute()
+
+                for ifin in self._final.instances():
+                    prob = base_s * ifin[0]
+                    self._tally[is1[1][0]][0] += prob
+                    self._tally[ifin[1][0]][1] += prob
+                    self._tally[ifin[1][1]][2] += prob
+                    self._tally[is0[1][1]][3] += prob
+                    self._tally[is0[1][1]].pairs[ifin[1][1]] += prob
 
     def detail(self, strings):
-        raise NotImplementedError()
+        tally = self._tally
+
+        out = strings['detailheader']
+
+        out += strings['ptabletitle'].format(title='Detailed placement probabilities')
+        out += strings['ptableheader']
+        for h in ['4th', '3rd', '2nd', '1st']:
+            out += strings['ptableheading'].format(heading=h)
+
+        for p in self._players:
+            out += '\n' + strings['ptablename'].format(player=p.name)
+            for i in tally[p]:
+                if i > 1e-10:
+                    out += strings['ptableentry'].format(prob=100*i)
+                else:
+                    out += strings['ptableempty']
+
+        out += strings['ptablebetween']
+
+        out += strings['ptabletitle'].format(title='Probability of each pair advancing')
+        out += strings['ptableheader']
+        for p in self._players:
+            out += strings['ptableheading'].format(heading=p.name[:7])
+        for p in self._players:
+            out += '\n' + strings['ptablename'].format(player=p.name)
+            for q in self._players:
+                if p != q and tally[p].pairs[q] >= 1e-10:
+                    out += strings['ptableentry'].format(prob=100*tally[p].pairs[q])
+                else:
+                    out += strings['ptableempty']
+
+        out += strings['detailfooter']
+
+        return out
 
     def summary(self, strings, title=None):
-        return 'yay'
+        tally = self._tally
+
+        if title == None:
+            title = 'MSL-style four-player group'
+        out = strings['header'].format(title=title)
+
+        players = sorted(self._players, key=lambda a: sum(tally[a][2:]),\
+                         reverse=True)
+
+        for p in players:
+            out += strings['mslgplayer'].format(player=p.name,\
+                                                prob=100*sum(tally[p][2:]))
+
+        out += strings['footer'].format(title=title)
+
+        return out

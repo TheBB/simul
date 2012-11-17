@@ -105,13 +105,16 @@ class Format:
     def random_instance(self, new=False):
         raise NotImplementedError()
 
+    def tally_maker(self):
+        return Tally(len(self._schema_out))
+
     def compute(self):
         if not self.is_ready():
             return
 
         self._tally = dict()
         for p in self._players:
-            self._tally[p] = Tally(len(self._schema_out))
+            self._tally[p] = self.tally_maker()
 
         if self.should_use_mc():
             self.compute_mc()

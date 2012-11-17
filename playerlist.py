@@ -52,7 +52,7 @@ def get_player(i, finder=None):
             choice = simul.better_input('Accept? (y/n) ', swipe=True)
             if choice.lower() == 'y':
                 result = results[0]
-    elif tlpd != None:
+    elif finder != None:
         if results == []:
             print('No matches for \'' + name + '\' in database.')
         elif results == None:

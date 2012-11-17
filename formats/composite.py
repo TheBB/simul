@@ -8,10 +8,32 @@ class Composite(Format):
         self.setup()
 
     def is_fixed(self):
-        raise NotImplementedError()
+        if type(self._matches) == list:
+            for m in self._matches:
+                if not m.is_fixed():
+                    return False
+            return True
+
+        elif type(self._matches) == dict:
+            for l in self._matches.values():
+                for m in l:
+                    if not m.is_fixed():
+                        return False
+            return True
 
     def is_modified(self):
-        raise NotImplementedError()
+        if type(self._matches) == list:
+            for m in self._matches:
+                if m.is_modified():
+                    return True
+            return False
+
+        elif type(self._matches) == dict:
+            for l in self._matches.values():
+                for m in l:
+                    if m.is_modified():
+                        return True
+            return False
 
     def clear(self):
         raise NotImplementedError()
@@ -45,3 +67,6 @@ class Composite(Format):
 
     def get_match(self, key):
         raise NotImplementedError()
+
+    def get_matches(self):
+        return self._matches

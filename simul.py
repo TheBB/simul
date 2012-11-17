@@ -69,14 +69,14 @@ def print_matches(list, pre='Modified matches', post='none'):
     print(pre + ':', end='')
     found = False
     for match in list:
-        if match.modified_result:
+        if match.is_modified():
             if found:
                 print(',', end='')
             found = True
-            print(' ' + match.player_a.name + ' ' +\
-                  str(match.result[0]) + '-' +\
-                  str(match.result[1]) + ' ' +\
-                  match.player_b.name, end='')
+            print(' ' + match.get_player(0).name + ' ' +\
+                  str(match._result[0]) + '-' +\
+                  str(match._result[1]) + ' ' +\
+                  match.get_player(1).name, end='')
     if found:
         print('')
     else:
@@ -260,6 +260,10 @@ if __name__ == '__main__':
                 obj.compute()
 
             elif s[0] == 'out' or s[0] == 'detail':
+                if not obj.is_updated():
+                    print('Changes have been made - run \'compute\' to update')
+                    continue
+
                 #if len(s) > 1:
                     #strs = output.get_strings({'type': obj.type.lower(), 'format': s[1]})
                 #else:
@@ -319,30 +323,16 @@ if __name__ == '__main__':
                     print(str(e))
 
             elif s[0] == 'list':
-                pass
-                #if obj.type in ['rrgroup', 'mslgroup']:
-                    #print_matches(obj.get_match_list())
+                if type(obj) in [match.Match]:
+                    matches = [obj]
+                else:
+                    matches = obj.get_matches()
 
-                #elif obj.type in ['debracket']:
-                    #for i in range(0,len(obj.winners)):
-                        #print_matches(obj.winners[i], 'WB' + str(i+1))
-                    #for i in range(0,len(obj.losers)):
-                        #print_matches(obj.losers[i], 'LB' + str(i+1))
-                    #print_matches([obj.final1], pre='First final', post='unmodified')
-                    #print_matches([obj.final2], pre='Second final', post='unmodified')
-
-                #elif obj.type in ['sebracket']:
-                    #for i in range(0,len(obj.bracket)):
-                        #print_matches(obj.bracket[i], 'R' + str(i+1))
-
-                #elif obj.type in ['match']:
-                    #if obj.fixed_result or obj.modified_result:
-                        #if obj.fixed_result:
-                            #print('Result fixed: ', end='')
-                        #elif obj.modified_result:
-                            #print('Result modified: ', end='')
-                        #print(obj.player_a.name + ' ' + str(obj.result[0]) + '-' +\
-                              #str(obj.result[1]) + ' ' + obj.player_b.name)
+                if type(matches) == list:
+                    print_matches(matches)
+                elif type(matches) == dict:
+                    for key in matches.keys():
+                        print_matches(matches[key], pre=key)
 
             elif s[0] == 'change':
                 pass
