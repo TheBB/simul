@@ -68,16 +68,16 @@ class MSLGroup(Composite):
         for (if0, if1) in itertools.product(self._first[0].instances(),\
                                             self._first[1].instances()):
             base_f = if0[0] * if1[0]
-            self._first[0].broadcast_instance(if0)
-            self._first[1].broadcast_instance(if1)
+            if0[2].broadcast_instance(if0)
+            if1[2].broadcast_instance(if1)
             for m in self._second:
                 m.compute()
 
             for (is0, is1) in itertools.product(self._second[0].instances(),\
                                                 self._second[1].instances()):
                 base_s = base_f * is0[0] * is1[0]
-                self._second[0].broadcast_instance(is0)
-                self._second[1].broadcast_instance(is1)
+                is0[2].broadcast_instance(is0)
+                is1[2].broadcast_instance(is0)
                 self._final.compute()
 
                 for ifin in self._final.instances():

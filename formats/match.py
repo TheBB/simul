@@ -60,7 +60,7 @@ class Match(Format):
             if self.is_fixed():
                 winner = self._players[0] if num_a > num_b else self._players[1]
                 loser = self._players[1] if num_a > num_b else self._players[0]
-                self.broadcast_instance((0, [loser, winner]))
+                self.broadcast_instance((0, [loser, winner], self))
 
         return True
 
@@ -71,6 +71,9 @@ class Match(Format):
         self.notify()
 
     def broadcast_instance(self, instance):
+        if instance[2] != self:
+            raise Exception('Mismatched instance broadcast')
+
         for (target, slot) in self._winner_links:
             target.set_player(slot, instance[1][1])
         for (target, slot) in self._loser_links:
@@ -81,13 +84,13 @@ class Match(Format):
             (ra, rb) = self._result
             winner = self._players[0] if ra > rb else self._players[1]
             loser = self._players[1] if ra > rb else self._players[0]
-            yield (1, [loser, winner])
+            yield (1, [loser, winner], self)
         else:
             for i in range(0,len(self._players)):
                 winner = self._players[i]
                 loser = self._players[1-i]
                 tally = self._tally[winner]
-                yield (tally[1], [loser, winner])
+                yield (tally[1], [loser, winner], self)
 
     def random_instance(self, new=False):
         if not self.is_updated():

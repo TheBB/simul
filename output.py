@@ -83,22 +83,24 @@ def get_strings(args):
     # Probability table
     if args['format'] == 'term':
         strings['detailheader'] = ''
-        strings['ptabletitle'] = '{title}\n\n'
-        strings['ptableheader'] = ' '*15
+        strings['ptabletitle'] = '{title}\n'
+        strings['ptableheader'] = '\n' + ' '*15
         strings['ptableheading'] = '{heading: >9}'
         strings['ptablename'] = '{player:>14}:'
         strings['ptableentry'] = '{prob: >8.2f}%'
         strings['ptableempty'] = '         '
+        strings['ptabletextnum'] = '  {text} ({prob:.2f}%)'
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = ''
     elif args['format'] == 'tls' or args['format'] == 'tl':
         strings['detailheader'] = '[code]'
-        strings['ptabletitle'] = '{title}\n\n'
-        strings['ptableheader'] = ' '*15
+        strings['ptabletitle'] = '{title}\n'
+        strings['ptableheader'] = '\n' + ' '*15
         strings['ptableheading'] = '{heading: >9}'
         strings['ptablename'] = '{player:>14}:'
         strings['ptableentry'] = '{prob: >8.2f}%'
         strings['ptableempty'] = '         '
+        strings['ptabletextnum'] = '  {text:>10} ({prob:5.2f}%)'
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = '[/code]'
         if args['format'] == 'tls':
@@ -106,12 +108,13 @@ def get_strings(args):
             strings['detailfooter'] = '[/code][/spoiler]'
     elif args['format'] == 'reddit':
         strings['detailheader'] = ''
-        strings['ptabletitle'] = '{title}\n\n'
-        strings['ptableheader'] = ' '*19
+        strings['ptabletitle'] = '{title}\n'
+        strings['ptableheader'] = '\n' + ' '*19
         strings['ptableheading'] = '{heading: >9}'
         strings['ptablename'] = '    {player:>16}:'
         strings['ptableentry'] = '{prob: >8.2f}%'
         strings['ptableempty'] = '         '
+        strings['ptabletextnum'] = '  {text} ({prob:.2f}%)'
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = ''
 

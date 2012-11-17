@@ -9,6 +9,9 @@ class Tally:
     def __setitem__(self, key, value):
         self.finishes[key] = value
 
+    def __len__(self):
+        return len(self.finishes)
+
     def __iter__(self):
         return iter(self.finishes)
 
