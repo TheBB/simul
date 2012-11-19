@@ -111,6 +111,12 @@ class Format:
     def tally_maker(self):
         return Tally(len(self._schema_out))
 
+    def save_tally(self):
+        self._saved_tally = self._tally
+
+    def get_original_tally(self):
+        return self._saved_tally
+
     def compute(self):
         if not self.is_ready():
             return

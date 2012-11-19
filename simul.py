@@ -15,11 +15,8 @@ import output
 import tlpd
 import glicko
 
-from formats import match, mslgroup, sebracket
-#import sebracket
-#import debracket
+from formats import match, mslgroup, sebracket, debracket
 #import roundrobin
-#import mslgroup
 #import combination
 
 class Completer:
@@ -110,9 +107,9 @@ def sanity_check(args):
             print('Threshold must be at least 1')
             sys.exit(1)
 
-    #if args['rounds'] < 2 and args['type'] == 'debracket':
-        #print('Must have at least two rounds')
-        #sys.exit(1)
+    if args['rounds'] < 2 and args['type'] == 'debracket':
+        print('Must have at least two rounds')
+        sys.exit(1)
 
 if __name__ == '__main__':
 
@@ -132,6 +129,8 @@ if __name__ == '__main__':
                      'ireplay'],\
             default=['mscore', 'sscore', 'imscore', 'isscore', 'ireplay'],\
             help='order of tiebreaks in a round robin group')
+    parser.add_argument('-r', '--rounds', dest='rounds', default=2, type=int,\
+            help='number of rounds in a bracket')
     parser.add_argument('-n', '--num', dest='num', nargs='+', default=[2], type=int,\
             help='number of sets required to win a match')
     parser.add_argument('-p', '--players', dest='players', default=4, type=int,\
@@ -177,25 +176,15 @@ if __name__ == '__main__':
     elif args['type'] == 'match':
         players = playerlist.PlayerList(2, finder)
         obj = match.Match(args['num'][0])
-        obj.set_players(players.players)
-        obj.compute()
     elif args['type'] == 'sebracket':
         players = playerlist.PlayerList(2**len(args['num']), finder)
         obj = sebracket.SEBracket(args['num'])
-        obj.set_players(players.players)
-        obj.compute()
-    #elif args['type'] == 'debracket':
-        #players = playerlist.PlayerList(pow(2,args['rounds']), finder)
-        #obj = debracket.DEBracket(args['num'][0], args['rounds'], players.players)
-        #if args['exact']:
-            #obj.compute_exact()
-        #else:
-            #obj.compute()
+    elif args['type'] == 'debracket':
+        players = playerlist.PlayerList(pow(2,args['rounds']), finder)
+        obj = debracket.DEBracket(args['num'][0], args['rounds'])
     elif args['type'] == 'mslgroup':
         players = playerlist.PlayerList(4, finder)
         obj = mslgroup.MSLGroup(args['num'][0])
-        obj.set_players(players.players)
-        obj.compute()
     #elif args['type'] == 'rrgroup':
         #players = playerlist.PlayerList(args['players'], finder)
         #obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
@@ -209,16 +198,20 @@ if __name__ == '__main__':
         #obj = combination.Combination(players.players)
         #obj.compute()
 
+    if args['load'] != None:
+        obj.set_players(players.players)
+        obj.compute()
+        obj.save_tally()
+
     print(obj.summary(strings, title=args['title']))
 
     if not args['noconsole']:
         supported = {'all': ['save','load','compute','out','exit','change'],\
                      match.Match: ['set','unset','list'],\
                      mslgroup.MSLGroup: ['set','unset','list','detail','mout'],\
-                     sebracket.SEBracket: ['set','unset','list','detail','mout']}
+                     sebracket.SEBracket: ['set','unset','list','detail','mout'],\
+                     debracket.DEBracket: ['set','unset','list','detail','mout']}
                      #'rrgroup': ['set','unset','list'],\
-                     #'sebracket': ['set','unset','list'],\
-                     #'debracket': ['set','unset','list','detail'],\
                      #'combination': ['']}
 
         #words = supported['all'] + obj.words + supported[obj.type] +\
