@@ -141,12 +141,7 @@ class DEBracket(Composite):
             m.compute()
 
         gens = [m.instances() for m in rnd]
-        iter = 1
         for instances in itertools.product(*gens):
-            if master == 0 and r == 0:
-                print('another iter ' + str(iter))
-                iter += 1
-
             prob = base
             for inst in instances:
                 prob *= inst[0]

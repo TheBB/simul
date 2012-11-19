@@ -15,8 +15,7 @@ import output
 import tlpd
 import glicko
 
-from formats import match, mslgroup, sebracket, debracket
-#import roundrobin
+from formats import match, mslgroup, sebracket, debracket, rrgroup
 #import combination
 
 class Completer:
@@ -185,20 +184,16 @@ if __name__ == '__main__':
     elif args['type'] == 'mslgroup':
         players = playerlist.PlayerList(4, finder)
         obj = mslgroup.MSLGroup(args['num'][0])
-    #elif args['type'] == 'rrgroup':
-        #players = playerlist.PlayerList(args['players'], finder)
-        #obj = roundrobin.Group(args['num'][0], args['tie'], players.players,\
-                               #args['threshold'])
-        #if args['exact']:
-            #obj.compute_exact()
-        #else:
-            #obj.compute()
+    elif args['type'] == 'rrgroup':
+        players = playerlist.PlayerList(args['players'], finder)
+        obj = rrgroup.RRGroup(args['players'], args['num'][0], args['tie'],\
+                              args['threshold'])
     #elif args['type'] == 'combination':
         #players = playerlist.PlayerList(32, finder)
         #obj = combination.Combination(players.players)
         #obj.compute()
 
-    if args['load'] != None:
+    if args['load'] == None:
         obj.set_players(players.players)
         obj.compute()
         obj.save_tally()
@@ -210,8 +205,8 @@ if __name__ == '__main__':
                      match.Match: ['set','unset','list'],\
                      mslgroup.MSLGroup: ['set','unset','list','detail','mout'],\
                      sebracket.SEBracket: ['set','unset','list','detail','mout'],\
-                     debracket.DEBracket: ['set','unset','list','detail','mout']}
-                     #'rrgroup': ['set','unset','list'],\
+                     debracket.DEBracket: ['set','unset','list','detail','mout'],\
+                     rrgroup.RRGroup: ['set','unset','list','detail','mout']}
                      #'combination': ['']}
 
         #words = supported['all'] + obj.words + supported[obj.type] +\
