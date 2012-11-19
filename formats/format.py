@@ -30,6 +30,8 @@ class Format:
         self._parents = []
         self._dependencies = []
         self._instance = None
+        self.force_mc = False
+        self.force_ex = False
 
     def add_parent(self, parent):
         self._parents.append(parent)
@@ -126,7 +128,9 @@ class Format:
         for p in self._players:
             self._tally[p] = self.tally_maker()
 
-        if self.should_use_mc():
+        if self.force_ex:
+            self.compute_exact()
+        elif self.should_use_mc() or self.force_mc:
             self.compute_mc()
         else:
             self.compute_exact()

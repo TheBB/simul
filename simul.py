@@ -16,7 +16,6 @@ import tlpd
 import glicko
 
 from formats import match, mslgroup, sebracket, debracket, rrgroup
-#import combination
 
 class Completer:
     def __init__(self, basewords):
@@ -148,8 +147,10 @@ if __name__ == '__main__':
             help='search in SC2Charts database')
     parser.add_argument('-nc', '--no-console', dest='noconsole', action='store_true',\
             help='skip the console')
-    parser.add_argument('--exact', dest='exact', action='store_true',\
+    parser.add_argument('-ex', '--exact', dest='exact', action='store_true',\
             help='force exact computation')
+    parser.add_argument('-mc', '--monte-carlo', dest='mc', action='store_true',\
+            help='force monte carlo computation')
     parser.add_argument('--glicko-update', dest='glicko-update', action='store_true',\
             help='update local glicko database')
 
@@ -188,10 +189,9 @@ if __name__ == '__main__':
         players = playerlist.PlayerList(args['players'], finder)
         obj = rrgroup.RRGroup(args['players'], args['num'][0], args['tie'],\
                               args['threshold'])
-    #elif args['type'] == 'combination':
-        #players = playerlist.PlayerList(32, finder)
-        #obj = combination.Combination(players.players)
-        #obj.compute()
+
+    obj.force_ex = args['exact']
+    obj.force_mc = args['mc']
 
     if args['load'] == None:
         obj.set_players(players.players)
@@ -207,7 +207,6 @@ if __name__ == '__main__':
                      sebracket.SEBracket: ['set','unset','list','detail','mout'],\
                      debracket.DEBracket: ['set','unset','list','detail','mout'],\
                      rrgroup.RRGroup: ['set','unset','list','detail','mout']}
-                     #'combination': ['']}
 
         #words = supported['all'] + obj.words + supported[obj.type] +\
                 #['name','race','elo']
@@ -232,14 +231,12 @@ if __name__ == '__main__':
                 break
 
             elif s[0] == 'compute':
-                #if obj.type not in ['rrgroup', 'debracket']:
-                    #obj.compute()
-                #elif (len(s) > 1 and s[1] == 'ex') or args['exact']:
-                    #obj.compute_exact()
-                #else:
-                    #obj.compute()
-
-                obj.compute()
+                if (len(s) > 1 and s[1] == 'ex'):
+                    obj.compute_exact()
+                elif (len(s) > 1 and s[1] == 'mc'):
+                    obj.compute_mc()
+                else:
+                    obj.compute()
 
             elif s[0] == 'out' or s[0] == 'detail':
                 if not obj.is_updated():
@@ -323,43 +320,43 @@ if __name__ == '__main__':
 
             elif s[0] == 'change':
                 pass
-                #if len(s) < 2:
-                    #print('Not enough arguments')
-                    #continue
+                if len(s) < 2:
+                    print('Not enough arguments')
+                    continue
 
-                #player = obj.get_player(s[-1])
-                #if player == None:
-                    #print('No such player \'' + s[-1] + '\'')
+                player = obj.get_player(s[-1])
+                if player == None:
+                    print('No such player \'' + s[-1] + '\'')
 
-                #recompute = False
+                recompute = False
 
-                #if len(s) < 3 or s[1] == 'name':
-                    #player.name = better_input('Name: ')
-                    #completer.add_words([p.name for p in obj.get_players()])
+                if len(s) < 3 or s[1] == 'name':
+                    player.name = better_input('Name: ')
+                    completer.add_words([p.name for p in obj.get_players()])
 
-                #if len(s) < 3 or s[1] == 'race':
-                    #race = ''
-                    #while race not in ['P', 'Z', 'T']:
-                        #race = better_input('Race: ', swipe=True).upper()
-                    #player.race = race
-                    #recompute = True
+                if len(s) < 3 or s[1] == 'race':
+                    race = ''
+                    while race not in ['P', 'Z', 'T']:
+                        race = better_input('Race: ', swipe=True).upper()
+                    player.race = race
+                    recompute = True
 
-                #if len(s) < 3 or s[1] == 'elo':
-                    #elo = playerlist.get_elo()
-                    #if elo == False:
-                        #player.elo = 0
-                        #player.elo_race['T'] = 0
-                        #player.elo_race['Z'] = 0
-                        #player.elo_race['P'] = 0
-                    #else:
-                        #player.elo = elo
-                        #player.elo_race['T'] = playerlist.get_elo('vT')
-                        #player.elo_race['Z'] = playerlist.get_elo('vZ')
-                        #player.elo_race['P'] = playerlist.get_elo('vP')
-                    #recompute = True
+                if len(s) < 3 or s[1] == 'elo':
+                    elo = playerlist.get_elo()
+                    if elo == False:
+                        player.elo = 0
+                        player.elo_race['T'] = 0
+                        player.elo_race['Z'] = 0
+                        player.elo_race['P'] = 0
+                    else:
+                        player.elo = elo
+                        player.elo_race['T'] = playerlist.get_elo('vT')
+                        player.elo_race['Z'] = playerlist.get_elo('vZ')
+                        player.elo_race['P'] = playerlist.get_elo('vP')
+                    recompute = True
 
-                #if recompute:
-                    #obj.compute()
+                if recompute:
+                    obj.compute()
 
     if args['save'] != None:
         put_to_file(obj, args['save'])
