@@ -1,7 +1,60 @@
 import itertools
+from operator import attrgetter
 
 from formats.composite import Composite
 from formats.match import Match
+from formats.format import Tally as ParentTally
+
+def get_ending(s):
+    if (s[-1] == '1') and (s[0] != '1' or len(s) == 1):
+        return 'st'
+    elif (s[-1] == '2') and (s[0] != '1' or len(s) == 1):
+        return 'nd'
+    elif (s[-1] == '3') and (s[0] != '1' or len(s) == 1):
+        return 'rd'
+    else:
+        return 'th'
+
+class Tally(ParentTally):
+
+    def __init__(self, nplayers, num):
+        ParentTally.__init__(self, nplayers)
+        self._nplayers = nplayers
+        self._num = num
+
+        self.mwins = [0] * nplayers
+        self.sscore = [0] * (2*(nplayers-1)*num + 1)
+        self.swins = [0] * ((nplayers-1) * num + 1)
+
+    def get_sscore(self, key):
+        return self.sscore[key + (self._nplayers - 1) * self._num]
+
+    def add_sscore(self, key, value):
+        self.sscore[key + (self._nplayers - 1) * self._num] += value
+
+    def exp_mscore(self):
+        exp = 0
+        for i in range(0,len(self.mwins)):
+            exp += i * self.mwins[i]
+
+        return (exp, self._nplayers-1-exp)
+
+    def exp_sscore(self):
+        scr = 0
+        for i in range(0,len(self.sscore)):
+            scr += (i-(self._nplayers-1)*self._num) * self.sscore[i]
+        
+        wins = 0
+        for i in range(0,len(self.swins)):
+            wins += i * self.swins[i]
+
+        return (wins, wins - scr)
+
+    #def scale(self, scale):
+        #ParentTally.scale(self, scale)
+        #self.mwins = [f/scale for f in self.mwins]
+        #self.sscore = [f/scale for f in self.sscore]
+        #self.swins = [f/scale for f in self.swins]
 
 class RRGroup(Composite):
 
@@ -42,9 +95,12 @@ class RRGroup(Composite):
         if len(key) < 2:
             raise Exception(ex)
 
-        fits = lambda m: (m.player_a == key[0] and m.player_b == key[1]) or\
-                         (m.player_b == key[0] and m.player_a == key[1])
-        gen = (player for player in self._player if fits(player))
+        fits_a = lambda m: (m.get_player(0).name == key[0] and\
+                            m.get_player(1).name == key[1])
+        fits_b = lambda m: (m.get_player(1).name == key[0] and\
+                            m.get_player(0).name == key[1])
+        fits = lambda m: fits_a(m) or fits_b(m)
+        gen = (m for m in self._matches if fits(m))
 
         try:
             return next(gen)
@@ -52,13 +108,16 @@ class RRGroup(Composite):
             raise Exception(ex)
     
     def should_use_mc(self):
-        return false
+        return False
+
+    def tally_maker(self):
+        return Tally(len(self._schema_out), self._num)
 
     def fill(self):
         for i in range(0,len(self._players)):
-            if players[i].flag == -1:
-                players[i].flag = 1 << i
-            players[i].num = i
+            if self._players[i].flag == -1:
+                self._players[i].flag = 1 << i
+            self._players[i].num = i
 
         m = 0
         for pair in itertools.combinations(self._players, 2):
@@ -69,26 +128,46 @@ class RRGroup(Composite):
         for m in self._matches:
             m.compute()
 
-        gens = [m.instances_detail() for m in self._matches]
+        gens = [m.instances_detail() for m in self._matches]
+        total = 0
         for instances in itertools.product(*gens):
-            prob = 1
+            base = 1
             for inst in instances:
-                prob *= inst[0]
+                base *= inst[0]
 
-            self.compute_table(instances, prob)
+            table = self.compute_table(instances, base)
+            if table != False:
+                for i in range(0,len(table)):
+                    tally = self._tally[table[i]]
+                    for (shift, prob) in table[i].temp_spread:
+                        tally[len(table)-i-1-shift] += prob * base
+                total += base
+
+            for p in self._players:
+                self._tally[p].mwins[p.temp_mscore] += base
+                self._tally[p].add_sscore(p.temp_sscore, base)
+                self._tally[p].swins[p.temp_swins] += base
+
+        for t in self._tally.values():
+            t.scale(total)
 
     def compute_table(self, instances, prob=1):
+        for p in self._players:
+            p.temp_mscore = 0
+            p.temp_sscore = 0
+            p.temp_swins = 0
+            p.temp_spread = [(0,1)]
+
         for inst in instances:
             inst[3].temp_mscore += 1
-            inst[4].temp_mscore -= 1
-            inst[3].temp_sscore += inst[1] - inst[2]
-            inst[4].temp_sscore += inst[2] - inst[1]
-            inst[3].temp_swins += inst[1]
-            inst[4].temp_swins += inst[2]
+            inst[3].temp_sscore += inst[5] - inst[6]
+            inst[4].temp_sscore += inst[6] - inst[5]
+            inst[3].temp_swins += inst[5]
+            inst[4].temp_swins += inst[6]
 
-        table = self.break_ties(list(self._players), self._tie, instances)
+        return self.break_ties(list(self._players), self._tie, instances)
 
-    def break_ties(self, table, tie, instances)
+    def break_ties(self, table, tie, instances):
         if tie[0] == 'imscore' or tie[0] == 'isscore' or tie[0] == 'iswins':
             for p in table:
                 p.temp_imscore = 0
@@ -100,11 +179,10 @@ class RRGroup(Composite):
                 id = self.players_to_id(comb[0], comb[1])
                 inst = instances[id]
                 inst[3].temp_imscore += 1
-                inst[4].temp_imscore -= 1
-                inst[3].temp_isscore += inst[1] - inst[2]
-                inst[4].temp_isscore += inst[2] - inst[1]
-                inst[3].temp_iswins += inst[1]
-                inst[4].temp_iswins += inst[2]
+                inst[3].temp_isscore += inst[5] - inst[6]
+                inst[4].temp_isscore += inst[6] - inst[5]
+                inst[3].temp_iswins += inst[5]
+                inst[4].temp_iswins += inst[6]
 
         if tie[0] == 'mscore' or tie[0] == 'sscore' or tie[0] == 'swins'\
         or tie[0] == 'imscore' or tie[0] == 'isscore' or tie[0] == 'iswins':
@@ -116,7 +194,7 @@ class RRGroup(Composite):
             for i in range(1, len(table)):
                 if key(table[i]) != keyval:
                     if i > keyind + 1:
-                        temp = self.break_ties(table[keyind:i], tie)
+                        temp = self.break_ties(table[keyind:i], tie, instances)
                         if temp != False:
                             table[keyind:i] = temp
                         else:
@@ -125,41 +203,134 @@ class RRGroup(Composite):
                     keyind = i
 
             if keyind < len(table) - 1 and keyind > 0:
-                temp = self.break_ties(table[keyind:], tie)
+                temp = self.break_ties(table[keyind:], tie, instances)
                 if temp != False:
                     table[keyind:] = temp
                 else:
                     return False
             elif keyind < len(table) - 1:
-                table = self.break_ties(table, tie[1:])
+                table = self.break_ties(table, tie[1:], instances)
                 if table == False:
                     return False
 
         if tie[0] == 'ireplay':
-            if len(table) == len(self._players):
+            if len(table) == len(self._players) and self._saved_tally == None:
                 return False
 
-            subgroup_id = sum([p.flag for p in table])
+            if len(table) != len(self._players):
+                subgroup_id = sum([p.flag for p in table])
 
-            if not subgroup_id in self._subgroups:
-                newplayers = []
-                for p in table:
-                    newplayers.append(playerlist.Player(copy=p))
-                subgroup = RRGroup(len(table), self._num, self._tie,\
-                                  subgroups=self._subgroups)
-                self._subgroups[subgroup_id] = subgroup
-                subgroup.set_players(newplayers)
-                subgroup.compute()
-            else:
-                subgroup = self._subgroups[subgroup_id]
+                if not subgroup_id in self._subgroups:
+                    newplayers = []
+                    for p in table:
+                        newplayers.append(playerlist.Player(copy=p))
+                    subgroup = RRGroup(len(table), self._num, self._tie,\
+                                      subgroups=self._subgroups)
+                    self._subgroups[subgroup_id] = subgroup
+                    subgroup.set_players(newplayers)
+                    subgroup.compute()
+                else:
+                    subgroup = self._subgroups[subgroup_id]
 
             root = 0
             for p in table:
                 p.temp_spread = []
-                ref = next(filter(lambda q: q.flag == p.flag, subgroup._players))
-                reftally = subgroup.get_tally()[ref]
-                for f in range(0,len(ref)):
-                    p.temp_spread.append((root+f, finishes[f]))
+                if len(table) != len(self._players):
+                    ref = next(filter(lambda q: q.flag == p.flag, subgroup._players))
+                    reftally = subgroup.get_tally()[ref]
+                else:
+                    reftally = self._saved_tally[p]
+                for f in range(0,len(reftally)):
+                    p.temp_spread.append((root+f, reftally[f]))
                 root -= 1
 
         return table
+
+    def detail(self, strings):
+        tally = self._tally
+        nplayers = len(self._schema_out)
+
+        out = strings['detailheader']
+
+        out += strings['ptabletitle'].format(title='Detailed placement probabilities')
+        out += strings['ptableheader']
+        for h in range(len(self._schema_out), 0, -1):
+            heading = str(h)
+            heading += get_ending(heading)
+            out += strings['ptableheading'].format(heading=heading)
+
+        for p in self._players:
+            out += '\n' + strings['ptablename'].format(player=p.name)
+            for i in tally[p]:
+                if i > 1e-10:
+                    out += strings['ptableentry'].format(prob=100*i)
+                else:
+                    out += strings['ptableempty']
+
+        out += strings['ptablebetween']
+
+        out += strings['ptabletitle'].format(title='Match score')
+        out += strings['ptableheader']
+        for h in range(0, nplayers):
+            out += strings['ptableheading'].format(heading=str(h) + '-' +\
+                                                  str(nplayers-h-1))
+
+        for p in self._players:
+            out += '\n' + strings['ptablename'].format(player=p.name)
+            for i in tally[p].mwins:
+                if i > 1e-10:
+                    out += strings['ptableentry'].format(prob=100*i)
+                else:
+                    out += strings['ptableempty']
+
+        out += strings['ptablebetween']
+
+        out += strings['ptabletitle'].format(title='Set score')
+        out += strings['ptableheader']
+        for h in range(-(nplayers-1)*self._num, (nplayers-1)*self._num+1):
+            out += strings['ptableheading'].format(heading=str(h))
+
+        for p in self._players:
+            out += '\n' + strings['ptablename'].format(player=p.name)
+            for i in tally[p].sscore:
+                if i > 1e-10:
+                    out += strings['ptableentry'].format(prob=100*i)
+                else:
+                    out += strings['ptableempty']
+
+        out += strings['detailfooter']
+
+        return out
+
+    def summary(self, strings, title=None):
+        if title == None:
+            title = str(len(self._players)) + '-player round robin'
+        out = strings['header'].format(title=title)
+
+        nm = len(self._schema_out) - 1
+        players = sorted(self._players, key=lambda p:\
+                         sum(self._tally[p][-self._threshold:])*100, reverse=True)
+
+        for p in players:
+            t = self._tally[p]
+            out += strings['gplayer'].format(player=p.name)
+
+            (mw, ml) = t.exp_mscore()
+            (sw, sl) = t.exp_sscore()
+            out += strings['gpexpscore'].format(mw=mw, ml=ml, sw=sw, sl=sl)
+
+            if self._threshold == 1:
+                out += strings['gpprobwin'].format(prob=t.finishes[-1]*100)
+            else:
+                out += strings['gpprobthr'].format(prob=sum(\
+                        t.finishes[-self._threshold:])*100,\
+                        thr=self._threshold)
+
+            place = str(t.finishes.index(max(t.finishes)) + 1)
+            place += get_ending(place)
+            out += strings['gpmlplace'].format(place=place,\
+                    prob=max(t.finishes)*100)
+
+        out += strings['footer'].format(title=title)
+
+        return out

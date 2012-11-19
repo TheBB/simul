@@ -133,7 +133,8 @@ class Match(Format):
         if self.is_fixed():
             winner = self._players[0] if start_a > start_b else self._players[1]
             loser = self._players[1] if start_a > start_b else self._players[0]
-            self._outcomes = [(start_a, start_b, 1, winner)]
+            self._outcomes = [(1, start_a, start_b, winner, loser,\
+                              max(start_a, start_b), min(start_a, start_b))]
             self._tally[winner][1] = 1
             self._tally[loser][0] = 1
             return
@@ -147,14 +148,14 @@ class Match(Format):
         for i in range(0, num - start_b):
             base = binomial(num-start_a+i-1,i) * pa**(num-start_a) * pb**i
             self._outcomes.append((base, num, start_b+i, self._players[0],\
-                                  self._players[1]))
+                                  self._players[1], num, start_b+i))
             self._tally[self._players[0]][1] += base
             self._tally[self._players[1]][0] += base
 
         for i in range(0, num - start_a):
             base = binomial(num-start_b+i-1,i) * pb**(num-start_b) * pa**i
             self._outcomes.append((base, start_a+i, num, self._players[1],\
-                                   self._players[0]))
+                                   self._players[0], num, start_a+i))
             self._tally[self._players[1]][1] += base
             self._tally[self._players[0]][0] += base
 

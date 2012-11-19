@@ -26,6 +26,7 @@ class Format:
         self._players = [None] * self.num_players()
         self._updated = False
         self._tally = None
+        self._saved_tally = None
         self._parents = []
         self._dependencies = []
         self._instance = None

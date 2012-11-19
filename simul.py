@@ -279,7 +279,7 @@ if __name__ == '__main__':
                 m = False
                 try:
                     if type(obj) not in [match.Match] and len(s) > 1:
-                        m = obj.get_match(s[1])
+                        m = obj.get_match(' '.join(s[1:]))
                     elif type(obj) in [match.Match]:
                         m = obj
 
