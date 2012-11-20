@@ -32,6 +32,7 @@ class Format:
         self._instance = None
         self.force_mc = False
         self.force_ex = False
+        self.image = None
 
     def add_parent(self, parent):
         self._parents.append(parent)

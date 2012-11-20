@@ -241,7 +241,7 @@ if __name__ == '__main__':
                     obj.compute()
 
             elif s[0] == 'image':
-                imager.make_match_image(obj)
+                obj.image = imager.imgur_upload(imager.make_match_image(obj))
 
             elif s[0] == 'out' or s[0] == 'detail':
                 if not obj.is_updated():

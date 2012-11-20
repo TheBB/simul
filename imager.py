@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 
 import subprocess
+from urllib.request import urlopen, Request
+from urllib.parse import urlencode
+import base64
+import json
 
 class Struct:
     pass
@@ -96,14 +100,24 @@ def make_match_image(m):
         im.add_rectangle(prev, 20, next, 30, (red,0,blue), (0,0,0))
         prev = next
 
-    im.make('match')
+    return im.make('match')
+
+def imgur_upload(fname):
+    pic = open(fname, 'rb')
+    s = base64.b64encode(pic.read())
+    pic.close()
+
+    url = 'http://api.imgur.com/2/upload.json'
+    params = dict()
+    params['key'] = '1823d9d2c867036ca98771dd21bb8eaa'
+    params['image'] = s
+    data = urlencode(params).encode('ascii')
+    req = Request(url, data)
+    response = urlopen(req)
+
+    response = response.read().decode()
+    response = json.loads(response)
+    return response['upload']['links']['original']
 
 if __name__ == '__main__':
-    im = Image(700,35)
-    im.add_text('MarineKing', 5, 5, True)
-    im.add_text('Ryung', 695, 5, False)
-    im.add_rectangle(5, 20, 150, 30, (255,0,0), (0,0,0))
-    im.add_rectangle(150, 20, 300, 30, (180,0,90), (0,0,0))
-    im.add_rectangle(300, 20, 450, 30, (90,0,180), (0,0,0))
-    im.add_rectangle(450, 20, 695, 30, (0,0,255), (0,0,0))
-    im.make('test')
+    imgur_upload('imgur/lee_snip.png')

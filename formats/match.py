@@ -199,6 +199,9 @@ class Match(Format):
                             pb=self._players[1].name, na=ml_outcome[1],\
                             nb=ml_outcome[2], prob=100*ml_outcome[0])
 
+        if self.image != None:
+            out += strings['mimage'].format(url=self.image)
+
         out += strings['footer'].format(title=title)
 
         return out

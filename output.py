@@ -35,6 +35,9 @@ def get_strings(format, type):
         strings['outcomei'] = '\n[indent]{winscore}-{losescore}: {prob:.2f}%'
     elif format == 'reddit':
         strings['outcomei'] = '\n* {winscore}-{losescore}: {prob:.2f}%'
+    strings['mimage'] = ''
+    if format == 'tl' or format == 'tls':
+        strings['mimage'] = '\n\n[center][img]{url}[/img][/center]'
 
     # Bracket-specific
     strings['mlwinnerlist'] = '\n\nMost likely winners:'
