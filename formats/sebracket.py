@@ -4,6 +4,8 @@ from formats.composite import Composite
 from formats.match import Match
 from formats.format import Tally as ParentTally
 
+import progressbar
+
 class Tally(ParentTally):
 
     def __init__(self, rounds, players):
@@ -61,7 +63,7 @@ class SEBracket(Composite):
             raise Exception(ex)
 
     def should_use_mc(self):
-        return False
+        return len(self._num) > 4
 
     def fill(self):
         for i in range(0,len(self._players)):
@@ -69,6 +71,38 @@ class SEBracket(Composite):
 
     def tally_maker(self):
         return Tally(len(self._schema_out), self._players)
+
+    def compute_mc(self, N=50000):
+        progress = progressbar.ProgressBar(N, exp='Monte Carlo')
+
+        for m in self._bracket[0]:
+            m.compute()
+
+        for i in range(0,N):
+            self.compute_mc_round(0, 1/N)
+
+            if i % 500 == 0:
+                progress.update_time(i)
+                print(progress.dyn_str())
+
+        progress.update_time(N)
+        print(progress.dyn_str())
+        print('')
+
+    def compute_mc_round(self, r, base=1):
+        num = len(self._bracket[r])
+
+        if r > 0:
+            for m in self._bracket[r]:
+                m.compute()
+
+        instances = [m.random_instance(new=True) for m in self._bracket[r]]
+        self.compute_instances(instances, r, base)
+
+        if num > 1:
+            self.compute_mc_round(r+1, base)
+        else:
+            self._tally[instances[0][1][1]][r+1] += base
 
     def compute_exact(self):
         self.compute_round(0)
@@ -84,15 +118,19 @@ class SEBracket(Composite):
             prob = base
             for inst in instances:
                 prob *= inst[0]
-                inst[2].broadcast_instance(inst)
-            for inst in instances:
-                self._tally[inst[1][0]][r] += prob
-                self._tally[inst[1][0]].eliminators[inst[1][1]] += prob
+
+            self.compute_instances(instances, r, prob)
 
             if num > 1:
                 self.compute_round(r+1, prob)
             else:
                 self._tally[instances[0][1][1]][r+1] += prob
+
+    def compute_instances(self, instances, r, base):
+        for inst in instances:
+            inst[2].broadcast_instance(inst)
+            self._tally[inst[1][0]][r] += base
+            self._tally[inst[1][0]].eliminators[inst[1][1]] += base
 
     def detail(self, strings):
         tally = self._tally
