@@ -73,11 +73,10 @@ class SEBracket(Composite):
         return Tally(len(self._schema_out), self._players)
 
     def compute_mc(self, N=50000):
-        progress = progressbar.ProgressBar(N, exp='Monte Carlo')
-
         for m in self._bracket[0]:
             m.compute()
 
+        progress = progressbar.ProgressBar(N, exp='Monte Carlo')
         for i in range(0,N):
             self.compute_mc_round(0, 1/N)
 

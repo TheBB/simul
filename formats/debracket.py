@@ -4,6 +4,8 @@ from formats.composite import Composite
 from formats.match import Match
 from formats.format import Tally as ParentTally
 
+import progressbar
+
 class Tally(ParentTally):
 
     def __init__(self, rounds, players):
@@ -111,7 +113,7 @@ class DEBracket(Composite):
                 raise Exception(ex)
 
     def should_use_mc(self):
-        return False
+        return self._rounds > 3
 
     def fill(self):
         for i in range(0,len(self._players)):
@@ -120,10 +122,30 @@ class DEBracket(Composite):
     def tally_maker(self):
         return Tally(len(self._schema_out), self._players)
 
+    def compute_mc(self, N=50000):
+        for m in self._winners[0]:
+            m.compute()
+
+        progress = progressbar.ProgressBar(N, exp='Monte Carlo')
+
+        for i in range(0,N):
+            self.compute_mc_round(0, base=1/N)
+
+            if i % 500 == 0:
+                progress.update_time(i)
+                print(progress.dyn_str())
+
+        progress.update_time(N)
+        print(progress.dyn_str())
+        print('')
+
     def compute_exact(self):
+        for m in self._winners[0]:
+            m.compute()
+
         self.compute_round(0)
 
-    def compute_round(self, r, master=0, base=1):
+    def fetch_round(self, r, master):
         if master == 0:
             mas = self._winners
         elif master == 1:
@@ -135,10 +157,58 @@ class DEBracket(Composite):
             rnd = mas[r]
         else:
             rnd = mas
+
+        if r > 0 or master > 0:
+            for m in rnd:
+                m.compute()
+
+        return (mas, rnd)
+
+    def compute_instances(self, instances, master, rnd, r, prob):
+        if master == 0:
+            for inst in instances:
+                self._tally[inst[1][0]].bumpers[inst[1][1]] += prob
+        elif master == 1:
+            for inst in instances:
+                self._tally[inst[1][0]][r] += prob
+                self._tally[inst[1][0]].eliminators[inst[1][1]] += prob
+        elif master == 2:
+            (i1, i2) = instances
+            wb_guy = rnd[0].get_player(0)
+            lb_guy = rnd[0].get_player(1)
+            if i1[1][1] == wb_guy or i2[1][1] == wb_guy:
+                winner = wb_guy
+                loser = lb_guy
+                self._tally[loser].eliminators[winner] += prob
+                if i1[1][1] != wb_guy:
+                    self._tally[winner].bumpers[loser] += prob
+            else:
+                winner = lb_guy
+                loser = wb_guy
+                self._tally[loser].bumpers[winner] += prob
+                self._tally[loser].eliminators[winner] += prob
+
+            self._tally[winner][-1] += prob
+            self._tally[loser][-2] += prob
+
+    def compute_mc_round(self, r, master=0, base=1):
+        (mas, rnd) = self.fetch_round(r, master)
         num = len(rnd)
 
-        for m in rnd:
-            m.compute()
+        instances = [m.random_instance(new=True) for m in rnd]
+        for inst in instances:
+            inst[2].broadcast_instance(inst)
+
+        self.compute_instances(instances, master, rnd, r, base)
+
+        if r < len(mas) - 1 and master < 2:
+            self.compute_mc_round(r+1, master, base)
+        elif r == len(mas) - 1 and master < 2:
+            self.compute_mc_round(0, master+1, base)
+
+    def compute_round(self, r, master=0, base=1):
+        (mas, rnd) = self.fetch_round(r, master)
+        num = len(rnd)
 
         gens = [m.instances() for m in rnd]
         for instances in itertools.product(*gens):
@@ -147,31 +217,7 @@ class DEBracket(Composite):
                 prob *= inst[0]
                 inst[2].broadcast_instance(inst)
 
-            if master == 0:
-                for inst in instances:
-                    self._tally[inst[1][0]].bumpers[inst[1][1]] += prob
-            elif master == 1:
-                for inst in instances:
-                    self._tally[inst[1][0]][r] += prob
-                    self._tally[inst[1][0]].eliminators[inst[1][1]] += prob
-            elif master == 2:
-                (i1, i2) = instances
-                wb_guy = rnd[0].get_player(0)
-                lb_guy = rnd[0].get_player(1)
-                if i1[1][1] == wb_guy or i2[1][1] == wb_guy:
-                    winner = wb_guy
-                    loser = lb_guy
-                    self._tally[loser].eliminators[winner] += prob
-                    if i1[1][1] != wb_guy:
-                        self._tally[winner].bumpers[loser] += prob
-                else:
-                    winner = lb_guy
-                    loser = wb_guy
-                    self._tally[loser].bumpers[winner] += prob
-                    self._tally[loser].eliminators[winner] += prob
-
-                self._tally[winner][-1] += prob
-                self._tally[loser][-2] += prob
+            self.compute_instances(instances, master, rnd, r, prob)
 
             if r < len(mas) - 1 and master < 2:
                 self.compute_round(r+1, master, prob)
