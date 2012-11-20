@@ -52,7 +52,7 @@ def get_player(i, finder=None):
             choice = simul.better_input('Accept? (y/n) ', swipe=True)
             if choice.lower() == 'y':
                 result = results[0]
-    elif tlpd != None:
+    elif finder != None:
         if results == []:
             print('No matches for \'' + name + '\' in database.')
         elif results == None:
@@ -110,6 +110,9 @@ class Player:
         my_q = pow(10, float(my_elo)/400)
         op_q = pow(10, float(op_elo)/400)
         return my_q/(my_q + op_q)
+
+    def copy(self):
+        return Player(copy=self)
 
 class PlayerList:
 
