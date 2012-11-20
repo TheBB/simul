@@ -111,6 +111,8 @@ def sanity_check(args):
 
 if __name__ == '__main__':
 
+    sys.path.append(os.getcwd())
+
     parser = argparse.ArgumentParser(description='Emulate a SC2 tournament'\
             + ' format.')
     parser.add_argument('-f', '--format', dest='format', default='term',\
@@ -161,8 +163,6 @@ if __name__ == '__main__':
         glicko.update()
         sys.exit(0)
 
-    strings = output.get_strings(args)
-
     finder = None
     if args['tlpd'] != 'none':
         iface = tlpd.Tlpd(args['tlpd'], args['tabulator'])
@@ -193,6 +193,8 @@ if __name__ == '__main__':
     obj.force_ex = args['exact']
     obj.force_mc = args['mc']
 
+    strings = output.get_strings(args['format'], type(obj))
+
     if args['load'] == None:
         obj.set_players(players.players)
         obj.compute()
@@ -208,8 +210,6 @@ if __name__ == '__main__':
                      debracket.DEBracket: ['set','unset','list','detail','mout'],\
                      rrgroup.RRGroup: ['set','unset','list','detail','mout']}
 
-        #words = supported['all'] + obj.words + supported[obj.type] +\
-                #['name','race','elo']
         words = supported['all'] + supported[type(obj)] + ['name','race','elo']
         completer = Completer(words)
         completer.add_words([p.name for p in obj.get_players()])
@@ -231,10 +231,11 @@ if __name__ == '__main__':
                 break
 
             elif s[0] == 'compute':
-                if (len(s) > 1 and s[1] == 'ex'):
-                    obj.compute_exact()
-                elif (len(s) > 1 and s[1] == 'mc'):
-                    obj.compute_mc()
+                if len(s) > 1:
+                    try:
+                        obj.compute(N=int(s[1]))
+                    except:
+                        obj.compute()
                 else:
                     obj.compute()
 
@@ -243,14 +244,15 @@ if __name__ == '__main__':
                     print('Changes have been made - run \'compute\' to update')
                     continue
 
-                #if len(s) > 1:
-                    #strs = output.get_strings({'type': obj.type.lower(), 'format': s[1]})
-                #else:
-                    #strs = strings
+                if len(s) > 1:
+                    strs = output.get_strings(s[1], type=type(obj))
+                else:
+                    strs = strings
+
                 if s[0] == 'out':
-                    print(obj.summary(strings, title=args['title']))
+                    print(obj.summary(strs, title=args['title']))
                 elif s[0] == 'detail':
-                    print(obj.detail(strings))
+                    print(obj.detail(strs))
 
             elif s[0] == 'save':
                 if len(s) > 1:
@@ -271,6 +273,7 @@ if __name__ == '__main__':
                 
                 if temp != None:
                     obj = temp
+                    strings = output.get_strings(args['format'], type(obj))
 
             elif s[0] == 'set' or s[0] == 'unset' or s[0] == 'mout':
                 m = False
@@ -356,7 +359,7 @@ if __name__ == '__main__':
                     recompute = True
 
                 if recompute:
-                    obj.compute()
+                    obj.notify()
 
     if args['save'] != None:
         put_to_file(obj, args['save'])

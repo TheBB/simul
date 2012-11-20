@@ -61,6 +61,9 @@ class MSLGroup(Composite):
     def tally_maker(self):
         return Tally(len(self._schema_out), self._players)
 
+    def compute_mc(self):
+        self.compute_exact()
+
     def compute_exact(self):
         for m in self._first:
             m.compute()

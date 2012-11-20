@@ -50,7 +50,7 @@ class Composite(Format):
     def random_instance(self, new=False):
         raise NotImplementedError()
 
-    def compute_mc(self, runs=1000):
+    def compute_mc(self, N):
         raise NotImplementedError()
 
     def compute_exact(self):

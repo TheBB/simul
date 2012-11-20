@@ -120,7 +120,7 @@ class Format:
     def get_original_tally(self):
         return self._saved_tally
 
-    def compute(self):
+    def compute(self, N=None):
         if not self.is_ready():
             return
 
@@ -131,7 +131,10 @@ class Format:
         if self.force_ex:
             self.compute_exact()
         elif self.should_use_mc() or self.force_mc:
-            self.compute_mc()
+            if N == None:
+                self.compute_mc()
+            else:
+                self.compute_mc(N)
         else:
             self.compute_exact()
 

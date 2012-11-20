@@ -111,6 +111,9 @@ class Player:
         op_q = pow(10, float(op_elo)/400)
         return my_q/(my_q + op_q)
 
+    def copy(self):
+        return Player(copy=self)
+
 class PlayerList:
 
     def __init__(self, num, finder=None):

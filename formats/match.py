@@ -126,6 +126,9 @@ class Match(Format):
                 self._instance_detail = outcome
                 return self._instance_detail
 
+    def compute_mc(self):
+        self.compute_exact()
+
     def compute_exact(self):
         start_a = self._result[0]
         start_b = self._result[1]

@@ -5,6 +5,8 @@ from formats.composite import Composite
 from formats.match import Match
 from formats.format import Tally as ParentTally
 
+import progressbar
+
 def get_ending(s):
     if (s[-1] == '1') and (s[0] != '1' or len(s) == 1):
         return 'st'
@@ -50,12 +52,6 @@ class Tally(ParentTally):
 
         return (wins, wins - scr)
 
-    #def scale(self, scale):
-        #ParentTally.scale(self, scale)
-        #self.mwins = [f/scale for f in self.mwins]
-        #self.sscore = [f/scale for f in self.sscore]
-        #self.swins = [f/scale for f in self.swins]
-
 class RRGroup(Composite):
 
     def __init__(self, nplayers, num, tie, threshold=1, subgroups=None):
@@ -68,8 +64,10 @@ class RRGroup(Composite):
         Composite.__init__(self, schema_in, schema_out)
 
         if subgroups != None:
+            self._original = False
             self._subgroups = subgroups
         else:
+            self._original = True
             self._subgroups = dict()
 
     def setup(self):
@@ -108,7 +106,8 @@ class RRGroup(Composite):
             raise Exception(ex)
     
     def should_use_mc(self):
-        return False
+        np = len(self._schema_out)
+        return (2*self._num)**(np*(np-1)/2) > 2e5
 
     def tally_maker(self):
         return Tally(len(self._schema_out), self._num)
@@ -124,6 +123,31 @@ class RRGroup(Composite):
             self._matches[m].set_players(list(pair))
             m += 1
 
+    def compute_mc(self, N=50000):
+        for m in self._matches:
+            m.compute()
+
+        total = 0
+        if self._original:
+            progress = progressbar.ProgressBar(N, exp='Monte Carlo')
+
+        for i in range(0,N):
+            instances = [m.random_instance_detail(new=True) for m in self._matches]
+            if self.compute_instances(instances, 1/N):
+                total += 1/N
+
+            if i % 500 == 0 and self._original:
+                progress.update_time(i)
+                print(progress.dyn_str())
+
+        if self._original:
+            progress.update_time(N)
+            print(progress.dyn_str())
+            print('')
+
+        for t in self._tally.values():
+            t.scale(total)
+
     def compute_exact(self):
         for m in self._matches:
             m.compute()
@@ -134,22 +158,29 @@ class RRGroup(Composite):
             base = 1
             for inst in instances:
                 base *= inst[0]
-
-            table = self.compute_table(instances, base)
-            if table != False:
-                for i in range(0,len(table)):
-                    tally = self._tally[table[i]]
-                    for (shift, prob) in table[i].temp_spread:
-                        tally[len(table)-i-1-shift] += prob * base
+            if self.compute_instances(instances, base):
                 total += base
-
-            for p in self._players:
-                self._tally[p].mwins[p.temp_mscore] += base
-                self._tally[p].add_sscore(p.temp_sscore, base)
-                self._tally[p].swins[p.temp_swins] += base
 
         for t in self._tally.values():
             t.scale(total)
+
+    def compute_instances(self, instances, base):
+        table = self.compute_table(instances, base)
+        if table != False:
+            for i in range(0,len(table)):
+                tally = self._tally[table[i]]
+                for (shift, prob) in table[i].temp_spread:
+                    tally[len(table)-i-1-shift] += prob * base
+
+        for p in self._players:
+            self._tally[p].mwins[p.temp_mscore] += base
+            self._tally[p].add_sscore(p.temp_sscore, base)
+            self._tally[p].swins[p.temp_swins] += base
+
+        if table != False:
+            return True
+        else:
+            return False
 
     def compute_table(self, instances, prob=1):
         for p in self._players:
@@ -223,11 +254,13 @@ class RRGroup(Composite):
                 if not subgroup_id in self._subgroups:
                     newplayers = []
                     for p in table:
-                        newplayers.append(playerlist.Player(copy=p))
+                        newplayers.append(p.copy())
                     subgroup = RRGroup(len(table), self._num, self._tie,\
                                       subgroups=self._subgroups)
                     self._subgroups[subgroup_id] = subgroup
                     subgroup.set_players(newplayers)
+                    subgroup.force_ex = self.force_ex
+                    subgroup.force_mc = self.force_mc
                     subgroup.compute()
                 else:
                     subgroup = self._subgroups[subgroup_id]
@@ -326,7 +359,7 @@ class RRGroup(Composite):
                         t.finishes[-self._threshold:])*100,\
                         thr=self._threshold)
 
-            place = str(t.finishes.index(max(t.finishes)) + 1)
+            place = str(len(self._schema_out)-t.finishes.index(max(t.finishes)))
             place += get_ending(place)
             out += strings['gpmlplace'].format(place=place,\
                     prob=max(t.finishes)*100)
