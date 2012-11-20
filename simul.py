@@ -14,6 +14,7 @@ import playerlist
 import output
 import tlpd
 import glicko
+import imager
 
 from formats import match, mslgroup, sebracket, debracket, rrgroup
 
@@ -204,7 +205,7 @@ if __name__ == '__main__':
 
     if not args['noconsole']:
         supported = {'all': ['save','load','compute','out','exit','change'],\
-                     match.Match: ['set','unset','list'],\
+                     match.Match: ['set','unset','list','image'],\
                      mslgroup.MSLGroup: ['set','unset','list','detail','mout'],\
                      sebracket.SEBracket: ['set','unset','list','detail','mout'],\
                      debracket.DEBracket: ['set','unset','list','detail','mout'],\
@@ -238,6 +239,9 @@ if __name__ == '__main__':
                         obj.compute()
                 else:
                     obj.compute()
+
+            elif s[0] == 'image':
+                imager.make_match_image(obj)
 
             elif s[0] == 'out' or s[0] == 'detail':
                 if not obj.is_updated():
