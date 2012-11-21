@@ -24,6 +24,10 @@ def get_player(i, finder=None):
     print('Entering player ' + str(i))
     name = simul.better_input('Name: ')
 
+    if name == '-':
+        print('')
+        return Player('BYE', 'T', -1000, 0, 0, 0)
+
     results = []
     if finder != None:
         results = finder(name)

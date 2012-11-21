@@ -102,6 +102,8 @@ class MSLGroup(Composite):
             out += strings['ptableheading'].format(heading=h)
 
         for p in self._players:
+            if p.name == 'BYE':
+                continue
             out += '\n' + strings['ptablename'].format(player=p.name)
             for i in tally[p]:
                 if i > 1e-10:
@@ -114,10 +116,15 @@ class MSLGroup(Composite):
         out += strings['ptabletitle'].format(title='Probability of each pair advancing')
         out += strings['ptableheader']
         for p in self._players:
-            out += strings['ptableheading'].format(heading=p.name[:7])
+            if p.name != 'BYE':
+                out += strings['ptableheading'].format(heading=p.name[:7])
         for p in self._players:
+            if p.name == 'BYE':
+                continue
             out += '\n' + strings['ptablename'].format(player=p.name)
             for q in self._players:
+                if q.name == 'BYE':
+                    continue
                 if p != q and tally[p].pairs[q] >= 1e-10:
                     out += strings['ptableentry'].format(prob=100*tally[p].pairs[q])
                 else:
@@ -138,9 +145,11 @@ class MSLGroup(Composite):
                          reverse=True)
 
         for p in players:
-            out += strings['mslgplayer'].format(player=p.name,\
-                                                prob=100*sum(tally[p][2:]))
+            if sum(tally[p][2:]) > 1e-10 and p.name != 'BYE':
+                out += strings['mslgplayer'].format(player=p.name,\
+                                                    prob=100*sum(tally[p][2:]))
 
+        out += strings['nomimage']
         out += strings['footer'].format(title=title)
 
         return out

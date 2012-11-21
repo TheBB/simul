@@ -239,6 +239,8 @@ class DEBracket(Composite):
                 out += strings['ptableheading'].format(heading='Win')
 
         for p in self._players:
+            if p.name == 'BYE':
+                continue
             out += '\n' + strings['ptablename'].format(player=p.name)
             for i in tally[p]:
                 if i > 1e-10:
@@ -250,6 +252,8 @@ class DEBracket(Composite):
 
         out += strings['ptabletitle'].format(title='Most likely to be eliminated by...')
         for p in self._players:
+            if p.name == 'BYE':
+                continue
             out += '\n' + strings['ptablename'].format(player=p.name)
             elims = sorted(self._players, key=lambda a: tally[p].eliminators[a],\
                            reverse=True)
@@ -263,6 +267,8 @@ class DEBracket(Composite):
         out += strings['ptabletitle'].format(title='Most likely to be sent to' +\
                                              ' the losers\' bracket by...')
         for p in self._players:
+            if p.name == 'BYE':
+                continue
             out += '\n' + strings['ptablename'].format(player=p.name)
             elims = sorted(self._players, key=lambda a: tally[p].bumpers[a],\
                            reverse=True)
@@ -287,7 +293,7 @@ class DEBracket(Composite):
 
         out += strings['mlwinnerlist']
         for p in players[0:16]:
-            if tally[p][-1] > 1e-10:
+            if tally[p][-1] > 1e-10 and p.name != 'BYE':
                 out += strings['mlwinneri'].format(player=p.name,\
                                                    prob=100*tally[p][-1])
 
@@ -302,6 +308,8 @@ class DEBracket(Composite):
 
         out += strings['exroundslist']
         for p in players:
+            if p.name == 'BYE':
+                continue
             exp = exp_rounds(tally[p])
             rounded = round(exp)
             expl = 'top ' + str(sum(self._schema_out[rounded:]))
@@ -309,6 +317,7 @@ class DEBracket(Composite):
             out += strings['exroundsi'].format(player=p.name, rounds=exp,\
                                                expl=expl)
 
+        out += strings['nomimage']
         out += strings['footer']
 
         return out

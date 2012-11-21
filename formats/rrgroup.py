@@ -293,6 +293,8 @@ class RRGroup(Composite):
             out += strings['ptableheading'].format(heading=heading)
 
         for p in self._players:
+            if p.name == 'BYE':
+                continue
             out += '\n' + strings['ptablename'].format(player=p.name)
             for i in tally[p]:
                 if i > 1e-10:
@@ -309,6 +311,8 @@ class RRGroup(Composite):
                                                   str(nplayers-h-1))
 
         for p in self._players:
+            if p.name == 'BYE':
+                continue
             out += '\n' + strings['ptablename'].format(player=p.name)
             for i in tally[p].mwins:
                 if i > 1e-10:
@@ -324,6 +328,8 @@ class RRGroup(Composite):
             out += strings['ptableheading'].format(heading=str(h))
 
         for p in self._players:
+            if p.name == 'BYE':
+                continue
             out += '\n' + strings['ptablename'].format(player=p.name)
             for i in tally[p].sscore:
                 if i > 1e-10:
@@ -345,6 +351,8 @@ class RRGroup(Composite):
                          sum(self._tally[p][-self._threshold:])*100, reverse=True)
 
         for p in players:
+            if p.name == 'BYE':
+                continue
             t = self._tally[p]
             out += strings['gplayer'].format(player=p.name)
 
@@ -364,6 +372,7 @@ class RRGroup(Composite):
             out += strings['gpmlplace'].format(place=place,\
                     prob=max(t.finishes)*100)
 
+        out += strings['nomimage']
         out += strings['footer'].format(title=title)
 
         return out
