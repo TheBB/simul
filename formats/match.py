@@ -201,6 +201,8 @@ class Match(Format):
 
         if self.image != None:
             out += strings['mimage'].format(url=self.image)
+        else:
+            out += strings['nomimage']
 
         out += strings['footer'].format(title=title)
 

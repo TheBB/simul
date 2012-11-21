@@ -21,6 +21,13 @@ def get_strings(format, type):
     elif format == 'term':
         strings['header'] = '{title}'
 
+    if format == 'tl' or format == 'tls':
+        strings['footer'] =\
+        '\n[small][url=http://www.teamliquid.net/blogs/viewblog.php?id=380850]details[/url], ' +\
+        '[url=http://www.sc2charts.net/en/edb/ranking/players]data source[/url], ' +\
+        '[url=https://github.com/TheBB/simul]code[/url][/small]' +\
+        strings['footer']
+
     # Match-specific
     strings['outcomelist'] = '\n\n{player} wins ({prob:.2f}%):'
     if format == 'reddit':
@@ -38,6 +45,10 @@ def get_strings(format, type):
     strings['mimage'] = ''
     if format == 'tl' or format == 'tls':
         strings['mimage'] = '\n\n[center][img]{url}[/img][/center]'
+        strings['nomimage'] = '\n'
+    else:
+        strings['mimage'] = ''
+        strings['nomimage'] = ''
 
     # Bracket-specific
     strings['mlwinnerlist'] = '\n\nMost likely winners:'
