@@ -156,6 +156,8 @@ if __name__ == '__main__':
             help='force monte carlo computation')
     parser.add_argument('--glicko-update', dest='glicko-update', action='store_true',\
             help='update local glicko database')
+    parser.add_argument('--debug', dest='debug', action='store_true',\
+            help='skip player entry')
 
     args = vars(parser.parse_args())
     sanity_check(args)
@@ -163,6 +165,9 @@ if __name__ == '__main__':
     if args['glicko-update']:
         glicko.update()
         sys.exit(0)
+
+    if args['debug']:
+        playerlist.debug = True
 
     finder = None
     if args['tlpd'] != 'none':
