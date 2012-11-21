@@ -80,7 +80,7 @@ class Image:
         return 'imgur/' + fname + '.png'
 
 def make_match_image(m):
-    clarity = 50
+    clarity = 75
 
     im = Image(700,35)
     im.add_text(m.get_player(0).name, 5, 5, True)
