@@ -17,12 +17,21 @@ class Match(Format):
         self._winner_links = []
         self._loser_links = []
         self._instance_detail = None
+        self._probs = (0, 0)
+        self._partially_updated = False
     
     def is_fixed(self):
         return self._result[0] == self._num or self._result[1] == self._num
 
     def is_modified(self):
         return self._result[0] != 0 or self._result[1] != 0
+
+    def is_partially_updated(self):
+        return self._partially_updated
+
+    def notify(self):
+        Format.notify(self)
+        self._partially_updated = False
 
     def should_use_mc(self):
         return False
@@ -89,11 +98,11 @@ class Match(Format):
             for i in range(0,len(self._players)):
                 winner = self._players[i]
                 loser = self._players[1-i]
-                tally = self._tally[winner]
-                yield (tally[1], [loser, winner], self)
+                prob = self._probs[i]
+                yield (prob, [loser, winner], self)
 
     def random_instance(self, new=False):
-        if not self.is_updated():
+        if not self.is_partially_updated():
             return None
 
         if not new and self._instance != None:
@@ -112,7 +121,7 @@ class Match(Format):
             yield outcome
 
     def random_instance_detail(self, new=False):
-        if not self.is_updated():
+        if not self.is_partially_updated():
             return None
 
         if not new and self._instance_detail != None:
@@ -128,6 +137,24 @@ class Match(Format):
 
     def compute_mc(self):
         self.compute_exact()
+
+    def compute_partial(self):
+        start_a = self._result[0]
+        start_b = self._result[1]
+        num = self._num
+        p0 = 0
+        p1 = 0
+
+        pa = self._players[0].prob_of_winning(self._players[1])
+        pb = 1 - pa
+
+        for i in range(0, num - start_b):
+            p0 += binomial(num-start_a+i-1,i) * pa**(num-start_a) * pb**i
+        for i in range(0, num - start_a):
+            p1 += binomial(num-start_b+i-1,i) * pb**(num-start_b) * pa**i
+
+        self._probs = (p0, p1)
+        self._partially_updated = True
 
     def compute_exact(self):
         start_a = self._result[0]
@@ -161,6 +188,10 @@ class Match(Format):
                                    self._players[0], num, start_a+i))
             self._tally[self._players[1]][1] += base
             self._tally[self._players[0]][0] += base
+
+        self._probs = (self._tally[self._players[0]][1],\
+                       self._tally[self._players[1]][1])
+        self._partially_updated = True
 
     def detail(self, strings):
         raise NotImplementedError()

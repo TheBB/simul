@@ -66,7 +66,7 @@ class MSLGroup(Composite):
 
     def compute_exact(self):
         for m in self._first:
-            m.compute()
+            m.compute_partial()
 
         for (if0, if1) in itertools.product(self._first[0].instances(),\
                                             self._first[1].instances()):
@@ -74,14 +74,14 @@ class MSLGroup(Composite):
             if0[2].broadcast_instance(if0)
             if1[2].broadcast_instance(if1)
             for m in self._second:
-                m.compute()
+                m.compute_partial()
 
             for (is0, is1) in itertools.product(self._second[0].instances(),\
                                                 self._second[1].instances()):
                 base_s = base_f * is0[0] * is1[0]
                 is0[2].broadcast_instance(is0)
                 is1[2].broadcast_instance(is0)
-                self._final.compute()
+                self._final.compute_partial()
 
                 for ifin in self._final.instances():
                     prob = base_s * ifin[0]

@@ -125,6 +125,9 @@ class Format:
         if not self.is_ready():
             return
 
+        if self.is_updated():
+            return
+
         self._tally = dict()
         for p in self._players:
             self._tally[p] = self.tally_maker()

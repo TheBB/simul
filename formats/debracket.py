@@ -124,7 +124,7 @@ class DEBracket(Composite):
 
     def compute_mc(self, N=50000):
         for m in self._winners[0]:
-            m.compute()
+            m.compute_partial()
 
         progress = progressbar.ProgressBar(N, exp='Monte Carlo')
 
@@ -141,7 +141,7 @@ class DEBracket(Composite):
 
     def compute_exact(self):
         for m in self._winners[0]:
-            m.compute()
+            m.compute_partial()
 
         self.compute_round(0)
 
@@ -160,7 +160,7 @@ class DEBracket(Composite):
 
         if r > 0 or master > 0:
             for m in rnd:
-                m.compute()
+                m.compute_partial()
 
         return (mas, rnd)
 

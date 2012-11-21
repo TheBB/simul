@@ -74,7 +74,7 @@ class SEBracket(Composite):
 
     def compute_mc(self, N=50000):
         for m in self._bracket[0]:
-            m.compute()
+            m.compute_partial()
 
         progress = progressbar.ProgressBar(N, exp='Monte Carlo')
         for i in range(0,N):
@@ -93,7 +93,7 @@ class SEBracket(Composite):
 
         if r > 0:
             for m in self._bracket[r]:
-                m.compute()
+                m.compute_partial()
 
         instances = [m.random_instance(new=True) for m in self._bracket[r]]
         self.compute_instances(instances, r, base)
@@ -110,7 +110,7 @@ class SEBracket(Composite):
         num = len(self._bracket[r])
 
         for m in self._bracket[r]:
-            m.compute()
+            m.compute_partial()
 
         gens = [m.instances() for m in self._bracket[r]]
         for instances in itertools.product(*gens):
