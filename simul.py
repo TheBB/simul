@@ -207,7 +207,7 @@ if __name__ == '__main__':
         obj.compute()
         obj.save_tally()
 
-    out = obj.summary(strings, title=args['title']))
+    out = obj.summary(strings, title=args['title'])
     pyperclip.copy(out)
     print(out)
 
