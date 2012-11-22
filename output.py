@@ -35,7 +35,7 @@ def get_strings(format, type):
     strings['mlwinner'] = '\n\nMost likely winner: {player} ({prob:.2f}%)'
     if format == 'reddit':
         strings['mlwinner'] += '  '
-    strings['mloutcome'] = '\nMost likely outcome: {pa} {na}-{nb} {pb} ({prob:.2f}%)'
+    strings['mloutcome'] = '\nPredicted outcome: {pa} {na}-{nb} {pb} ({prob:.2f}%)'
     if format == 'term':
         strings['outcomei'] = '\n{winscore: >5}-{losescore: <1}: {prob: >6.2f}%'
     elif format == 'tl' or format == 'tls':

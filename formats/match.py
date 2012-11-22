@@ -193,6 +193,22 @@ class Match(Format):
                        self._tally[self._players[1]][1])
         self._partially_updated = True
 
+    def find_lsup(self):
+        outcomes = sorted(self._outcomes, key=lambda a: a[1]-a[2])
+        probs = [a[0] for a in outcomes]
+
+        sup = lambda i: abs(sum(probs[:i+1]) - sum(probs[i:]))
+
+        ind = 0
+        objective = sup(0)
+        for i in range(1, len(probs)):
+            p = sup(i)
+            if p < objective:
+                objective = p
+                ind = i
+
+        return outcomes[ind]
+
     def detail(self, strings):
         raise NotImplementedError()
 
@@ -206,7 +222,6 @@ class Match(Format):
 
         ml_winner = None
         ml_winner_prob = 0
-        ml_outcome = (0, 0, 0, None, None)
         i = 0
         for p in self._players:
             if tally[p][1] > ml_winner_prob:
@@ -215,8 +230,6 @@ class Match(Format):
 
             out += strings['outcomelist'].format(player=p.name, prob=100*tally[p][1])
             for outcome in self._outcomes:
-                if outcome[0] > ml_outcome[0]:
-                    ml_outcome = outcome
                 if outcome[3] == p:
                     out += strings['outcomei'].format(winscore=outcome[1+i],\
                             losescore=outcome[2-i], prob=100*outcome[0])
@@ -226,9 +239,10 @@ class Match(Format):
         out += strings['mlwinner'].format(player=ml_winner.name, 
                             prob=100*ml_winner_prob)
 
+        lsoutcome = self.find_lsup()
         out += strings['mloutcome'].format(pa=self._players[0].name,\
-                            pb=self._players[1].name, na=ml_outcome[1],\
-                            nb=ml_outcome[2], prob=100*ml_outcome[0])
+                            pb=self._players[1].name, na=lsoutcome[1],\
+                            nb=lsoutcome[2], prob=100*lsoutcome[0])
 
         if self.image != None:
             out += strings['mimage'].format(url=self.image)
