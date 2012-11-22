@@ -235,8 +235,10 @@ if __name__ == '__main__':
     print(out)
 
     if not args['noconsole']:
-        composite_commands = ['set','unset','list','detail','mout','mimage']
-        supported = {'all': ['save','load','compute','out','exit','change'],\
+        composite_commands = ['set','unset','list','detail','mout','mimage',\
+                             'mcopy','detailcopy']
+        supported = {'all': ['save','load','compute','out','exit','change',\
+                             'copy'],
                      match.Match: ['set','unset','list','image'],\
                      mslgroup.MSLGroup: composite_commands,\
                      sebracket.SEBracket: composite_commands,\
@@ -280,8 +282,8 @@ if __name__ == '__main__':
 
                 loop_image(m)
 
-            elif s[0] == 'out' or s[0] == 'mout' or s[0] == 'detail':
-                if s[0] == 'mout':
+            elif s[0] in ['out','mout','detail','copy','mcopy','detailcopy']:
+                if s[0] in ['mout','mcopy']
                     m = loop_find_match(obj, s[1:])
                 else:
                     m = obj
@@ -295,13 +297,15 @@ if __name__ == '__main__':
                 else:
                     strs = strings
 
-                if s[0] == 'out' or s[0] == 'mout':
+                if s[0] in ['out','mout','copy','mcopy']:
                     out = m.summary(strs, title=args['title'])
-                elif s[0] == 'detail':
+                else:
                     out = m.detail(strs)
 
-                pyperclip.copy(out)
-                print(out)
+                if s[0] in ['copy','mcopy','detailcopy']
+                    pyperclip.copy(out)
+                if s[0] in ['out','mout','detail']:
+                    print(out)
 
             elif s[0] == 'save':
                 if len(s) > 1:
