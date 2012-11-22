@@ -116,6 +116,9 @@ def imgur_upload(fname):
     response = urlopen(req)
 
     response = response.read().decode()
+    with open('testimgur', 'w') as f:
+        f.write(response)
+
     response = json.loads(response)
     return response['upload']['links']['original']
 
