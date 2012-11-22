@@ -15,6 +15,7 @@ import output
 import tlpd
 import glicko
 import imager
+import pyperclip
 
 from formats import match, mslgroup, sebracket, debracket, rrgroup
 
@@ -206,7 +207,9 @@ if __name__ == '__main__':
         obj.compute()
         obj.save_tally()
 
-    print(obj.summary(strings, title=args['title']))
+    out = obj.summary(strings, title=args['title']))
+    pyperclip.copy(out)
+    print(out)
 
     if not args['noconsole']:
         supported = {'all': ['save','load','compute','out','exit','change'],\
@@ -259,9 +262,12 @@ if __name__ == '__main__':
                     strs = strings
 
                 if s[0] == 'out':
-                    print(obj.summary(strs, title=args['title']))
+                    out = obj.summary(strs, title=args['title'])
                 elif s[0] == 'detail':
-                    print(obj.detail(strs))
+                    out = obj.detail(strs)
+
+                pyperclip.copy(out)
+                print(out)
 
             elif s[0] == 'save':
                 if len(s) > 1:
