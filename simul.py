@@ -111,14 +111,37 @@ def sanity_check(args):
         print('Must have at least two rounds')
         sys.exit(1)
 
+def loop_image(obj):
+    obj.image = imager.imgur_upload(imager.make_match_image(obj))
+
+def loop_find_match(obj, key):
+    try:
+        if type(obj) not in [match.Match] and len(s) > 1:
+            m = obj.get_match(' '.join(key))
+        elif type(obj) in [match.Match]:
+            m = obj
+
+        if m == False:
+            print('Not enough arguments')
+            return None
+
+        return m
+
+    except Exception as e:
+        print(str(e))
+        return None
+
+
 if __name__ == '__main__':
 
     sys.path.append(os.getcwd())
 
+    valid_formats = ['term','tl','tls','reddit']
+
     parser = argparse.ArgumentParser(description='Emulate a SC2 tournament'\
             + ' format.')
     parser.add_argument('-f', '--format', dest='format', default='term',\
-            choices=['term','tl','tls','reddit'],\
+            choices=valid_formats,\
             help='output format')
     parser.add_argument('-t', '--type', dest='type', default='match',\
             choices=['match','sebracket','rrgroup','mslgroup','debracket',\
@@ -212,12 +235,13 @@ if __name__ == '__main__':
     print(out)
 
     if not args['noconsole']:
+        composite_commands = ['set','unset','list','detail','mout','mimage']
         supported = {'all': ['save','load','compute','out','exit','change'],\
                      match.Match: ['set','unset','list','image'],\
-                     mslgroup.MSLGroup: ['set','unset','list','detail','mout'],\
-                     sebracket.SEBracket: ['set','unset','list','detail','mout'],\
-                     debracket.DEBracket: ['set','unset','list','detail','mout'],\
-                     rrgroup.RRGroup: ['set','unset','list','detail','mout']}
+                     mslgroup.MSLGroup: composite_commands,\
+                     sebracket.SEBracket: composite_commands,\
+                     debracket.DEBracket: composite_commands,\
+                     rrgroup.RRGroup: composite_commands}
 
         words = supported['all'] + supported[type(obj)] + ['name','race','elo']
         completer = Completer(words)
@@ -248,23 +272,33 @@ if __name__ == '__main__':
                 else:
                     obj.compute(override=True)
 
-            elif s[0] == 'image':
-                obj.image = imager.imgur_upload(imager.make_match_image(obj))
+            elif s[0] == 'image' or s[0] == 'mimage':
+                if s[0] == 'mimage':
+                    m = loop_find_match(obj, s[1:])
+                else:
+                    m = obj
 
-            elif s[0] == 'out' or s[0] == 'detail':
-                if not obj.is_updated():
+                loop_image(m)
+
+            elif s[0] == 'out' or s[0] == 'mout' or s[0] == 'detail':
+                if s[0] == 'mout':
+                    m = loop_find_match(obj, s[1:])
+                else:
+                    m = obj
+
+                if not m.is_updated():
                     print('Changes have been made - run \'compute\' to update')
                     continue
 
-                if len(s) > 1:
-                    strs = output.get_strings(s[1], type=type(obj))
+                if s[-1] in valid_formats:
+                    strs = output.get_strings(s[-1], type=type(obj))
                 else:
                     strs = strings
 
-                if s[0] == 'out':
-                    out = obj.summary(strs, title=args['title'])
+                if s[0] == 'out' or s[0] == 'mout':
+                    out = m.summary(strs, title=args['title'])
                 elif s[0] == 'detail':
-                    out = obj.detail(strs)
+                    out = m.detail(strs)
 
                 pyperclip.copy(out)
                 print(out)
@@ -290,39 +324,26 @@ if __name__ == '__main__':
                     obj = temp
                     strings = output.get_strings(args['format'], type(obj))
 
-            elif s[0] == 'set' or s[0] == 'unset' or s[0] == 'mout':
-                m = False
-                try:
-                    if type(obj) not in [match.Match] and len(s) > 1:
-                        m = obj.get_match(' '.join(s[1:]))
-                    elif type(obj) in [match.Match]:
-                        m = obj
+            elif s[0] == 'set' or s[0] == 'unset':
+                m = loop_find_match(obj, s[1:])
 
-                    if m == False:
-                        print('Not enough arguments')
-                        continue
+                if m == None:
+                    continue
 
-                    if s[0] == 'mout':
-                        print(m.summary(strings))
-                        continue
+                if not m.can_modify():
+                    print('Match not yet ready (unresolved dependencies?)')
+                    continue
 
-                    if not m.can_modify():
-                        print('Match not yet ready (unresolved dependencies?)')
-                        continue
-
-                    if s[0] == 'set':
-                        ia = int(better_input('Score for ' + m.get_player(0).name\
-                                              + ': ', swipe=True))
-                        ib = int(better_input('Score for ' + m.get_player(1).name\
-                                              + ': ', swipe=True))
-                        res = m.modify(ia, ib)
-                        if not res:
-                            print('Unable to modify match')
-                    elif s[0] == 'unset':
-                        m.clear()
-
-                except Exception as e:
-                    print(str(e))
+                if s[0] == 'set':
+                    ia = int(better_input('Score for ' + m.get_player(0).name\
+                                          + ': ', swipe=True))
+                    ib = int(better_input('Score for ' + m.get_player(1).name\
+                                          + ': ', swipe=True))
+                    res = m.modify(ia, ib)
+                    if not res:
+                        print('Unable to modify match')
+                elif s[0] == 'unset':
+                    m.clear()
 
             elif s[0] == 'list':
                 if type(obj) in [match.Match]:
