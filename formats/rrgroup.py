@@ -93,10 +93,10 @@ class RRGroup(Composite):
         if len(key) < 2:
             raise Exception(ex)
 
-        fits_a = lambda m: (m.get_player(0).name == key[0] and\
-                            m.get_player(1).name == key[1])
-        fits_b = lambda m: (m.get_player(1).name == key[0] and\
-                            m.get_player(0).name == key[1])
+        fits_a = lambda m: (m.get_player(0).name.lower() == key[0] and\
+                            m.get_player(1).name.lower() == key[1])
+        fits_b = lambda m: (m.get_player(1).name.lower() == key[0] and\
+                            m.get_player(0).name.lower() == key[1])
         fits = lambda m: fits_a(m) or fits_b(m)
         gen = (m for m in self._matches if fits(m))
 

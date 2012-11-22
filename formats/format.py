@@ -121,11 +121,11 @@ class Format:
     def get_original_tally(self):
         return self._saved_tally
 
-    def compute(self, N=None):
+    def compute(self, N=None, override=False):
         if not self.is_ready():
             return
 
-        if self.is_updated():
+        if self.is_updated() and not override:
             return
 
         self._tally = dict()

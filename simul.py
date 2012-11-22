@@ -204,7 +204,7 @@ if __name__ == '__main__':
 
     if args['load'] == None:
         obj.set_players(players.players)
-        obj.compute()
+        obj.compute(override=True)
         obj.save_tally()
 
     out = obj.summary(strings, title=args['title'])
@@ -242,11 +242,11 @@ if __name__ == '__main__':
             elif s[0] == 'compute':
                 if len(s) > 1:
                     try:
-                        obj.compute(N=int(s[1]))
+                        obj.compute(N=int(s[1]), override=True)
                     except:
-                        obj.compute()
+                        obj.compute(override=True)
                 else:
-                    obj.compute()
+                    obj.compute(override=True)
 
             elif s[0] == 'image':
                 obj.image = imager.imgur_upload(imager.make_match_image(obj))
