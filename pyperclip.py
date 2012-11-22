@@ -129,7 +129,7 @@ elif os.name == 'mac' or platform.system() == 'Darwin':
     getcb = macGetClipboard
     setcb = macSetClipboard
 elif os.name == 'posix' or platform.system() == 'Linux':
-    xclipExists = os.system('which xclip') == 0
+    xclipExists = os.system('which xclip > /dev/null') == 0
     if xclipExists:
         getcb = xclipGetClipboard
         setcb = xclipSetClipboard
