@@ -26,7 +26,7 @@ def get_player(i, finder=None):
 
     if name == '-':
         print('')
-        return Player('BYE', 'T', -1000, 0, 0, 0)
+        return Player('BYE', 'T', -10000, 0, 0, 0)
 
     results = []
     if finder != None:

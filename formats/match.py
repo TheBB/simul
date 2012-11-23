@@ -79,6 +79,12 @@ class Match(Format):
     def fill(self):
         self.notify()
 
+        if self.is_ready():
+            if self._players[1].name == 'BYE':
+                self.modify(self._num, 0)
+            elif self._players[0].name == 'BYE':
+                self.modify(0, self._num)
+
     def broadcast_instance(self, instance):
         if instance[2] != self:
             raise Exception('Mismatched instance broadcast')
@@ -121,7 +127,7 @@ class Match(Format):
             yield outcome
 
     def random_instance_detail(self, new=False):
-        if not self.is_partially_updated():
+        if not self.is_updated():
             return None
 
         if not new and self._instance_detail != None:

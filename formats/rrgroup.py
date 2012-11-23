@@ -190,6 +190,8 @@ class RRGroup(Composite):
             p.temp_spread = [(0,1)]
 
         for inst in instances:
+            if inst[3] == None:
+                print(inst)
             inst[3].temp_mscore += 1
             inst[3].temp_sscore += inst[5] - inst[6]
             inst[4].temp_sscore += inst[6] - inst[5]

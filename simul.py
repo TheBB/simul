@@ -218,7 +218,7 @@ if __name__ == '__main__':
     elif args['type'] == 'rrgroup':
         players = playerlist.PlayerList(args['players'], finder)
         obj = rrgroup.RRGroup(args['players'], args['num'][0], args['tie'],\
-                              args['threshold'])
+                              threshold=args['threshold'])
 
     obj.force_ex = args['exact']
     obj.force_mc = args['mc']
@@ -283,7 +283,7 @@ if __name__ == '__main__':
                 loop_image(m)
 
             elif s[0] in ['out','mout','detail','copy','mcopy','detailcopy']:
-                if s[0] in ['mout','mcopy']
+                if s[0] in ['mout','mcopy']:
                     m = loop_find_match(obj, s[1:])
                 else:
                     m = obj
@@ -302,7 +302,7 @@ if __name__ == '__main__':
                 else:
                     out = m.detail(strs)
 
-                if s[0] in ['copy','mcopy','detailcopy']
+                if s[0] in ['copy','mcopy','detailcopy']:
                     pyperclip.copy(out)
                 if s[0] in ['out','mout','detail']:
                     print(out)

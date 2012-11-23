@@ -125,7 +125,7 @@ def get_strings(format, type):
     elif format == 'reddit':
         strings['detailheader'] = ''
         strings['ptabletitle'] = '{title}\n'
-        strings['ptableheader'] = '\n' + ' '*19
+        strings['ptableheader'] = '\n' + ' '*21
         strings['ptableheading'] = '{heading: >9}'
         strings['ptablename'] = '    {player:>16}:'
         strings['ptableentry'] = '{prob: >8.2f}%'
