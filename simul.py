@@ -112,14 +112,19 @@ def sanity_check(args):
         sys.exit(1)
 
 def loop_image(obj):
-    obj.image = imager.imgur_upload(imager.make_match_image(obj))
+    try:
+        obj.image = imager.imgur_upload(imager.make_match_image(obj))
+    except Exception as e:
+        print(str(e))
 
 def loop_find_match(obj, key):
     try:
         if type(obj) not in [match.Match] and len(s) > 1:
             m = obj.get_match(' '.join(key))
-        elif type(obj) in [match.Match]:
+        elif type(obj) in [match.Match] and len(s):
             m = obj
+        else:
+            return None
 
         if m == False:
             print('Not enough arguments')
@@ -130,7 +135,6 @@ def loop_find_match(obj, key):
     except Exception as e:
         print(str(e))
         return None
-
 
 if __name__ == '__main__':
 
@@ -242,6 +246,7 @@ if __name__ == '__main__':
                      match.Match: ['set','unset','list','image'],\
                      mslgroup.MSLGroup: composite_commands,\
                      sebracket.SEBracket: composite_commands,\
+
                      debracket.DEBracket: composite_commands,\
                      rrgroup.RRGroup: composite_commands}
 
@@ -280,6 +285,11 @@ if __name__ == '__main__':
                 else:
                     m = obj
 
+                if m == None:
+                    continue
+
+                if not m.is_updated():
+                    m.compute()
                 loop_image(m)
 
             elif s[0] in ['out','mout','detail','copy','mcopy','detailcopy']:
@@ -288,9 +298,14 @@ if __name__ == '__main__':
                 else:
                     m = obj
 
-                if not m.is_updated():
+                if m == None:
+                    continue
+
+                if not m.is_updated() and type(m) not in [match.Match]:
                     print('Changes have been made - run \'compute\' to update')
                     continue
+                elif not m.is_updated():
+                    m.compute()
 
                 if s[-1] in valid_formats:
                     strs = output.get_strings(s[-1], type=type(obj))

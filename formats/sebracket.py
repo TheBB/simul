@@ -37,7 +37,7 @@ class SEBracket(Composite):
 
         for r in range(0, len(self._num)):
             for i in range(0, 2**(len(self._num)-1-r)):
-                m = Match(self._num[-r])
+                m = Match(self._num[r])
                 this_round.append(m)
 
                 m.add_parent(self)
@@ -53,7 +53,7 @@ class SEBracket(Composite):
     def get_match(self, key):
         ex = 'No such match found \'' + key + '\''
 
-        key = key.split('-')
+        key = key.split(' ')[0].split('-')
         if len(key) < 2:
             raise Exception(ex)
 

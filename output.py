@@ -46,6 +46,9 @@ def get_strings(format, type):
     if format == 'tl' or format == 'tls':
         strings['mimage'] = '\n\n[center][img]{url}[/img][/center]'
         strings['nomimage'] = '\n'
+    elif format == 'reddit':
+        strings['mimage'] = '\n\n[Visualization]({url})'
+        strings['nomimage'] = ''
     else:
         strings['mimage'] = ''
         strings['nomimage'] = ''

@@ -203,7 +203,8 @@ class Match(Format):
         outcomes = sorted(self._outcomes, key=lambda a: a[1]-a[2])
         probs = [a[0] for a in outcomes]
 
-        sup = lambda i: abs(sum(probs[:i+1]) - sum(probs[i:]))
+        #sup = lambda i: abs(sum(probs[:i+1]) - sum(probs[i:]))
+        sup = lambda i: -min(sum(probs[:i+1]), sum(probs[i:]))
 
         ind = 0
         objective = sup(0)

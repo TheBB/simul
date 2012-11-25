@@ -95,6 +95,8 @@ class DEBracket(Composite):
         self._final.append(f2)
 
     def get_match(self, key):
+        key = key.split(' ')[0]
+
         ex = 'No such match found \'' + key + '\''
 
         if key == 'f1':

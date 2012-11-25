@@ -38,6 +38,7 @@ class MSLGroup(Composite):
         self._final.add_parent(self)
 
     def get_match(self, key):
+        key = key.split(' ')[0]
         if key.lower() == 'first':
             return self._first[0]
         elif key.lower() == 'second':
@@ -49,7 +50,7 @@ class MSLGroup(Composite):
         elif key.lower() == 'final':
             return self._final
         else:
-            return None
+            raise Exception('No such match found \'' + key + '\'')
 
     def should_use_mc(self):
         return False
