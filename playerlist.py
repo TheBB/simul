@@ -49,9 +49,11 @@ def get_player(i, finder=None):
 
         if pl:
             s = 'Which is correct? (1-' + str(len(results)) + ', 0 for none) '
-            choice = int(simul.better_input(s, swipe=True))
-            if choice > 0:
-                result = results[choice-1]
+            choice = simul.better_input(s, swipe=True)
+            if choice == 'y':
+                result = results[0]
+            elif int(choice) > 0:
+                result = results[int(choice)-1]
         else:
             choice = simul.better_input('Accept? (y/n) ', swipe=True)
             if choice.lower() == 'y':

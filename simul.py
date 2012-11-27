@@ -17,7 +17,7 @@ import glicko
 import imager
 import pyperclip
 
-from formats import match, mslgroup, sebracket, debracket, rrgroup
+from formats import match, mslgroup, sebracket, debracket, rrgroup, ipl5
 
 class Completer:
     def __init__(self, basewords):
@@ -149,7 +149,7 @@ if __name__ == '__main__':
             help='output format')
     parser.add_argument('-t', '--type', dest='type', default='match',\
             choices=['match','sebracket','rrgroup','mslgroup','debracket',\
-                    'combination'],\
+                    'ipl5'],\
             help='tournament type')
     parser.add_argument('--title', dest='title', default=None,\
             help='title')
@@ -223,6 +223,9 @@ if __name__ == '__main__':
         players = playerlist.PlayerList(args['players'], finder)
         obj = rrgroup.RRGroup(args['players'], args['num'][0], args['tie'],\
                               threshold=args['threshold'])
+    elif args['type'] == 'ipl5':
+        players = playerlist.PlayerList(72, finder)
+        obj = ipl5.IPL5Bracket()
 
     obj.force_ex = args['exact']
     obj.force_mc = args['mc']
@@ -246,9 +249,9 @@ if __name__ == '__main__':
                      match.Match: ['set','unset','list','image'],\
                      mslgroup.MSLGroup: composite_commands,\
                      sebracket.SEBracket: composite_commands,\
-
                      debracket.DEBracket: composite_commands,\
-                     rrgroup.RRGroup: composite_commands}
+                     rrgroup.RRGroup: composite_commands,\
+                     ipl5.IPL5Bracket: composite_commands}
 
         words = supported['all'] + supported[type(obj)] + ['name','race','elo']
         completer = Completer(words)
