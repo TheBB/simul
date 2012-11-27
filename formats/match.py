@@ -222,8 +222,7 @@ class Match(Format):
     def summary(self, strings, title=None):
         tally = self._tally
 
-        if title == None:
-            title = self._players[0].name + ' vs. ' + self._players[1].name
+        title = self._players[0].name + ' vs. ' + self._players[1].name
 
         out = strings['header'].format(title=title)
 
@@ -249,7 +248,7 @@ class Match(Format):
         lsoutcome = self.find_lsup()
         out += strings['mloutcome'].format(pa=self._players[0].name,\
                             pb=self._players[1].name, na=lsoutcome[1],\
-                            nb=lsoutcome[2], prob=100*lsoutcome[0])
+                            nb=lsoutcome[2])
 
         if self.image != None:
             out += strings['mimage'].format(url=self.image)

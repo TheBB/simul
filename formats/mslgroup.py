@@ -81,7 +81,7 @@ class MSLGroup(Composite):
                                                 self._second[1].instances()):
                 base_s = base_f * is0[0] * is1[0]
                 is0[2].broadcast_instance(is0)
-                is1[2].broadcast_instance(is0)
+                is1[2].broadcast_instance(is1)
                 self._final.compute_partial()
 
                 for ifin in self._final.instances():
