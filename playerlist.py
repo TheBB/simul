@@ -65,6 +65,8 @@ def get_player(i, finder=None):
                 print('No matches for \'' + name + '\' in database.')
             elif results == None:
                 print('Unable to consult database.')
+        elif finder == None:
+            break
 
     if result != None:
         name = result['name']

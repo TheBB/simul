@@ -57,7 +57,9 @@ class IPL5Bracket(Composite):
         L = 16
         fill_rounds = [1, 3, 4, 6, 8, 10, -1]
         fill_ind = 0
-        flip = False
+        pm = [[24,26,28,30,16,18,20,22,8,10,12,14,0,2,4,6],\
+              [4,5,6,7,0,1,2,3,12,13,14,15,8,9,10,11], [5,4,7,6,1,0,3,2],\
+              [0,1,2,3,4,5,6,7], [3,2,1,0], [0,1], [0]]
         for r in range(0,11):
             rnd = []
             for i in range(0,L):
@@ -66,11 +68,10 @@ class IPL5Bracket(Composite):
                 
                 m.add_parent(self)
                 if r == 0:
-                    self._winners[0][2*i].add_loser_link(m, 0)
-                    self._winners[0][2*i+1].add_loser_link(m, 1)
+                    self._winners[0][pm[0][i]].add_loser_link(m, 0)
+                    self._winners[0][pm[0][i]+1].add_loser_link(m, 1)
                 elif r == fill_rounds[fill_ind]:
-                    par = L-i-1 if flip else i
-                    self._winners[fill_ind+1][par].add_loser_link(m, 0)
+                    self._winners[fill_ind+1][pm[fill_ind+1][i]].add_loser_link(m, 0)
                     prev_round[i].add_winner_link(m, 1)
                 else:
                     prev_round[2*i].add_winner_link(m, 0)
@@ -78,7 +79,6 @@ class IPL5Bracket(Composite):
 
             if r == fill_rounds[fill_ind]:
                 fill_ind += 1
-                flip = True
 
             self._matches['Loser Round ' + str(r+1)] = rnd
             self._losers.append(rnd)
