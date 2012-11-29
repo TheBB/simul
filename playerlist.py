@@ -22,47 +22,49 @@ def get_elo(s=''):
 
 def get_player(i, finder=None):
     print('Entering player ' + str(i))
-    name = simul.better_input('Name: ')
-
-    if name == '-':
-        print('')
-        return Player('BYE', 'T', -10000, 0, 0, 0)
-
-    results = []
-    if finder != None:
-        results = finder(name)
 
     result = None
-    if results != None and len(results) > 0:
-        pl = len(results) > 1
-        print('Possible match' + ('es' if pl else '') + ':')
+    while result == None:
+        name = simul.better_input('Name: ')
 
-        i = 1
-        for res in results:
-            print((str(i) + ': ' if pl else '') + res['name'] + ' ('\
-                  + res['race'] + ') from '\
-                  + res['team'] + ' (' + str(round(res['elo'])) + ', '\
-                  + str(round(res['elo_vt'])) + ', '\
-                  + str(round(res['elo_vz'])) + ', '\
-                  + str(round(res['elo_vp'])) + ')')
-            i += 1
+        if name == '-':
+            print('')
+            return Player('BYE', 'T', -10000, 0, 0, 0)
 
-        if pl:
-            s = 'Which is correct? (1-' + str(len(results)) + ', 0 for none) '
-            choice = simul.better_input(s, swipe=True)
-            if choice == 'y':
-                result = results[0]
-            elif int(choice) > 0:
-                result = results[int(choice)-1]
-        else:
-            choice = simul.better_input('Accept? (y/n) ', swipe=True)
-            if choice.lower() == 'y':
-                result = results[0]
-    elif finder != None:
-        if results == []:
-            print('No matches for \'' + name + '\' in database.')
-        elif results == None:
-            print('Unable to consult database.')
+        results = []
+        if finder != None:
+            results = finder(name)
+
+        if results != None and len(results) > 0:
+            pl = len(results) > 1
+            print('Possible match' + ('es' if pl else '') + ':')
+
+            i = 1
+            for res in results:
+                print((str(i) + ': ' if pl else '') + res['name'] + ' ('\
+                      + res['race'] + ') from '\
+                      + res['team'] + ' (' + str(round(res['elo'])) + ', '\
+                      + str(round(res['elo_vt'])) + ', '\
+                      + str(round(res['elo_vz'])) + ', '\
+                      + str(round(res['elo_vp'])) + ')')
+                i += 1
+
+            if pl:
+                s = 'Which is correct? (1-' + str(len(results)) + ', 0 for none) '
+                choice = simul.better_input(s, swipe=True)
+                if choice == 'y':
+                    result = results[0]
+                elif int(choice) > 0:
+                    result = results[int(choice)-1]
+            else:
+                choice = simul.better_input('Accept? (y/n) ', swipe=True)
+                if choice.lower() == 'y':
+                    result = results[0]
+        elif finder != None:
+            if results == []:
+                print('No matches for \'' + name + '\' in database.')
+            elif results == None:
+                print('Unable to consult database.')
 
     if result != None:
         name = result['name']
