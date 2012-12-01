@@ -137,4 +137,7 @@ def get_strings(format, type):
         strings['ptablebetween'] = '\n\n'
         strings['detailfooter'] = ''
 
+    # Other
+    strings['perf'] = 'Performance of {name}: badness {bprob:.2f}%, goodness {gprob:.2f}%'
+
     return strings

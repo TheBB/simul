@@ -80,12 +80,21 @@ def print_matches(list, pre='Modified matches', post='none'):
     else:
         print(' ' + post)
 
-def sanity_check(args):
-    if args['load'] != None:
-        if not os.path.isfile(args['load']):
-            print('File does not exist: \'' + args['load'] + '\'')
-            sys.exit(1)
+def perf_eval(p, ot, ct):
+    def cumsum(a):
+        for i in range(1,len(a)):
+            a[i] += a[i-1]
+        return a
+    def dot(a,b):
+        ret = 0
+        for i in range(0,len(a)):
+            ret += a[i] * b[i]
+        return ret
+    bad = dot(cumsum(list(ot)), ct)
+    good = dot(cumsum(list(ot)[-1::-1])[-1::-1], ct)
+    return strings['perf'].format(name=p.name, bprob=100*bad, gprob=100*good)
 
+def sanity_check(args):
     for n in args['num']:
         if n < 1:
             print('Number of sets to win must be at least 1')
@@ -167,10 +176,8 @@ if __name__ == '__main__':
             help='number of players in a group')
     parser.add_argument('--threshold', dest='threshold', default=1, type=int,\
             help='placement threshold in a group')
-    parser.add_argument('-s', '--save', dest='save',\
-            help='save data to file')
-    parser.add_argument('-l', '--load', dest='load',\
-            help='load data from file')
+    parser.add_argument('-i', '--input', dest='input', default=None,\
+            help='save and load data from file')
     parser.add_argument('--spec', dest='spec', default=None,\
             help='file for combination specs')
     parser.add_argument('--tlpd', dest='tlpd', default='none',\
@@ -208,8 +215,10 @@ if __name__ == '__main__':
         finder = glicko.search
 
     obj = None
-    if args['load'] != None:
-        obj = get_from_file(args['load'])
+    loaded = False
+    if args['input'] != None and os.path.isfile(args['input']):
+        obj = get_from_file(args['input'])
+        loaded = True
     elif args['type'] == 'match':
         players = playerlist.PlayerList(2, finder)
         obj = match.Match(args['num'][0])
@@ -237,7 +246,7 @@ if __name__ == '__main__':
 
     strings = output.get_strings(args['format'], type(obj))
 
-    if args['load'] == None:
+    if not loaded:
         obj.set_players(players.players)
         obj.compute(override=True)
         obj.save_tally()
@@ -248,7 +257,7 @@ if __name__ == '__main__':
 
     if not args['noconsole']:
         composite_commands = ['set','unset','list','detail','mout','mimage',\
-                             'mcopy','detailcopy']
+                             'mcopy','detailcopy','perf']
         supported = {'all': ['save','load','compute','out','exit','change',\
                              'copy'],
                      match.Match: ['set','unset','list','image'],\
@@ -331,11 +340,21 @@ if __name__ == '__main__':
                 if s[0] in ['out','mout','detail']:
                     print(out)
 
+            elif s[0] in ['perf']:
+                if len(s) < 2:
+                    print('Not enough arguments')
+                    continue
+
+                player = obj.get_player(s[1])
+                otally = obj.get_original_tally()[player]
+                ctally = obj.get_tally()[player]
+                print(perf_eval(player, otally, ctally))
+
             elif s[0] == 'save':
                 if len(s) > 1:
                     put_to_file(obj, s[1])
-                elif args['save'] != None:
-                    put_to_file(obj, args['save'])
+                elif args['input'] != None:
+                    put_to_file(obj, args['input'])
                 else:
                     print('No filename given')
 
@@ -343,8 +362,8 @@ if __name__ == '__main__':
                 temp = None
                 if len(s) > 1:
                     temp = get_from_file(s[1])
-                elif args['load'] != None:
-                    temp = get_from_file(args['load'])
+                elif args['input'] != None:
+                    temp = get_from_file(args['input'])
                 else:
                     print('No filename given')
                 
@@ -425,5 +444,5 @@ if __name__ == '__main__':
                 if recompute:
                     obj.notify()
 
-    if args['save'] != None:
-        put_to_file(obj, args['save'])
+    if args['input'] != None:
+        put_to_file(obj, args['input'])
