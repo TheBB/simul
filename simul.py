@@ -326,9 +326,9 @@ if __name__ == '__main__':
                     m.compute()
 
                 if s[-1] in valid_formats:
-                    strs = output.get_strings(s[-1], type=type(obj))
+                    strs = output.get_strings(s[-1], type=type(m))
                 else:
-                    strs = strings
+                    strs = output.get_strings(args['format'], type=type(m))
 
                 if s[0] in ['out','mout','copy','mcopy']:
                     out = m.summary(strs, title=args['title'])
