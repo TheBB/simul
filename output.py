@@ -24,7 +24,7 @@ def get_strings(format, type):
     if format == 'tl' or format == 'tls':
         strings['footer'] =\
         '\n[small][url=http://www.teamliquid.net/blogs/viewblog.php?id=380850]details[/url], ' +\
-        '[url=http://www.sc2charts.net/en/edb/ranking/players]data source[/url], ' +\
+        '[url=http://aligulac.com/]data source[/url], ' +\
         '[url=https://github.com/TheBB/simul]code[/url][/small]' +\
         strings['footer']
 
