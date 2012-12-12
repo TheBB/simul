@@ -52,7 +52,7 @@ def update():
         pass
 
     cur.execute('''CREATE TABLE players (name text, race text, country text,
-                url text, rating integer)''')
+                scountry text, url text, rating integer)''')
 
     page_url = 'http://www.sc2charts.net/en/edb/ranking/players/&page={number}'
 
@@ -102,7 +102,12 @@ def update():
                 player_name = temp.strip()
 
             c = _next_nonstring(c.next_sibling)
-            temp = next(c.children).next_sibling
+            q = next(c.children)
+            if type(q) != bs4.element.NavigableString:
+                player_scountry = q['alt'].upper()
+            else:
+                player_scountry = ''
+            temp = q.next_sibling
             if temp != None:
                 player_country = temp.strip()
             else:
@@ -112,11 +117,11 @@ def update():
             player_rating = int(_next_nonstring(c.next_sibling).string)
 
             cur.execute('''INSERT INTO players VALUES (:name, :race, :country,
-                        :url, :rating)''', {'name': player_name,\
-                                            'race': player_race,\
-                                            'country': player_country,\
-                                            'url': player_url,\
-                                            'rating': player_rating})
+                        :scountry, :url, :rating)''', 
+                        {'name': player_name, 'race': player_race,\
+                         'country': player_country,\
+                         'scountry': player_scountry, 'url': player_url,\
+                         'rating': player_rating})
 
     progress.update_time(num_pages)
     print(progress.dyn_str())

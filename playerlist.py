@@ -3,6 +3,8 @@ try:
 except ImportError:
     import readline
 
+from scipy.stats import norm
+
 import simul
 
 debug = False
@@ -103,8 +105,7 @@ class Player:
             self.name = name
             self.race = race
             self.elo = elo
-            avg = (elo_vp + elo_vt + elo_vz)/3
-            self.elo_race = {'P': elo_vp-avg, 'T': elo_vt-avg, 'Z': elo_vz-avg}
+            self.elo_race = {'P': elo_vp, 'T': elo_vt, 'Z': elo_vz}
             self.flag = -1
         else:
             self.name = copy.name
@@ -115,11 +116,9 @@ class Player:
 
     def prob_of_winning(self, opponent):
         mix = 0.3
-        my_elo = self.elo + mix * self.elo_race[opponent.race]
-        op_elo = opponent.elo + mix * opponent.elo_race[self.race]
-        my_q = pow(10, float(my_elo)/400)
-        op_q = pow(10, float(op_elo)/400)
-        return my_q/(my_q + op_q)
+        my_elo = self.elo + self.elo_race[opponent.race]
+        op_elo = opponent.elo + opponent.elo_race[self.race]
+        return norm.cdf((my_elo - op_elo)/1000)
 
     def copy(self):
         return Player(copy=self)

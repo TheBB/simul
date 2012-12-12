@@ -14,6 +14,7 @@ import playerlist
 import output
 import tlpd
 import glicko
+import ali
 import imager
 import pyperclip
 
@@ -186,6 +187,8 @@ if __name__ == '__main__':
             help='tabulator ID for the TLPD database')
     parser.add_argument('--glicko', dest='glicko', action='store_true',\
             help='search in SC2Charts database')
+    parser.add_argument('--ali', dest='ali', action='store_true',\
+            help='search in Aligulac database')
     parser.add_argument('-nc', '--no-console', dest='noconsole', action='store_true',\
             help='skip the console')
     parser.add_argument('-ex', '--exact', dest='exact', action='store_true',\
@@ -208,11 +211,13 @@ if __name__ == '__main__':
         playerlist.debug = True
 
     finder = None
-    if args['tlpd'] != 'none':
-        iface = tlpd.Tlpd(args['tlpd'], args['tabulator'])
-        finder = iface.search
+    if args['ali']:
+        finder = ali.search
     elif args['glicko']:
         finder = glicko.search
+    elif args['tlpd'] != 'none':
+        iface = tlpd.Tlpd(args['tlpd'], args['tabulator'])
+        finder = iface.search
 
     obj = None
     loaded = False
