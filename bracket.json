@@ -1,0 +1,96 @@
+{
+    "name": "IPL 5",
+    "rounds": {
+        "wb1": {
+            "type": "match",
+            "number": 32,
+            "feeds": ["lb1-1:16-1:2", "wb2-1:16-1:2"]
+        },
+        "wb2": {
+            "type": "match",
+            "number": 16,
+            "feeds": ["lb2-1:16-1", "wb3-1:8-1:2"]
+        },
+        "wb3": {
+            "type": "match",
+            "number": 8,
+            "feeds": ["lb4-1:8-1", "wb4-1:8-2"]
+        },
+        "wb4": {
+            "type": "match",
+            "number": 8,
+            "feeds": ["lb5-1:8-1", "wb5-1:4-1:2"]
+        },
+        "wb5": {
+            "type": "match",
+            "number": 4,
+            "feeds": ["lb7-1:4-1", "wb6-1:2-1:2"]
+        },
+        "wb6": {
+            "type": "match",
+            "number": 2,
+            "feeds": ["lb9-1:2-1", "wb7-1:2"]
+        },
+        "wb7": {
+            "type": "match",
+            "feeds": ["lb11-1", "final-1"]
+        }
+        "lb1": {
+            "type": "match",
+            "number": 16,
+            "feeds": ["exit-1", "lb2-1:16-2"]
+        },
+        "lb2": {
+            "type": "match",
+            "number": 16,
+            "feeds": ["exit-2", "lb3-1:8-1:2"]
+        },
+        "lb3": {
+            "type": "match",
+            "number": 8,
+            "feeds": ["exit-3", "lb4-1:8-2"]
+        },
+        "lb4": {
+            "type": "match",
+            "number": 8,
+            "feeds": ["exit-4", "lb5-1:8-2"]
+        },
+        "lb5": {
+            "type": "match",
+            "number": 8,
+            "feeds": ["exit-5", "lb6-1:4-1:2"]
+        },
+        "lb6": {
+            "type": "match",
+            "number": 4,
+            "feeds": ["exit-6", "lb7-1:4-2"]
+        },
+        "lb7": {
+            "type": "match",
+            "number": 4,
+            "feeds": ["exit-7", "lb8-1:2-1:2"]
+        },
+        "lb8": {
+            "type": "match",
+            "number": 2,
+            "feeds": ["exit-8", "lb9-1:2-2"]
+        },
+        "lb9": {
+            "type": "match",
+            "number": 2,
+            "feeds" ["exit-9", "lb10-1:2"]
+        },
+        "lb10": {
+            "type": "match",
+            "feeds": ["exit-10", "lb11-2"]
+        },
+        "lb11": {
+            "type": "match",
+            "feeds": ["exit-11", "final-2"]
+        }
+        "final": {
+            "type": "definalmatch",
+            "feeds": ["exit-12", "exit-13"]
+        }
+    }
+}
