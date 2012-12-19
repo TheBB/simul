@@ -20,10 +20,14 @@ def search(player):
             t['team'] = r['country']
         else:
             t['team'] = 'unknown'
-        t['elo'] = r['rating']
-        t['elo_vp'] = r['rating_vp']
-        t['elo_vt'] = r['rating_vt']
-        t['elo_vz'] = r['rating_vz']
+        t['elo'] = float(r['rating'])
+        t['elo_vp'] = float(r['rating_vp'])
+        t['elo_vt'] = float(r['rating_vt'])
+        t['elo_vz'] = float(r['rating_vz'])
+        t['dev'] = float(r['dev'])
+        t['dev_vp'] = float(r['dev_vp'])
+        t['dev_vt'] = float(r['dev_vt'])
+        t['dev_vz'] = float(r['dev_vz'])
         ret.append(t)
 
     return ret
